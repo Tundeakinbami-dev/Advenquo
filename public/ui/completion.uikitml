@@ -1,0 +1,112 @@
+<!--
+  Advenquo — Celebration / Completion panel.
+  Revealed when the player has discovered all four cultural objects.
+  Faces the player above the display table.
+  Width 38 cm, height 32 cm.
+-->
+<style>
+  .root {
+    flex-direction: column;
+    width: 38;
+    background-color: rgba(10, 15, 45, 0.96);
+    border-radius: 1.2;
+    border-width: 0.2;
+    border-color: #f5d370;
+  }
+
+  .header {
+    background-color: #1a237e;
+    padding-top: 2;
+    padding-bottom: 1.5;
+    padding-left: 2;
+    padding-right: 2;
+    border-radius: 1.2;
+    align-items: center;
+  }
+
+  .celebrate {
+    font-size: 1.3;
+    font-weight: 700;
+    color: #f5d370;
+    letter-spacing: 0.1;
+  }
+
+  .title {
+    font-size: 2.2;
+    font-weight: 700;
+    color: #ffffff;
+    text-align: center;
+    margin-top: 0.5;
+  }
+
+  .body {
+    padding-top: 1.5;
+    padding-bottom: 2;
+    padding-left: 2.5;
+    padding-right: 2.5;
+    flex-direction: column;
+    gap: 1;
+  }
+
+  .message {
+    font-size: 1.5;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.45;
+    text-align: center;
+  }
+
+  .unlocked-box {
+    background-color: rgba(245, 211, 112, 0.12);
+    border-radius: 0.8;
+    border-width: 0.1;
+    border-color: #f5d370;
+    padding-top: 1;
+    padding-bottom: 1;
+    padding-left: 1.5;
+    padding-right: 1.5;
+    align-items: center;
+    margin-top: 0.5;
+  }
+
+  .unlocked-title {
+    font-size: 1.3;
+    font-weight: 700;
+    color: #f5d370;
+  }
+
+  .unlocked-dest {
+    font-size: 1.5;
+    font-weight: 600;
+    color: #ffffff;
+    margin-top: 0.3;
+  }
+
+  .tagline {
+    font-size: 1.25;
+    color: #90caf9;
+    text-align: center;
+    margin-top: 0.5;
+  }
+</style>
+
+<Panel class="root">
+  <div class="header">
+    <div class="celebrate">EXPLORATION COMPLETE</div>
+    <div class="title">E ku oriire! (Congratulations!)</div>
+  </div>
+
+  <div class="body">
+    <div class="message">
+      You have explored the foundational treasures of Yoruba heritage: the Adire cloth, the Gangan talking drum, the carved Igba calabash, and the blessed Obi kola nut.
+    </div>
+
+    <div class="unlocked-box">
+      <div class="unlocked-title">NEXT DESTINATION UNLOCKED</div>
+      <div class="unlocked-dest">Nile Valley: Ancient Nubian Architecture</div>
+    </div>
+
+    <div class="tagline">
+      "Discover your world. Unlock the next."
+    </div>
+  </div>
+</Panel>

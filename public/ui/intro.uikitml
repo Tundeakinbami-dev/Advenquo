@@ -1,0 +1,130 @@
+<!--
+  Advenquo — Intro / Welcome panel.
+  Shown persistently at the left side of the scene.
+  In XR, the Enter/Exit buttons swap based on immersive state.
+  The discovery-count text is updated by SceneUISystem at runtime.
+
+  UIKit units are centimetres. This panel is 30 cm wide × 36 cm tall.
+  It faces +Z in the scene; rotate the scene node to face the player.
+-->
+<style>
+  .root {
+    flex-direction: column;
+    width: 30;
+    background-color: rgba(10, 10, 30, 0.92);
+    border-radius: 1.2;
+    border-width: 0.15;
+    border-color: #4a90d9;
+  }
+
+  .header {
+    background-color: #1a237e;
+    padding-top: 2;
+    padding-bottom: 1.5;
+    padding-left: 2;
+    padding-right: 2;
+    border-radius: 1.2;
+    align-items: center;
+  }
+
+  .title {
+    font-size: 2.4;
+    font-weight: 700;
+    color: #f5d370;
+    text-align: center;
+    letter-spacing: -0.05;
+  }
+
+  .subtitle {
+    font-size: 1.4;
+    color: #90caf9;
+    text-align: center;
+    margin-top: 0.5;
+  }
+
+  .body {
+    padding-top: 1.5;
+    padding-bottom: 1.5;
+    padding-left: 2;
+    padding-right: 2;
+    flex-direction: column;
+    gap: 1;
+  }
+
+  .instruction {
+    font-size: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.4;
+  }
+
+  .counter {
+    font-size: 1.6;
+    font-weight: 600;
+    color: #f5d370;
+    margin-top: 0.5;
+  }
+
+  .btn-row {
+    padding-left: 2;
+    padding-right: 2;
+    padding-bottom: 2;
+    flex-direction: column;
+    gap: 0.8;
+  }
+
+  .xr-btn {
+    background-color: #f5d370;
+    border-radius: 0.8;
+    padding-top: 1.2;
+    padding-bottom: 1.2;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .xr-btn-label {
+    font-size: 1.6;
+    font-weight: 700;
+    color: #1a237e;
+  }
+
+  .exit-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.8;
+    border-width: 0.1;
+    border-color: rgba(255, 255, 255, 0.3);
+    padding-top: 1;
+    padding-bottom: 1;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .exit-btn-label {
+    font-size: 1.4;
+    color: rgba(255, 255, 255, 0.7);
+  }
+</style>
+
+<Panel class="root">
+  <div class="header">
+    <div class="title">Advenquo</div>
+    <div class="subtitle">Yoruba Cultural Journey</div>
+  </div>
+
+  <div class="body">
+    <div class="instruction">
+      Point at each object on the table and pinch or press to discover its story.
+    </div>
+    <div id="discovery-count" class="counter">0 / 4 discovered</div>
+  </div>
+
+  <div class="btn-row">
+    <div id="xr-enter-btn" class="xr-btn">
+      <div class="xr-btn-label">Enter VR</div>
+    </div>
+    <div id="xr-exit-btn" class="exit-btn" style="display: none">
+      <div class="exit-btn-label">Exit to Browser</div>
+    </div>
+  </div>
+</Panel>
