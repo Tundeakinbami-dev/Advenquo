@@ -1,0 +1,221 @@
+{
+  "version": "iwsdk.scene.v1",
+  "units": "meters",
+  "components": {
+    "com.iwsdk.components.DomeGradient": {
+      "sky": [0.22, 0.42, 0.82, 1],
+      "equator": [0.85, 0.72, 0.58, 1],
+      "ground": [0.38, 0.28, 0.2, 1],
+      "intensity": 1
+    },
+    "com.iwsdk.components.IBLGradient": {
+      "sky": [0.55, 0.68, 0.85, 1],
+      "equator": [0.85, 0.72, 0.58, 1],
+      "ground": [0.38, 0.28, 0.2, 1],
+      "intensity": 1
+    }
+  },
+  "resources": {},
+  "nodes": [
+    {
+      "id": "display-table",
+      "name": "Display Table",
+      "content": {
+        "type": "asset",
+        "asset": "display-table"
+      },
+      "transform": {
+        "position": [0, 0.72, -0.75]
+      }
+    },
+    {
+      "id": "adire-cloth",
+      "name": "Adire Cloth",
+      "content": {
+        "type": "asset",
+        "asset": "adire-cloth"
+      },
+      "transform": {
+        "position": [-0.32, 0.76, -0.72]
+      },
+      "components": {
+        "CulturalObject": {
+          "factId": "adire-cloth",
+          "discovered": false
+        },
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget"
+        },
+        "AudioSource": {
+          "src": "./audio/chime.mp3",
+          "maxInstances": 2,
+          "playbackMode": "fade-restart"
+        }
+      }
+    },
+    {
+      "id": "talking-drum",
+      "name": "Talking Drum",
+      "content": {
+        "type": "asset",
+        "asset": "talking-drum"
+      },
+      "transform": {
+        "position": [-0.11, 0.76, -0.72]
+      },
+      "components": {
+        "CulturalObject": {
+          "factId": "talking-drum",
+          "discovered": false
+        },
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget"
+        },
+        "AudioSource": {
+          "src": "./audio/chime.mp3",
+          "maxInstances": 2,
+          "playbackMode": "fade-restart"
+        }
+      }
+    },
+    {
+      "id": "calabash",
+      "name": "Calabash Bowl",
+      "content": {
+        "type": "asset",
+        "asset": "calabash"
+      },
+      "transform": {
+        "position": [0.11, 0.76, -0.72]
+      },
+      "components": {
+        "CulturalObject": {
+          "factId": "calabash",
+          "discovered": false
+        },
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget"
+        },
+        "AudioSource": {
+          "src": "./audio/chime.mp3",
+          "maxInstances": 2,
+          "playbackMode": "fade-restart"
+        }
+      }
+    },
+    {
+      "id": "kola-nut",
+      "name": "Kola Nut",
+      "content": {
+        "type": "asset",
+        "asset": "kola-nut"
+      },
+      "transform": {
+        "position": [0.32, 0.76, -0.72]
+      },
+      "components": {
+        "CulturalObject": {
+          "factId": "kola-nut",
+          "discovered": false
+        },
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget"
+        },
+        "AudioSource": {
+          "src": "./audio/chime.mp3",
+          "maxInstances": 2,
+          "playbackMode": "fade-restart"
+        }
+      }
+    },
+    {
+      "id": "intro-panel",
+      "name": "Intro Panel",
+      "content": {
+        "type": "asset",
+        "asset": "intro-panel"
+      },
+      "transform": {
+        "position": [-0.65, 1.15, -0.75],
+        "rotationDeg": [0, 25, 0]
+      },
+      "components": {
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "fact-panel-adire",
+      "name": "Fact Panel: Adire",
+      "content": {
+        "type": "asset",
+        "asset": "fact-panel-adire"
+      },
+      "transform": {
+        "position": [-0.32, 1.15, -0.75]
+      },
+      "components": {
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "fact-panel-drum",
+      "name": "Fact Panel: Drum",
+      "content": {
+        "type": "asset",
+        "asset": "fact-panel-drum"
+      },
+      "transform": {
+        "position": [-0.11, 1.15, -0.75]
+      },
+      "components": {
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "fact-panel-calabash",
+      "name": "Fact Panel: Calabash",
+      "content": {
+        "type": "asset",
+        "asset": "fact-panel-calabash"
+      },
+      "transform": {
+        "position": [0.11, 1.15, -0.75]
+      },
+      "components": {
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "fact-panel-kola",
+      "name": "Fact Panel: Kola",
+      "content": {
+        "type": "asset",
+        "asset": "fact-panel-kola"
+      },
+      "transform": {
+        "position": [0.32, 1.15, -0.75]
+      },
+      "components": {
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "completion-panel",
+      "name": "Completion Celebration Panel",
+      "content": {
+        "type": "asset",
+        "asset": "completion-panel"
+      },
+      "transform": {
+        "position": [0, 1.25, -0.75]
+      },
+      "components": {
+        "RayInteractable": {}
+      }
+    }
+  ]
+}
