@@ -12,6 +12,7 @@ import projectOptions from 'virtual:iwsdk-project';
 
 import { DiscoverySystem } from './discovery-system.js';
 import { SceneUISystem } from './scene-ui-system.js';
+import { gameShell } from './game/game-shell.js';
 
 World.create(
   document.getElementById('scene-container') as HTMLDivElement,
@@ -19,4 +20,5 @@ World.create(
 ).then((world) => {
   world.registerSystem(DiscoverySystem);
   world.registerSystem(SceneUISystem);
+  gameShell.init();
 });
