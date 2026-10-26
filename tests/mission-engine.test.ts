@@ -19,13 +19,14 @@ describe('Mission Engine', () => {
 
   it('contains all required MVP missions', () => {
     const missions = missionEngine.getAllMissions();
-    assert.strictEqual(missions.length, 4);
+    assert.strictEqual(missions.length, 5);
 
     const types = missions.map((m) => m.type);
     assert.ok(types.includes('language'), 'Contextual language mission must exist');
     assert.ok(types.includes('investigation'), 'Cultural investigation mission must exist');
     assert.ok(types.includes('geography_navigation'), 'Geography navigation mission must exist');
     assert.ok(types.includes('contemporary_world_now'), 'World Now linked mission must exist');
+    assert.ok(missions.some((m) => m.id === 'mission_adire_purchase'), 'Market purchase conversation mission must exist');
   });
 
   it('starts a mission and initializes clean active state', () => {
