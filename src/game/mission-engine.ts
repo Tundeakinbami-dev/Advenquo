@@ -56,6 +56,13 @@ export class MissionEngine {
     return this.missionsMap.get(missionId);
   }
 
+  public registerMission(mission: MissionDefinition): void {
+    this.missionsMap.set(mission.id, mission);
+    if (!MISSIONS.some((m) => m.id === mission.id)) {
+      MISSIONS.push(mission);
+    }
+  }
+
   public getAllMissions(): MissionDefinition[] {
     return MISSIONS;
   }
