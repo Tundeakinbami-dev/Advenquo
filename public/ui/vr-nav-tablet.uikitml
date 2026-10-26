@@ -1,0 +1,377 @@
+<style>
+  .root {
+    flex-direction: column;
+    width: 48;
+    background-color: rgba(10, 16, 36, 0.96);
+    border-radius: 1.4;
+    border-width: 0.15;
+    border-color: #4a90d9;
+  }
+
+  .nav-header {
+    background-color: #1a237e;
+    padding-top: 1.2;
+    padding-bottom: 1.2;
+    padding-left: 1.5;
+    padding-right: 1.5;
+    border-radius: 1.4;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .title-brand {
+    font-size: 2.2;
+    font-weight: 700;
+    color: #f5d370;
+  }
+
+  .tab-bar {
+    flex-direction: row;
+    gap: 0.8;
+  }
+
+  .tab-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.6;
+    border-width: 0.08;
+    border-color: rgba(255, 255, 255, 0.3);
+    padding-top: 0.6;
+    padding-bottom: 0.6;
+    padding-left: 1.2;
+    padding-right: 1.2;
+    cursor: pointer;
+  }
+
+  .tab-btn-active {
+    background-color: #f5d370;
+    border-color: #f5d370;
+  }
+
+  .tab-label {
+    font-size: 1.2;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  .tab-label-active {
+    color: #1a237e;
+  }
+
+  .content-area {
+    padding-top: 1.6;
+    padding-bottom: 1.6;
+    padding-left: 2;
+    padding-right: 2;
+    flex-direction: column;
+  }
+
+  .mission-view {
+    flex-direction: column;
+    gap: 1.2;
+  }
+
+  .section-title {
+    font-size: 1.8;
+    font-weight: 700;
+    color: #f5d370;
+  }
+
+  .mission-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 1;
+    border-width: 0.1;
+    border-color: rgba(245, 211, 112, 0.4);
+    padding-top: 1.2;
+    padding-bottom: 1.2;
+    padding-left: 1.5;
+    padding-right: 1.5;
+    flex-direction: column;
+    gap: 0.8;
+  }
+
+  .mission-card-title {
+    font-size: 1.6;
+    font-weight: 700;
+    color: #ffffff;
+  }
+
+  .mission-card-desc {
+    font-size: 1.35;
+    color: #cbd5e1;
+    line-height: 1.35;
+  }
+
+  .mission-meta-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .badge-xp {
+    background-color: rgba(245, 211, 112, 0.2);
+    border-radius: 0.5;
+    padding-top: 0.4;
+    padding-bottom: 0.4;
+    padding-left: 0.8;
+    padding-right: 0.8;
+  }
+
+  .badge-xp-text {
+    font-size: 1.2;
+    font-weight: 600;
+    color: #f5d370;
+  }
+
+  .world-now-view {
+    flex-direction: column;
+    gap: 1;
+  }
+
+  .news-badge {
+    background-color: #00e676;
+    border-radius: 0.5;
+    padding-top: 0.4;
+    padding-bottom: 0.4;
+    padding-left: 0.8;
+    padding-right: 0.8;
+    align-self: flex-start;
+  }
+
+  .news-badge-text {
+    font-size: 1.1;
+    font-weight: 700;
+    color: #0a1024;
+  }
+
+  .news-headline {
+    font-size: 1.7;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.3;
+  }
+
+  .news-summary {
+    font-size: 1.35;
+    color: #cbd5e1;
+    line-height: 1.4;
+  }
+
+  .news-source {
+    font-size: 1.15;
+    color: #90caf9;
+  }
+
+  .journal-view {
+    flex-direction: column;
+    gap: 1;
+  }
+
+  .stats-row {
+    flex-direction: row;
+    gap: 1.5;
+  }
+
+  .stat-box {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 0.8;
+    padding-top: 0.8;
+    padding-bottom: 0.8;
+    padding-left: 1.2;
+    padding-right: 1.2;
+    flex-direction: column;
+    align-items: center;
+    width: 12;
+  }
+
+  .stat-val {
+    font-size: 1.8;
+    font-weight: 700;
+    color: #f5d370;
+  }
+
+  .stat-lbl {
+    font-size: 1.1;
+    color: #90caf9;
+  }
+
+  .vocab-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 0.8;
+    padding-top: 0.8;
+    padding-bottom: 0.8;
+    padding-left: 1.2;
+    padding-right: 1.2;
+    flex-direction: column;
+    gap: 0.4;
+  }
+
+  .vocab-term {
+    font-size: 1.5;
+    font-weight: 700;
+    color: #f5d370;
+  }
+
+  .vocab-gloss {
+    font-size: 1.3;
+    color: #ffffff;
+  }
+
+  .settings-view {
+    flex-direction: column;
+    gap: 1.2;
+  }
+
+  .setting-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-radius: 0.8;
+    padding-top: 1;
+    padding-bottom: 1;
+    padding-left: 1.5;
+    padding-right: 1.5;
+  }
+
+  .setting-label {
+    font-size: 1.45;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  .toggle-btn {
+    background-color: #f5d370;
+    border-radius: 0.6;
+    padding-top: 0.6;
+    padding-bottom: 0.6;
+    padding-left: 1.2;
+    padding-right: 1.2;
+    cursor: pointer;
+  }
+
+  .toggle-btn-label {
+    font-size: 1.3;
+    font-weight: 700;
+    color: #1a237e;
+  }
+
+  .action-btn-danger {
+    background-color: rgba(239, 68, 68, 0.2);
+    border-radius: 0.6;
+    border-width: 0.1;
+    border-color: #ef4444;
+    padding-top: 0.6;
+    padding-bottom: 0.6;
+    padding-left: 1.2;
+    padding-right: 1.2;
+    cursor: pointer;
+  }
+
+  .action-label-danger {
+    font-size: 1.3;
+    font-weight: 700;
+    color: #fca5a5;
+  }
+</style>
+
+<Panel class="root">
+  <div class="nav-header">
+    <div class="title-brand">Advenquo VR</div>
+    <div class="tab-bar">
+      <div id="tab-btn-missions" class="tab-btn tab-btn-active">
+        <div id="tab-lbl-missions" class="tab-label tab-label-active">Missions</div>
+      </div>
+      <div id="tab-btn-worldnow" class="tab-btn">
+        <div id="tab-lbl-worldnow" class="tab-label">World Now</div>
+      </div>
+      <div id="tab-btn-journal" class="tab-btn">
+        <div id="tab-lbl-journal" class="tab-label">Passport</div>
+      </div>
+      <div id="tab-btn-settings" class="tab-btn">
+        <div id="tab-lbl-settings" class="tab-label">Comfort</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-area">
+    <div id="view-missions" class="mission-view">
+      <div class="section-title">Active Objective</div>
+      <div class="mission-card">
+        <div id="tablet-mission-title" class="mission-card-title">
+          Ẹ Káàárọ̀: The Morning Protocol
+        </div>
+        <div id="tablet-mission-prompt" class="mission-card-desc">
+          Approach Baba Adéwálé on the carved courtyard veranda and greet him using the respectful elder honorific register.
+        </div>
+        <div class="mission-meta-row">
+          <div id="tablet-mission-step" class="badge-xp">
+            <div id="tablet-step-text" class="badge-xp-text">Step 1 of 2</div>
+          </div>
+          <div id="tablet-mission-xp" class="badge-xp">
+            <div id="tablet-xp-text" class="badge-xp-text">+200 XP</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-worldnow" class="world-now-view" style="display: none">
+      <div class="news-badge">
+        <div class="news-badge-text">VERIFIED REPORT • 2026</div>
+      </div>
+      <div id="tablet-news-title" class="news-headline">
+        Lagos Blue Line Electric Rail: Sustainable Megacity Transit
+      </div>
+      <div id="tablet-news-summary" class="news-summary">
+        Phase 1 electric passenger rail spans 13 km between Marina and Mile 2 along an elevated coastal lagoon viaduct, cutting commute times from 2+ hours to under 25 minutes with zero tailpipe emissions.
+      </div>
+      <div id="tablet-news-source" class="news-source">
+        Source: LAMATA Strategic Plan &amp; Railway Gazette
+      </div>
+    </div>
+
+    <div id="view-journal" class="journal-view" style="display: none">
+      <div class="stats-row">
+        <div class="stat-box">
+          <div id="tablet-player-level" class="stat-val">1</div>
+          <div class="stat-lbl">Explorer Level</div>
+        </div>
+        <div class="stat-box">
+          <div id="tablet-player-xp" class="stat-val">0</div>
+          <div class="stat-lbl">Total XP</div>
+        </div>
+        <div class="stat-box">
+          <div id="tablet-stamps-count" class="stat-val">0 / 4</div>
+          <div class="stat-lbl">Passport Stamps</div>
+        </div>
+      </div>
+      <div class="vocab-card">
+        <div class="vocab-term">Yoruba Greeting Protocol</div>
+        <div id="tablet-vocab-preview" class="vocab-gloss">
+          "Ẹ káàárọ̀ o" — Good morning (Elder Honorific with respect prefix "Ẹ")
+        </div>
+      </div>
+    </div>
+
+    <div id="view-settings" class="settings-view" style="display: none">
+      <div class="setting-row">
+        <div class="setting-label">Turning Style</div>
+        <div id="btn-toggle-turn" class="toggle-btn">
+          <div id="lbl-toggle-turn" class="toggle-btn-label">Snap Turn (45°)</div>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">Comfort Vignette</div>
+        <div id="btn-toggle-vignette" class="toggle-btn">
+          <div id="lbl-toggle-vignette" class="toggle-btn-label">Active (Low Motion)</div>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">Locomotion Reset</div>
+        <div id="btn-reset-pos" class="action-btn-danger">
+          <div class="action-label-danger">Return to Spawn</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Panel>

@@ -634,4 +634,156 @@ export const MISSIONS: MissionDefinition[] = [
       },
     ],
   },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // 5. CONTEXTUAL PURCHASE & MARKET CONVERSATION
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'mission_adire_purchase',
+    version: '1.0.0',
+    title: 'The Indigo Transaction: Artisan Guild Etiquette',
+    type: 'language',
+    destinationId: 'nigeria',
+    districtId: 'isale_eko',
+    difficulty: 'explorer',
+    estimatedMinutes: 6,
+    learningObjectives: [
+      {
+        skill: 'languageComprehension',
+        targetDescription: 'Practice respectful artisan greetings and price inquiries in Yoruba',
+        xpReward: 120,
+      },
+      {
+        skill: 'culturalInterpretation',
+        targetDescription: 'Understand the relational ethics of market bargaining and craft valuation in West Africa',
+        xpReward: 90,
+      },
+    ],
+    introContext:
+      'You have arrived at the vibrant Adire stall of Iyá Aláso in Ìsàlẹ̀ Èkó. Deep indigo fabrics sway gently in the market breeze. In Yoruba commercial ethics, trade is not a cold impersonal transaction; it is a relational encounter honoring the maker’s skill and mutual respect.',
+    steps: [
+      {
+        id: 'step_greet_artisan',
+        ordinal: 1,
+        type: 'dialogue',
+        title: 'Greeting Master Iyá Aláso',
+        prompt: 'You approach the stall. How do you greet the master dyer Iyá Aláso respectfully?',
+        context: 'Iyá Aláso is smoothing the folds of an indigo cloth with intricate cassava-resist motifs.',
+        characterName: 'Iyá Aláso',
+        characterRole: 'Master Adire Artisan',
+        dialogueChoices: [
+          {
+            id: 'choice_greet_respect',
+            text: 'Ẹ káàárọ̀ o, Iyá Aláso! Ẹ kú iṣẹ́ o! (Good morning, Mother of Cloth! Blessings on your labor!)',
+            requiresLanguageSkill: true,
+            isCorrect: true,
+            feedback: 'Iyá Aláso beams with warmth. "Àkànbí, ẹ kárọ̀! Ẹ kú àbọ̀! (Welcome!) You speak with deep appreciation for craft."',
+            explanation: '"Ẹ kú iṣẹ́" is a beloved Yoruba greeting specifically honoring someone’s active labor and craftsmanship.',
+          },
+          {
+            id: 'choice_greet_blunt',
+            text: 'How much for this blue cloth on the table?',
+            requiresLanguageSkill: false,
+            isCorrect: false,
+            feedback: 'She shakes her head with a gentle smile: "A greeting comes before the coin. One who enters without greeting leaves without blessing."',
+            explanation: 'In Nigerian heritage markets, jumping straight to prices without exchanging pleasantries is considered dismissive.',
+          },
+        ],
+        hint: 'Use the greeting that combines morning wishes with "Ẹ kú iṣẹ́" (blessing on your work).',
+        successOutcome: 'Iyá Aláso welcomes you warmly to examine the newly dipped indigo fabrics.',
+        retryGuidance: 'Acknowledge the artisan’s labor with courteous Yoruba greetings before asking about prices.',
+      },
+      {
+        id: 'step_ask_price',
+        ordinal: 2,
+        type: 'dialogue',
+        title: 'Inquiring About the Adire Cloth Price',
+        prompt: 'You wish to inquire about the price of the hand-painted Adire Eleko cloth. How do you ask courteously in Yoruba?',
+        context: 'Iyá Aláso holds up a four-yard piece featuring the traditional Olókùn geometric lattice.',
+        characterName: 'Iyá Aláso',
+        characterRole: 'Master Adire Artisan',
+        dialogueChoices: [
+          {
+            id: 'choice_price_polite',
+            text: 'Ẹ jọ̀wọ́, mélòó ni aṣọ Adirẹ yìí? (Please, how much is this Adire cloth?)',
+            requiresLanguageSkill: true,
+            isCorrect: true,
+            feedback: 'She explains: "For an explorer who speaks with respect, it is five thousand naira. Hand-drawn with cassava starch from Abeokuta."',
+            explanation: '"Ẹ jọ̀wọ́" (please) + "mélòó ni" (how much is) forms the polite, grammatically correct price inquiry.',
+          },
+          {
+            id: 'choice_price_harsh',
+            text: 'This looks expensive. Make it cheap for me right now.',
+            requiresLanguageSkill: false,
+            isCorrect: false,
+            feedback: 'She smiles patiently: "Quality fabric does not shout for attention. Understand the hours spent over the indigo pot first."',
+            explanation: 'Aggressive bargaining without appreciating artisanal labor breaches market courtesy.',
+          },
+        ],
+        hint: '"mélòó ni" means "how much is" in Yoruba.',
+        successOutcome: 'You have mastered the courteous dialogue of purchasing authentic cultural artifacts.',
+        retryGuidance: 'Use "Ẹ jọ̀wọ́, mélòó ni..." to ask about value politely.',
+      },
+    ],
+    rewards: {
+      xp: 220,
+      passportStamp: {
+        id: 'stamp_adire_trader',
+        name: 'Oníṣòwò: Market Etiquette',
+        category: 'language',
+        destinationId: 'nigeria',
+        districtId: 'isale_eko',
+        icon: '🧵',
+        description: 'Mastered Yoruba market greetings, labor blessings ("Ẹ kú iṣẹ́"), and respectful commerce.',
+      },
+      vocabulary: [
+        {
+          term: 'Ẹ kú iṣẹ́',
+          phonetic: 'Eh koo ee-sheh',
+          englishGloss: 'Well done on your work / Blessings on your labor',
+          language: 'Yoruba',
+          context: 'Essential greeting acknowledging artisans, traders, and laborers at work.',
+        },
+        {
+          term: 'Mélòó ni?',
+          phonetic: 'Meh-loh nee',
+          englishGloss: 'How much is it?',
+          language: 'Yoruba',
+          context: 'Standard courteous phrase for price inquiry in marketplaces.',
+        },
+      ],
+      journalDiscovery: {
+        id: 'journal_yoruba_market_ethics',
+        title: 'The Relational Economy: Yoruba Market Guilds & Etiquette',
+        category: 'Society & Economics',
+        summary:
+          'In traditional Yoruba commerce governed by the Ìyál’ọ́jà (Market Mother), pricing is relational. Greetings establish social bond and mutual goodwill before currency changes hands.',
+        verifiedFact:
+          'Yoruba marketplaces have recognized artisan guilds where pricing reflects both botanical ingredient costs (indigo elu) and days of manual starch painting.',
+        sourceAttribution: 'Toyin Falola, "The Yoruba Market System and Indigenous Capitalism", Cambridge University Press.',
+      },
+      skillsAdvancement: {
+        languageComprehension: 20,
+        culturalInterpretation: 20,
+      },
+    },
+    culturalDebrief: {
+      summary:
+        'You completed a respectful purchase conversation with master artisan Iyá Aláso at the Adire stall.',
+      keyVocabulary: ['Ẹ kú iṣẹ́', 'Mélòó ni?'],
+      culturalTakeaway:
+        'Commerce in West Africa is communal. Respect for the artisan’s time and labor is as valuable as the monetary exchange.',
+      realWorldContext:
+        'Across markets from Balogun in Lagos to Itoku in Abeokuta, courteous greetings remain the essential passport to fair trade.',
+    },
+    sources: [
+      {
+        publisher: 'Cambridge University Press',
+        title: 'The Yoruba Market System and Indigenous Capitalism',
+        url: 'https://doi.org/10.1017/CBO9780511584060',
+        publishedDate: '2020-05-14',
+        verifiedDate: '2026-02-16',
+      },
+    ],
+  },
 ];

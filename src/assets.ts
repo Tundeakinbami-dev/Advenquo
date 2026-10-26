@@ -17,15 +17,33 @@ import { AssetType, defineAssets } from '@iwsdk/core';
 
 import { buildAdireCloth } from './scene-assets/adire-cloth.scene-asset.js';
 import { buildCalabash } from './scene-assets/calabash.scene-asset.js';
+import { buildCourtyardVeranda } from './scene-assets/courtyard-veranda.scene-asset.js';
 import { buildDisplayTable } from './scene-assets/display-table.scene-asset.js';
+import { buildDistrictSign } from './scene-assets/district-sign.scene-asset.js';
 import { buildKolaNut } from './scene-assets/kola-nut.scene-asset.js';
+import { buildMarketGround } from './scene-assets/market-ground.scene-asset.js';
+import { buildMarketProps } from './scene-assets/market-props.scene-asset.js';
+import { buildMarketStall } from './scene-assets/market-stall.scene-asset.js';
+import { buildNpcBabaAdewale } from './scene-assets/npc-baba-adewale.scene-asset.js';
+import { buildNpcIyaAlaso } from './scene-assets/npc-iya-alaso.scene-asset.js';
 import { buildTalkingDrum } from './scene-assets/talking-drum.scene-asset.js';
 
 const publicAssetUrl = (filePath: string): string =>
   `${import.meta.env.BASE_URL}${filePath.replace(/^\/+/u, '')}`;
 
 export default defineAssets({
-  // ── Procedural 3D models (bare Object3D — no wrapper object) ───────────
+  // ── Procedural 3D Environment & Architecture ────────────────────────────
+  'market-ground': buildMarketGround(),
+  'courtyard-veranda': buildCourtyardVeranda(),
+  'market-stall': buildMarketStall(),
+  'market-props': buildMarketProps(),
+  'district-sign': buildDistrictSign(),
+
+  // ── Procedural 3D NPCs ──────────────────────────────────────────────────
+  'npc-baba-adewale': buildNpcBabaAdewale(),
+  'npc-iya-alaso': buildNpcIyaAlaso(),
+
+  // ── Procedural 3D Cultural Artifacts ────────────────────────────────────
   'display-table': buildDisplayTable(),
   'adire-cloth': buildAdireCloth(),
   'talking-drum': buildTalkingDrum(),
@@ -37,6 +55,16 @@ export default defineAssets({
     url: publicAssetUrl('ui/intro.uikitml'),
     type: AssetType.UIKitML,
     name: 'Intro Panel',
+  },
+  'npc-dialogue-panel': {
+    url: publicAssetUrl('ui/npc-dialogue.uikitml'),
+    type: AssetType.UIKitML,
+    name: 'NPC Dialogue Panel',
+  },
+  'vr-nav-tablet': {
+    url: publicAssetUrl('ui/vr-nav-tablet.uikitml'),
+    type: AssetType.UIKitML,
+    name: 'VR Navigation Tablet',
   },
   'fact-panel-adire': {
     url: publicAssetUrl('ui/fact-adire.uikitml'),
