@@ -273,6 +273,26 @@
     font-weight: 700;
     color: #fca5a5;
   }
+
+  .news-nav-btn {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: 0.6;
+    border-width: 0.08;
+    border-color: rgba(245, 211, 112, 0.4);
+    padding-top: 0.6;
+    padding-bottom: 0.6;
+    padding-left: 1.4;
+    padding-right: 1.4;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .news-nav-label {
+    font-size: 1.25;
+    font-weight: 700;
+    color: #f5d370;
+  }
 </style>
 
 <Panel class="root">
@@ -316,8 +336,11 @@
     </div>
 
     <div id="view-worldnow" class="world-now-view" style="display: none">
-      <div class="news-badge">
-        <div class="news-badge-text">VERIFIED REPORT • 2026</div>
+      <div style="flex-direction: row; justify-content: space-between; align-items: center;">
+        <div id="tablet-news-badge" class="news-badge">
+          <div id="tablet-news-badge-text" class="news-badge-text">VERIFIED REPORT • 2026</div>
+        </div>
+        <div id="tablet-news-counter" style="font-size: 1.1; color: #f5d370; font-weight: 700;">Story 1 / 3</div>
       </div>
       <div id="tablet-news-title" class="news-headline">
         Lagos Blue Line Electric Rail: Sustainable Megacity Transit
@@ -327,6 +350,14 @@
       </div>
       <div id="tablet-news-source" class="news-source">
         Source: LAMATA Strategic Plan &amp; Railway Gazette
+      </div>
+      <div style="flex-direction: row; gap: 1.2; margin-top: 0.8;">
+        <div id="btn-news-prev" class="news-nav-btn">
+          <div class="news-nav-label">← Prev Story</div>
+        </div>
+        <div id="btn-news-next" class="news-nav-btn">
+          <div class="news-nav-label">Next Story →</div>
+        </div>
       </div>
     </div>
 

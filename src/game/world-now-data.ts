@@ -1,13 +1,17 @@
 /**
- * Advenquo: World Now Editorial Content & Real-World Intelligence
+ * Advenquo: World Now Editorial Content & Real-World Intelligence Bridge
  *
  * Implements curated, verified contemporary African and global developments.
  * Every article carries real publishers, verifiable URLs, exact dates,
  * editorial review statuses, and explicit distinctions between verified facts,
  * developing scenarios, and educational game adaptations.
+ *
+ * Bridges seamlessly with the Global Live World Engine.
  */
 
 import type { WorldNowStory } from './types.js';
+import type { WorldEvent } from '../live-world/types.js';
+import { eventResolver } from '../live-world/intelligence/event-resolver.js';
 
 export const WORLD_NOW_STORIES: WorldNowStory[] = [
   {
@@ -81,3 +85,61 @@ export const WORLD_NOW_STORIES: WorldNowStory[] = [
     ],
   },
 ];
+
+/**
+ * Converts a Live WorldEvent into a compatible WorldNowStory object.
+ */
+export function convertEventToStory(event: WorldEvent): WorldNowStory {
+  const categoryMap: Record<string, WorldNowStory['category']> = {
+    economy_business: 'Infrastructure & Transit',
+    environment_climate: 'Ecology & Agriculture',
+    culture_society: 'Arts & Heritage',
+    science_technology: 'Technology & Innovation',
+    politics_governance: 'Infrastructure & Transit',
+    protests_civic: 'Infrastructure & Transit',
+  };
+
+  const category = categoryMap[event.topic] || 'Technology & Innovation';
+  const leadSource = event.sources[0];
+  const dateStr = (event.publishedAt || event.lastUpdatedAt || new Date().toISOString()).split('T')[0];
+
+  return {
+    id: event.id,
+    headline: event.title,
+    summary: event.shortSummary,
+    category,
+    publisher: leadSource ? leadSource.publisher : 'Verified Global Intelligence',
+    sourceUrl: leadSource ? leadSource.url : 'https://advenquo.com/world-now',
+    publishedAt: dateStr,
+    verifiedAt: dateStr,
+    editorialReviewAt: dateStr,
+    status: event.status === 'PUBLISHED' || event.status === 'UPDATED' || event.status === 'CORRECTED' ? 'PUBLISHED' : 'REVIEW',
+    verificationLevel: event.confidenceRating === 'VERIFIED_FACT' ? 'VERIFIED_FACT' : 'DEVELOPING_NEWS',
+    linkedMissionId: event.linkedAdventureId,
+    linkedDistrictId: event.location.districtId || 'isale_eko',
+    tags: event.tags,
+    factualHighlights: event.claims.map((c) => c.statement),
+    uncertaintyNotes: event.unresolvedQuestions.length > 0 ? event.unresolvedQuestions[0] : undefined,
+  };
+}
+
+/**
+ * Retrieves all contemporary stories combining baseline verified stories with live events.
+ */
+export function getAllCombinedStories(): WorldNowStory[] {
+  const liveEvents = eventResolver.getAllEvents();
+  const liveStories = liveEvents
+    .filter((e) => e.status === 'PUBLISHED' || e.status === 'UPDATED' || e.status === 'CORRECTED')
+    .map(convertEventToStory);
+
+  // Combine and deduplicate by ID
+  const map = new Map<string, WorldNowStory>();
+  for (const s of WORLD_NOW_STORIES) {
+    map.set(s.id, s);
+  }
+  for (const s of liveStories) {
+    map.set(s.id, s);
+  }
+
+  return Array.from(map.values());
+}

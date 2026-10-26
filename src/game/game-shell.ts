@@ -10,7 +10,9 @@ import { storage } from './storage.js';
 import { missionEngine } from './mission-engine.js';
 import type { ChoiceEvaluationResult, MissionCompletionResult } from './mission-engine.js';
 import { DESTINATIONS } from './world-data.js';
-import { WORLD_NOW_STORIES } from './world-now-data.js';
+import { getAllCombinedStories, WORLD_NOW_STORIES } from './world-now-data.js';
+import { bootstrapLiveWorldEngine } from '../live-world/bootstrap.js';
+import { worldEngineApi } from '../live-world/service/world-engine-api.js';
 import type {
   ActiveMissionState,
   Destination,
@@ -24,6 +26,7 @@ import {
   injectAppStyles,
   renderDistrictExplorationView,
   renderGlobalMapView,
+  renderLiveEventDetailModal,
   renderMissionModal,
   renderPassportView,
   renderPOIModal,
@@ -99,6 +102,11 @@ export class GameShell {
     // Default to map or district
     const state = storage.getState();
     this.activeTab = 'map';
+
+    // Bootstrap Global Live World Engine
+    bootstrapLiveWorldEngine().then(() => {
+      this.render();
+    });
 
     this.render();
 
@@ -210,11 +218,10 @@ export class GameShell {
           }
 
           case 'world_now': {
+            const combinedStories = getAllCombinedStories();
             const worldNowView = renderWorldNowView(
-              WORLD_NOW_STORIES,
-              (story) => {
-                if (story.linkedMissionId) this.startMission(story.linkedMissionId);
-              },
+              combinedStories,
+              (story) => this.openEventDetailModal(story),
               (missionId) => this.startMission(missionId),
             );
             this.viewContainer.appendChild(worldNowView);
@@ -263,6 +270,29 @@ export class GameShell {
     );
 
     this.activePOIModal = modal;
+    this.modalContainer.appendChild(modal);
+  }
+
+  public openEventDetailModal(story: WorldNowStory): void {
+    if (!this.modalContainer) return;
+    this.closeAllModals();
+
+    const modal = renderLiveEventDetailModal(
+      story,
+      (missionId) => this.startMission(missionId),
+      (storyId) => {
+        worldEngineApi.submitReport(
+          storyId,
+          'factual_inaccuracy',
+          'Explorer community fact-check submission.',
+        );
+        alert(
+          'Thank you for upholding Advenquo information integrity! Your report has been submitted to the editorial desk for review.',
+        );
+      },
+      () => this.closeAllModals(),
+    );
+
     this.modalContainer.appendChild(modal);
   }
 

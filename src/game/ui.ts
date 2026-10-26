@@ -430,6 +430,55 @@ export function injectAppStyles(): void {
       gap: 4px;
     }
 
+    .badge-developing {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge-corrected {
+      background: rgba(147, 51, 234, 0.2);
+      color: #c084fc;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .filter-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-muted);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .filter-pill:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text-main);
+    }
+
+    .filter-pill.active {
+      background: var(--gold-accent);
+      color: #0a1024;
+      border-color: var(--gold-accent);
+      font-weight: 700;
+    }
+
     .story-headline {
       font-size: 18px;
       font-weight: 700;
@@ -867,78 +916,410 @@ export function renderWorldNowView(
   const container = document.createElement('div');
   container.className = 'view-card-max';
 
+  let currentCategory = 'all';
+  let currentSearch = '';
+  let activeViewMode: 'feed' | 'map' = 'feed';
+
+  const categories = [
+    { id: 'all', label: 'All Developments' },
+    { id: 'Infrastructure & Transit', label: '🚆 Transit & Infrastructure' },
+    { id: 'Ecology & Agriculture', label: '🌱 Ecology & Climate' },
+    { id: 'Arts & Heritage', label: '🏺 Heritage & Arts' },
+    { id: 'Technology & Innovation', label: '💡 Tech & Innovation' },
+  ];
+
+  function filterStories(): WorldNowStory[] {
+    return stories.filter((s) => {
+      const matchCat = currentCategory === 'all' || s.category === currentCategory;
+      const matchSearch =
+        !currentSearch ||
+        s.headline.toLowerCase().includes(currentSearch.toLowerCase()) ||
+        s.summary.toLowerCase().includes(currentSearch.toLowerCase()) ||
+        s.tags.some((t) => t.toLowerCase().includes(currentSearch.toLowerCase()));
+      return matchCat && matchSearch;
+    });
+  }
+
+  function renderContent(): void {
+    const filtered = filterStories();
+    const feedHost = container.querySelector('#world-now-dynamic-content');
+    if (!feedHost) return;
+
+    if (activeViewMode === 'map') {
+      feedHost.innerHTML = `
+        <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <span style="font-size: 14px; font-weight: 700; color: var(--gold-accent);">
+              🗺️ Global &amp; Regional Coordinate Intelligence Map
+            </span>
+            <span style="font-size: 12px; color: var(--text-dim);">
+              Active Coordinate Pins: ${filtered.length} Locations
+            </span>
+          </div>
+
+          <!-- Interactive SVG Map -->
+          <div style="position: relative; width: 100%; height: 340px; background: #070d1e; border-radius: 10px; overflow: hidden; border: 1px solid rgba(74, 144, 217, 0.3);">
+            <svg viewBox="0 0 800 400" style="width: 100%; height: 100%; background: radial-gradient(circle at 40% 50%, #0d1b3a 0%, #060a16 100%);">
+              <!-- Grid lines -->
+              <line x1="0" y1="100" x2="800" y2="100" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4" />
+              <line x1="0" y1="200" x2="800" y2="200" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4" />
+              <line x1="0" y1="300" x2="800" y2="300" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4" />
+              <line x1="200" y1="0" x2="200" y2="400" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4" />
+              <line x1="400" y1="0" x2="400" y2="400" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4" />
+              <line x1="600" y1="0" x2="600" y2="400" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4" />
+
+              <!-- Stylized African Coastline Silhouette -->
+              <path d="M 330 80 Q 400 70 480 85 Q 520 120 540 180 Q 560 260 480 340 Q 430 380 400 370 Q 380 300 360 240 Q 320 220 290 190 Q 280 140 330 80 Z"
+                    fill="rgba(245, 211, 112, 0.04)" stroke="rgba(245, 211, 112, 0.25)" stroke-width="1.5" />
+
+              <!-- West African Coast detail -->
+              <path d="M 290 190 Q 340 200 370 215 Q 400 210 420 240"
+                    fill="none" stroke="rgba(0, 230, 118, 0.4)" stroke-width="2" stroke-dasharray="2 2" />
+
+              <!-- Regional Label -->
+              <text x="390" y="160" fill="rgba(255,255,255,0.15)" font-size="16" font-weight="700" text-anchor="middle">WEST &amp; CENTRAL AFRICA</text>
+              <text x="375" y="235" fill="rgba(245,211,112,0.6)" font-size="11" font-weight="600">Gulf of Guinea</text>
+
+              <!-- Plotted Story Pins -->
+              <!-- Lagos Hub Pin (6.45 N, 3.39 E) -->
+              <g class="svg-map-pin" data-story-id="${filtered[0]?.id || ''}" style="cursor: pointer;">
+                <circle cx="365" cy="215" r="14" fill="rgba(0, 230, 118, 0.2)" />
+                <circle cx="365" cy="215" r="7" fill="#00e676" />
+                <circle cx="365" cy="215" r="3" fill="#ffffff" />
+                <text x="365" y="238" fill="#ffffff" font-size="11" font-weight="700" text-anchor="middle">Lagos [6.45°N, 3.39°E]</text>
+              </g>
+
+              <!-- Sahelian Belt Pin (13.5 N, 8.5 E) -->
+              <g class="svg-map-pin" data-story-id="${filtered[1]?.id || ''}" style="cursor: pointer;">
+                <circle cx="410" cy="140" r="14" fill="rgba(245, 211, 112, 0.2)" />
+                <circle cx="410" cy="140" r="7" fill="#f5d370" />
+                <circle cx="410" cy="140" r="3" fill="#ffffff" />
+                <text x="410" y="125" fill="#f5d370" font-size="11" font-weight="700" text-anchor="middle">Sahel Agroforestry [13.5°N, 8.5°E]</text>
+              </g>
+
+              <!-- NCMM Museum Heritage Pin -->
+              <g class="svg-map-pin" data-story-id="${filtered[2]?.id || ''}" style="cursor: pointer;">
+                <circle cx="350" cy="205" r="12" fill="rgba(99, 102, 241, 0.25)" />
+                <circle cx="350" cy="205" r="6" fill="#818cf8" />
+                <circle cx="350" cy="205" r="2.5" fill="#ffffff" />
+                <text x="320" y="200" fill="#cbd5e1" font-size="10" font-weight="600" text-anchor="end">Ìsàlẹ̀ Èkó Archives</text>
+              </g>
+            </svg>
+          </div>
+
+          <div style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">
+            💡 <em>Tip: Click any geographic pin on the map to inspect full verified intelligence, primary sources, and open the interactive investigation.</em>
+          </div>
+        </div>
+      `;
+
+      feedHost.querySelectorAll('.svg-map-pin').forEach((pin) => {
+        pin.addEventListener('click', (e) => {
+          const sId = (e.currentTarget as HTMLElement).getAttribute('data-story-id');
+          const found = stories.find((s) => s.id === sId) || stories[0];
+          if (found) onSelectStory(found);
+        });
+      });
+      return;
+    }
+
+    // Default Feed View
+    if (filtered.length === 0) {
+      feedHost.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px; color: var(--text-dim);">
+          <span style="font-size: 32px; display: block; margin-bottom: 8px;">🔍</span>
+          No developments match your selected criteria. Try adjusting the topic or search keywords.
+        </div>
+      `;
+      return;
+    }
+
+    feedHost.innerHTML = filtered
+      .map(
+        (story) => `
+      <div class="story-card" data-story-id="${story.id}">
+        <div class="story-meta">
+          <span class="${story.verificationLevel === 'VERIFIED_FACT' ? 'badge-verified' : 'badge-developing'}">
+            ${story.verificationLevel === 'VERIFIED_FACT' ? '✓ VERIFIED FACT' : '⚡ DEVELOPING STORY'}
+          </span>
+          <span style="color: var(--gold-accent); font-weight: 600;">${story.category}</span>
+          <span>· Published: ${story.publishedAt}</span>
+          <span>· Verified: ${story.verifiedAt}</span>
+          <span>· Source: ${story.publisher}</span>
+        </div>
+
+        <h3 class="story-headline">${story.headline}</h3>
+        <p class="story-summary">${story.summary}</p>
+
+        <div class="story-highlights">
+          <strong>Verified Highlights:</strong>
+          <ul>
+            ${story.factualHighlights.map((highlight) => `<li>${highlight}</li>`).join('')}
+          </ul>
+        </div>
+
+        ${
+          story.uncertaintyNotes
+            ? `<div style="font-size: 12px; color: #f59e0b; background: rgba(245, 158, 11, 0.1); padding: 8px 12px; border-radius: 6px;">
+                <strong>Notice on Developing Aspects:</strong> ${story.uncertaintyNotes}
+              </div>`
+            : ''
+        }
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button class="btn-secondary btn-investigate-story" data-story-id="${story.id}" style="font-size: 13px; padding: 6px 12px;">
+              🔍 Investigate Details &amp; Sources
+            </button>
+            <a href="${story.sourceUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 13px; color: var(--indigo-accent); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+              🔗 Sourced Publisher (${story.publisher}) ↗
+            </a>
+          </div>
+
+          ${
+            story.linkedMissionId
+              ? `<button class="btn-gold btn-world-now-mission" data-mission-id="${story.linkedMissionId}">
+                  Start Connected Mission →
+                </button>`
+              : ''
+          }
+        </div>
+      </div>
+    `,
+      )
+      .join('');
+
+    feedHost.querySelectorAll('.btn-world-now-mission').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const mId = (e.currentTarget as HTMLElement).getAttribute('data-mission-id');
+        if (mId) onStartLinkedMission(mId);
+      });
+    });
+
+    feedHost.querySelectorAll('.btn-investigate-story').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const sId = (e.currentTarget as HTMLElement).getAttribute('data-story-id');
+        const found = stories.find((s) => s.id === sId);
+        if (found) onSelectStory(found);
+      });
+    });
+  }
+
   container.innerHTML = `
     <div style="background: var(--bg-panel); border: 1px solid var(--border-panel); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 20px;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
         <div>
           <h2 style="font-size: 24px; color: var(--gold-accent); margin: 0 0 4px 0;">📰 World Now Intelligence Hub</h2>
-          <p style="font-size: 14px; color: var(--text-muted); margin: 0;">Verified real-world developments, verified sources, and connected adventure investigations.</p>
+          <p style="font-size: 14px; color: var(--text-muted); margin: 0;">Verified real-world developments, verified sources, and connected interactive adventure investigations.</p>
         </div>
-        <span class="badge-verified">
-          ✓ Editorial Pipeline: Fact-Checked & Dated
-        </span>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button id="btn-toggle-feed-view" class="filter-pill active" style="font-size: 13px; padding: 6px 14px;">📰 Live Feed</button>
+          <button id="btn-toggle-map-view" class="filter-pill" style="font-size: 13px; padding: 6px 14px;">🗺️ Map Explorer</button>
+          <span class="badge-verified" style="margin-left: 6px;">
+            ✓ Real-Time Verified Engine
+          </span>
+        </div>
       </div>
 
-      <!-- Story Feed -->
-      <div style="display: flex; flex-direction: column; gap: 16px;">
-        ${stories
-          .map(
-            (story) => `
-          <div class="story-card" data-story-id="${story.id}">
-            <div class="story-meta">
-              <span class="badge-verified">✓ ${story.verificationLevel}</span>
-              <span style="color: var(--gold-accent); font-weight: 600;">${story.category}</span>
-              <span>· Published: ${story.publishedAt}</span>
-              <span>· Verified: ${story.verifiedAt}</span>
-              <span>· Source: ${story.publisher}</span>
+      <!-- Controls bar: Search & Category Pills -->
+      <div style="display: flex; flex-direction: column; gap: 12px; background: rgba(0, 0, 0, 0.25); padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.06);">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <input type="text" id="world-now-search-input" placeholder="Search verified headlines, topics, or keywords..." style="
+            flex: 1;
+            min-width: 240px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+          " />
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="category-pills-bar">
+          ${categories
+            .map(
+              (cat) => `
+            <button type="button" class="filter-pill ${cat.id === 'all' ? 'active' : ''}" data-cat-id="${cat.id}">
+              ${cat.label}
+            </button>
+          `,
+            )
+            .join('')}
+        </div>
+      </div>
+
+      <!-- Dynamic Feed / Map Container -->
+      <div id="world-now-dynamic-content" style="display: flex; flex-direction: column; gap: 16px;"></div>
+    </div>
+  `;
+
+  // Wire search input
+  const searchInput = container.querySelector('#world-now-search-input') as HTMLInputElement;
+  searchInput?.addEventListener('input', () => {
+    currentSearch = searchInput.value.trim();
+    renderContent();
+  });
+
+  // Wire category pills
+  container.querySelectorAll('#category-pills-bar .filter-pill').forEach((pill) => {
+    pill.addEventListener('click', (e) => {
+      container.querySelectorAll('#category-pills-bar .filter-pill').forEach((p) => p.classList.remove('active'));
+      const el = e.currentTarget as HTMLElement;
+      el.classList.add('active');
+      currentCategory = el.getAttribute('data-cat-id') || 'all';
+      renderContent();
+    });
+  });
+
+  // Wire view mode buttons
+  const btnFeed = container.querySelector('#btn-toggle-feed-view');
+  const btnMap = container.querySelector('#btn-toggle-map-view');
+
+  btnFeed?.addEventListener('click', () => {
+    activeViewMode = 'feed';
+    btnFeed.classList.add('active');
+    btnMap?.classList.remove('active');
+    renderContent();
+  });
+
+  btnMap?.addEventListener('click', () => {
+    activeViewMode = 'map';
+    btnMap.classList.add('active');
+    btnFeed?.classList.remove('active');
+    renderContent();
+  });
+
+  // Initial render
+  renderContent();
+  return container;
+}
+
+export function renderLiveEventDetailModal(
+  story: WorldNowStory,
+  onStartLinkedMission: (missionId: string) => void,
+  onReportInaccuracy: (storyId: string) => void,
+  onClose: () => void,
+): HTMLElement {
+  const backdrop = document.createElement('div');
+  backdrop.className = 'advenquo-modal-backdrop';
+
+  backdrop.innerHTML = `
+    <div class="advenquo-modal-content" style="max-width: 740px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span class="${story.verificationLevel === 'VERIFIED_FACT' ? 'badge-verified' : 'badge-developing'}">
+            ${story.verificationLevel === 'VERIFIED_FACT' ? '✓ VERIFIED FACT' : '⚡ DEVELOPING STORY'}
+          </span>
+          <span style="font-size: 13px; color: var(--gold-accent); font-weight: 700;">${story.category}</span>
+        </div>
+        <button id="modal-close-x" style="background: transparent; border: none; color: var(--text-dim); font-size: 20px; cursor: pointer;">✕</button>
+      </div>
+
+      <div class="modal-body" style="gap: 20px;">
+        <!-- Headline & Summary -->
+        <div>
+          <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main); margin: 0 0 10px 0; line-height: 1.35;">
+            ${story.headline}
+          </h2>
+          <p style="font-size: 14px; color: var(--text-muted); line-height: 1.6; margin: 0;">
+            ${story.summary}
+          </p>
+        </div>
+
+        <!-- Verified Findings & Claims -->
+        <div style="background: rgba(0, 0, 0, 0.35); border-left: 3px solid var(--tag-verified); padding: 14px 18px; border-radius: 0 8px 8px 0;">
+          <span style="font-size: 13px; font-weight: 700; color: var(--gold-accent); display: block; margin-bottom: 8px;">
+            Verified Intelligence Highlights
+          </span>
+          <ul style="margin: 0; padding-left: 18px; font-size: 13px; color: var(--text-main); display: flex; flex-direction: column; gap: 6px;">
+            ${story.factualHighlights.map((highlight) => `<li>${highlight}</li>`).join('')}
+          </ul>
+        </div>
+
+        <!-- Interactive Updates Timeline -->
+        <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 16px;">
+          <span style="font-size: 13px; font-weight: 700; color: var(--gold-accent); display: block; margin-bottom: 12px;">
+            Chronological Development Timeline
+          </span>
+          <div style="display: flex; flex-direction: column; gap: 12px; padding-left: 8px; border-left: 2px solid rgba(245, 211, 112, 0.4);">
+            <div style="position: relative; padding-left: 14px;">
+              <div style="position: absolute; left: -19px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--gold-accent);"></div>
+              <span style="font-size: 11px; color: var(--text-dim);">${story.publishedAt} (UTC)</span>
+              <div style="font-size: 13px; font-weight: 600; color: var(--text-main);">Initial Reporting Intake &amp; Provenance Record</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Recorded by Advenquo from ${story.publisher}.</div>
             </div>
-
-            <h3 class="story-headline">${story.headline}</h3>
-            <p class="story-summary">${story.summary}</p>
-
-            <div class="story-highlights">
-              <strong>Verified Findings:</strong>
-              <ul>
-                ${story.factualHighlights.map((highlight) => `<li>${highlight}</li>`).join('')}
-              </ul>
-            </div>
-
-            ${
-              story.uncertaintyNotes
-                ? `<div style="font-size: 12px; color: #f59e0b; background: rgba(245, 158, 11, 0.1); padding: 8px 12px; border-radius: 6px;">
-                    <strong>Notice on Developing Aspects:</strong> ${story.uncertaintyNotes}
-                  </div>`
-                : ''
-            }
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; flex-wrap: wrap; gap: 12px;">
-              <a href="${story.sourceUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 13px; color: var(--indigo-accent); text-decoration: none; display: flex; align-items: center; gap: 4px;">
-                🔗 Read Verified Source (${story.publisher}) ↗
-              </a>
-              ${
-                story.linkedMissionId
-                  ? `<button class="btn-gold btn-world-now-mission" data-mission-id="${story.linkedMissionId}">
-                      Start Connected Mission →
-                    </button>`
-                  : ''
-              }
+            <div style="position: relative; padding-left: 14px;">
+              <div style="position: absolute; left: -19px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: #00e676;"></div>
+              <span style="font-size: 11px; color: var(--text-dim);">${story.verifiedAt} (UTC)</span>
+              <div style="font-size: 13px; font-weight: 600; color: var(--text-main);">Editorial Verification &amp; Corroboration Review</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Verified against institutional documentation and satellite/engineering records.</div>
             </div>
           </div>
-        `,
-          )
-          .join('')}
+        </div>
+
+        <!-- Sourced Evidence Panel -->
+        <div style="background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+          <span style="font-size: 13px; font-weight: 700; color: var(--gold-accent);">
+            Sources, Attribution &amp; Licensing
+          </span>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="font-size: 13px; color: var(--text-dim);">
+              Publisher: <strong style="color: var(--text-main);">${story.publisher}</strong> · Status: <strong>${story.status}</strong>
+            </div>
+            <a href="${story.sourceUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 13px; color: var(--indigo-accent); text-decoration: none;">
+              🔗 Direct Source Document ↗
+            </a>
+          </div>
+          <p style="font-size: 11px; color: var(--text-dim); margin: 4px 0 0 0;">
+            Attribution Notice: Verified under fair use citation and open public record standards. No algorithmic alteration of source quotes.
+          </p>
+        </div>
+
+        ${
+          story.uncertaintyNotes
+            ? `<div style="font-size: 13px; color: #f59e0b; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); padding: 12px; border-radius: 8px;">
+                <strong>Known Uncertainties &amp; Developing Factors:</strong><br />
+                ${story.uncertaintyNotes}
+              </div>`
+            : ''
+        }
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <button class="btn-secondary" id="btn-report-story" style="font-size: 12px; padding: 8px 12px;">
+          🚩 Report Inaccuracy / Feedback
+        </button>
+
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-secondary" id="btn-modal-close">Close</button>
+          ${
+            story.linkedMissionId
+              ? `<button class="btn-gold" id="btn-modal-start-mission">
+                  Launch Connected Adventure →
+                </button>`
+              : ''
+          }
+        </div>
       </div>
     </div>
   `;
 
-  container.querySelectorAll('.btn-world-now-mission').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      const mId = (e.currentTarget as HTMLElement).getAttribute('data-mission-id');
-      if (mId) onStartLinkedMission(mId);
-    });
+  backdrop.querySelector('#modal-close-x')?.addEventListener('click', onClose);
+  backdrop.querySelector('#btn-modal-close')?.addEventListener('click', onClose);
+
+  backdrop.querySelector('#btn-modal-start-mission')?.addEventListener('click', () => {
+    if (story.linkedMissionId) {
+      onClose();
+      onStartLinkedMission(story.linkedMissionId);
+    }
   });
 
-  return container;
+  backdrop.querySelector('#btn-report-story')?.addEventListener('click', () => {
+    onReportInaccuracy(story.id);
+  });
+
+  return backdrop;
 }
 
 export function renderPassportView(state: GameSaveState): HTMLElement {

@@ -24,11 +24,12 @@ import {
 
 import { missionEngine } from './game/mission-engine.js';
 import { storage } from './game/storage.js';
-import { WORLD_NOW_STORIES } from './game/world-now-data.js';
+import { getAllCombinedStories } from './game/world-now-data.js';
 
 export class VRTabletSystem extends createSystem({}) {
   private tablet: UIKitMLAsset | null = null;
   private activeTab: 'missions' | 'worldnow' | 'journal' | 'settings' = 'missions';
+  private currentStoryIndex = 0;
 
   // Cached views
   private viewMissions: any = null;
@@ -56,6 +57,10 @@ export class VRTabletSystem extends createSystem({}) {
   private newsTitleEl: UIKit.Text | null = null;
   private newsSummaryEl: UIKit.Text | null = null;
   private newsSourceEl: UIKit.Text | null = null;
+  private newsCounterEl: UIKit.Text | null = null;
+  private newsBadgeTextEl: UIKit.Text | null = null;
+  private btnNewsPrev: any = null;
+  private btnNewsNext: any = null;
 
   private levelEl: UIKit.Text | null = null;
   private xpEl: UIKit.Text | null = null;
@@ -103,6 +108,28 @@ export class VRTabletSystem extends createSystem({}) {
     this.newsTitleEl = this.tablet.getElementById<UIKit.Text>('tablet-news-title');
     this.newsSummaryEl = this.tablet.getElementById<UIKit.Text>('tablet-news-summary');
     this.newsSourceEl = this.tablet.getElementById<UIKit.Text>('tablet-news-source');
+    this.newsCounterEl = this.tablet.getElementById<UIKit.Text>('tablet-news-counter');
+    this.newsBadgeTextEl = this.tablet.getElementById<UIKit.Text>('tablet-news-badge-text');
+    this.btnNewsPrev = this.tablet.getElementById('btn-news-prev');
+    this.btnNewsNext = this.tablet.getElementById('btn-news-next');
+
+    // Wire news navigation
+    const onNewsPrev = (): void => {
+      const stories = getAllCombinedStories();
+      if (stories.length === 0) return;
+      this.currentStoryIndex = (this.currentStoryIndex - 1 + stories.length) % stories.length;
+      this._refreshData();
+    };
+
+    const onNewsNext = (): void => {
+      const stories = getAllCombinedStories();
+      if (stories.length === 0) return;
+      this.currentStoryIndex = (this.currentStoryIndex + 1) % stories.length;
+      this._refreshData();
+    };
+
+    this.btnNewsPrev?.addEventListener('click', onNewsPrev);
+    this.btnNewsNext?.addEventListener('click', onNewsNext);
 
     // Cache journal elements
     this.levelEl = this.tablet.getElementById<UIKit.Text>('tablet-player-level');
@@ -145,6 +172,8 @@ export class VRTabletSystem extends createSystem({}) {
       () => this.btnToggleTurn?.removeEventListener('click', onToggleTurn),
       () => this.btnToggleVignette?.removeEventListener('click', onToggleVignette),
       () => this.btnResetPos?.removeEventListener('click', onResetPos),
+      () => this.btnNewsPrev?.removeEventListener('click', onNewsPrev),
+      () => this.btnNewsNext?.removeEventListener('click', onNewsNext),
     );
 
     // Initial update
@@ -212,13 +241,23 @@ export class VRTabletSystem extends createSystem({}) {
     } as never);
     this.missionXpEl?.setProperties({ text: `+${curMission.rewards.xp} XP` } as never);
 
-    // 2. Refresh World Now view
-    const latestStory = WORLD_NOW_STORIES[0];
-    if (latestStory) {
-      this.newsTitleEl?.setProperties({ text: latestStory.headline } as never);
-      this.newsSummaryEl?.setProperties({ text: latestStory.summary } as never);
+    // 2. Refresh World Now view with live combined stories
+    const stories = getAllCombinedStories();
+    if (stories.length > 0) {
+      if (this.currentStoryIndex >= stories.length) {
+        this.currentStoryIndex = 0;
+      }
+      const curStory = stories[this.currentStoryIndex];
+      this.newsTitleEl?.setProperties({ text: curStory.headline } as never);
+      this.newsSummaryEl?.setProperties({ text: curStory.summary } as never);
       this.newsSourceEl?.setProperties({
-        text: `Publisher: ${latestStory.publisher} (${latestStory.publishedAt})`,
+        text: `Publisher: ${curStory.publisher} (${curStory.publishedAt})`,
+      } as never);
+      this.newsCounterEl?.setProperties({
+        text: `Story ${this.currentStoryIndex + 1} / ${stories.length}`,
+      } as never);
+      this.newsBadgeTextEl?.setProperties({
+        text: `${curStory.verificationLevel === 'VERIFIED_FACT' ? '✓ VERIFIED' : '⚡ DEVELOPING'} • ${curStory.category.toUpperCase()}`,
       } as never);
     }
 
