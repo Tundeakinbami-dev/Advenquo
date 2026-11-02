@@ -8,5 +8,7 @@
 import { defineComponents } from '@iwsdk/core';
 import { CulturalObject } from './cultural-object-component.js';
 import { NPCCharacter } from './npc-component.js';
+import { AdventureState, AdventureItem } from './adventure-mission-component.js';
 
-export default defineComponents([CulturalObject, NPCCharacter]);
+export default defineComponents([CulturalObject, NPCCharacter, AdventureState, AdventureItem]);
+

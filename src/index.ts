@@ -14,7 +14,9 @@ import { World } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
 
 import { LocomotionComfortSystem } from './locomotion-comfort-system.js';
+import { PlayerControllerSystem } from './player-controller-system.js';
 import { DiscoverySystem } from './discovery-system.js';
+import { AdventureMissionSystem } from './adventure-mission-system.js';
 import { ResponsiveUISystem } from './responsive-ui-system.js';
 import { SceneUISystem } from './scene-ui-system.js';
 import { NpcDialogueSystem } from './npc-dialogue-system.js';
@@ -26,10 +28,13 @@ World.create(
   projectOptions,
 ).then((world) => {
   world.registerSystem(LocomotionComfortSystem);
+  world.registerSystem(PlayerControllerSystem);
   world.registerSystem(DiscoverySystem);
+  world.registerSystem(AdventureMissionSystem);
   world.registerSystem(SceneUISystem);
   world.registerSystem(ResponsiveUISystem);
   world.registerSystem(NpcDialogueSystem);
   world.registerSystem(VRTabletSystem);
   gameShell.init();
 });
+

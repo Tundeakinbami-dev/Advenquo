@@ -17,8 +17,11 @@ import type {
   WorldNowStory,
 } from './types.js';
 import type { ChoiceEvaluationResult, MissionCompletionResult } from './mission-engine.js';
+import { AdventureMissionSystem } from '../adventure-mission-system.js';
+import { PlayerControllerSystem } from '../player-controller-system.js';
 
 export function injectAppStyles(): void {
+
   const existing = document.getElementById('advenquo-styles');
   if (existing) return;
 
@@ -632,10 +635,252 @@ export function injectAppStyles(): void {
       border-color: #ef4444;
       background: rgba(239, 68, 68, 0.15);
     }
+
+    /* ── Adventure 3D HUD Styles ────────────────────────── */
+    .advenquo-adventure-hud-root {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+      z-index: 70;
+      box-sizing: border-box;
+    }
+
+    .adventure-top-bar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .adventure-objective-card {
+      background: rgba(12, 18, 34, 0.94);
+      border: 1px solid var(--gold-accent);
+      border-radius: 12px;
+      padding: 12px 18px;
+      max-width: 520px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(12px);
+      pointer-events: auto;
+      transition: all 0.3s ease;
+    }
+
+    .adventure-objective-tag {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      color: var(--gold-accent);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .adventure-objective-instruction {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+
+    .adventure-objective-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .adventure-target-badge {
+      background: rgba(245, 211, 112, 0.15);
+      color: var(--gold-accent);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* Dialogue Card */
+    .adventure-dialogue-card {
+      background: rgba(10, 15, 28, 0.96);
+      border: 1.5px solid var(--gold-accent);
+      border-radius: 16px;
+      padding: 18px 22px;
+      max-width: 660px;
+      width: 90%;
+      margin: 0 auto 16px auto;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(16px);
+      pointer-events: auto;
+      animation: slideUpFade 0.3s ease-out;
+    }
+
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dialogue-speaker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px solid rgba(245, 211, 112, 0.2);
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+
+    .dialogue-speaker-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--gold-accent);
+    }
+
+    .dialogue-speaker-role {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .dialogue-speech-text {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .dialogue-cultural-note {
+      background: rgba(26, 35, 126, 0.4);
+      border-left: 3px solid var(--indigo-accent);
+      padding: 6px 12px;
+      border-radius: 0 6px 6px 0;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .dialogue-choices-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dialogue-choice-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 10px 14px;
+      text-align: left;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .dialogue-choice-btn:hover {
+      background: rgba(245, 211, 112, 0.18);
+      border-color: var(--gold-accent);
+      color: var(--gold-accent);
+      transform: translateX(4px);
+    }
+
+    /* Action Prompt Button */
+    .adventure-action-prompt {
+      margin: 0 auto 20px auto;
+      background: linear-gradient(135deg, #f5d370 0%, #ffb300 100%);
+      color: #1a237e;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 26px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(245, 211, 112, 0.45);
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: pulseBtn 1.8s infinite alternate;
+    }
+
+    @keyframes pulseBtn {
+      from { transform: scale(1); box-shadow: 0 4px 14px rgba(245, 211, 112, 0.35); }
+      to { transform: scale(1.04); box-shadow: 0 8px 24px rgba(245, 211, 112, 0.6); }
+    }
+
+    /* Toast Notification */
+    .adventure-toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--gold-accent);
+      border-radius: 10px;
+      padding: 12px 20px;
+      color: #ffffff;
+      font-size: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(12px);
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .adventure-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Satchel Drawer */
+    .adventure-satchel-drawer {
+      position: absolute;
+      top: 70px;
+      right: 16px;
+      background: rgba(14, 20, 36, 0.96);
+      border: 1px solid var(--border-panel);
+      border-radius: 12px;
+      padding: 16px;
+      width: 290px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(14px);
+      pointer-events: auto;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .adventure-satchel-drawer.open {
+      display: flex;
+    }
+
+    .adventure-controls-hint {
+      background: rgba(10, 15, 28, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: var(--text-muted);
+      pointer-events: auto;
+      backdrop-filter: blur(8px);
+    }
   `;
 
   document.head.appendChild(style);
 }
+
 
 export function renderTopNavBar(
   activeTab: string,
@@ -1498,32 +1743,184 @@ export function renderSpatialHUD(
   totalCount: number,
   onReturnToExploration: () => void,
 ): HTMLElement {
-  const hud = document.createElement('div');
-  hud.className = 'spatial-encounter-hud';
+  const root = document.createElement('div');
+  root.className = 'advenquo-adventure-hud-root';
 
-  hud.innerHTML = `
-    <div class="spatial-hud-title">
-      <span>🏺 3D Artifact Room</span>
-      <span style="font-size: 11px; background: rgba(245, 211, 112, 0.15); color: var(--gold-accent); padding: 2px 6px; border-radius: 4px;">Seated Mode</span>
+  const advSystem = AdventureMissionSystem.getInstance();
+  const playerController = PlayerControllerSystem.getInstance();
+  const objective = advSystem ? advSystem.getActiveObjective() : null;
+  const dialogue = advSystem ? advSystem.getActiveDialogue() : null;
+  const inventory = advSystem ? advSystem.getInventory() : [];
+  const distance = playerController ? Math.round(playerController.getDistanceToTarget() * 10) / 10 : 0;
+  const bearing = playerController ? playerController.getBearingToTarget() : 0;
+  const isNearTarget = distance > 0 && distance <= (objective?.targetRadius || 3.2);
+
+  // Direction indicator based on bearing (-180 to 180 degrees)
+  let compassArrow = '⬆️';
+  if (bearing > 45 && bearing < 135) compassArrow = '➡️';
+  else if (bearing >= 135 || bearing <= -135) compassArrow = '⬇️';
+  else if (bearing < -45 && bearing > -135) compassArrow = '⬅️';
+
+  root.innerHTML = `
+    <!-- Top Adventure Navigation & Objective Bar -->
+    <div class="adventure-top-bar">
+      <div style="display: flex; flex-direction: column; gap: 8px; pointer-events: auto;">
+        <button class="btn-gold" id="btn-spatial-return" style="font-size: 13px; padding: 8px 14px; gap: 6px;">
+          ← District Overview
+        </button>
+        <div style="font-size: 12px; font-weight: 700; color: var(--gold-accent); background: rgba(12, 18, 34, 0.85); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-panel); backdrop-filter: blur(8px);">
+          🏺 Artifacts: <span id="spatial-counter">${discoveredCount} / ${totalCount}</span>
+        </div>
+      </div>
+
+      <!-- Objective Tracker Card -->
+      ${
+        objective
+          ? `
+        <div class="adventure-objective-card">
+          <div class="adventure-objective-tag">
+            <span>🎯 ${objective.title}</span>
+          </div>
+          <div class="adventure-objective-instruction">
+            ${objective.instruction}
+          </div>
+          <div class="adventure-objective-meta">
+            <span class="adventure-target-badge">
+              📍 ${objective.targetName}
+            </span>
+            <span id="adventure-distance-label">
+              ${compassArrow} ${distance > 0 ? `${distance}m away` : 'At location'}
+            </span>
+
+          </div>
+        </div>
+      `
+          : ''
+      }
+
+      <!-- Satchel Bag & Controls Guide -->
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; pointer-events: auto;">
+        <button class="btn-gold" id="btn-adventure-satchel" style="font-size: 13px; padding: 8px 14px; gap: 8px; background: rgba(22, 30, 58, 0.95); border-color: var(--border-panel);">
+          🎒 Satchel (${inventory.length})
+        </button>
+        <div class="adventure-controls-hint">
+          ⌨️ WASD to Walk • Mouse Drag to Look • [E] Interact
+        </div>
+      </div>
     </div>
-    <div class="spatial-hud-body">
-      Four authentic Yoruba artifacts rest on the mahogany table before you.
-      <br /><br />
-      <strong>Interaction:</strong><br />
-      • <em>In VR:</em> Pinch thumb & index or pull controller trigger.<br />
-      • <em>Desktop:</em> Click directly on artifacts with your mouse.
+
+    <!-- Satchel Drawer (Floating Inventory) -->
+    <div id="adventure-satchel-drawer" class="adventure-satchel-drawer">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-panel); padding-bottom: 8px;">
+        <strong style="color: var(--gold-accent); font-size: 14px;">🎒 Explorer Satchel</strong>
+        <span style="font-size: 12px; color: var(--text-muted);">${inventory.length} item(s)</span>
+      </div>
+      ${
+        inventory.length === 0
+          ? `<p style="font-size: 13px; color: var(--text-muted); font-style: italic; margin: 8px 0;">Your satchel is empty. Explore the market to discover clues and items.</p>`
+          : inventory
+              .map(
+                (item) => `
+          <div style="background: rgba(255, 255, 255, 0.05); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+            <div style="font-weight: 700; font-size: 13px; color: var(--gold-accent); margin-bottom: 4px;">
+              ${item.icon} ${item.name}
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); line-height: 1.3;">
+              ${item.description}
+            </div>
+          </div>
+        `,
+              )
+              .join('')
+      }
     </div>
-    <div style="font-size: 13px; font-weight: 700; color: var(--gold-accent);">
-      Discovered: <span id="spatial-counter">${discoveredCount} / ${totalCount}</span>
+
+    <!-- Active Toast Notification Container -->
+    <div id="adventure-toast" class="adventure-toast"></div>
+
+    <!-- Bottom Context: Interactive Dialogue OR Action Prompt -->
+    <div>
+      ${
+        dialogue
+          ? `
+        <div class="adventure-dialogue-card">
+          <div class="dialogue-speaker-header">
+            <span class="dialogue-speaker-name">🗣️ ${dialogue.characterName}</span>
+            <span class="dialogue-speaker-role">${dialogue.characterRole}</span>
+          </div>
+          <div class="dialogue-speech-text">
+            "${dialogue.speech}"
+          </div>
+          ${
+            dialogue.culturalNote
+              ? `
+            <div class="dialogue-cultural-note">
+              <strong>Cultural Context:</strong> ${dialogue.culturalNote}
+            </div>
+          `
+              : ''
+          }
+          <div class="dialogue-choices-grid">
+            ${dialogue.choices
+              .map(
+                (c) => `
+              <button class="dialogue-choice-btn" data-choice-id="${c.id}">
+                <span>${c.text}</span>
+                ${c.yorubaTerm ? `<span style="font-size: 12px; color: var(--gold-accent); background: rgba(245, 211, 112, 0.15); padding: 2px 8px; border-radius: 4px;">${c.yorubaTerm}</span>` : '<span>→</span>'}
+              </button>
+            `,
+              )
+              .join('')}
+          </div>
+          <div style="text-align: right; margin-top: 10px;">
+            <button id="btn-dialogue-dismiss" style="background: transparent; border: none; color: var(--text-muted); font-size: 12px; cursor: pointer; text-decoration: underline;">
+              Continue exploring
+            </button>
+          </div>
+        </div>
+      `
+          : isNearTarget
+            ? `
+        <button class="adventure-action-prompt" id="btn-adventure-action">
+          <span>✨ [ E ] Interact with ${objective?.targetName}</span>
+        </button>
+      `
+            : ''
+      }
     </div>
-    <button class="btn-gold" id="btn-spatial-return" style="width: 100%; justify-content: center; font-size: 13px; padding: 8px 12px;">
-      ← Return to Exploration
-    </button>
   `;
 
-  hud.querySelector('#btn-spatial-return')?.addEventListener('click', onReturnToExploration);
-  return hud;
+  // Wire events
+  root.querySelector('#btn-spatial-return')?.addEventListener('click', onReturnToExploration);
+
+  const satchelBtn = root.querySelector('#btn-adventure-satchel');
+  const satchelDrawer = root.querySelector('#adventure-satchel-drawer');
+  satchelBtn?.addEventListener('click', () => {
+    satchelDrawer?.classList.toggle('open');
+  });
+
+  const actionPromptBtn = root.querySelector('#btn-adventure-action');
+  actionPromptBtn?.addEventListener('click', () => {
+    advSystem?.triggerNearbyInteraction();
+  });
+
+  const dismissBtn = root.querySelector('#btn-dialogue-dismiss');
+  dismissBtn?.addEventListener('click', () => {
+    advSystem?.dismissDialogue();
+  });
+
+  root.querySelectorAll('.dialogue-choice-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const choiceId = (e.currentTarget as HTMLElement).getAttribute('data-choice-id');
+      if (choiceId && advSystem) {
+        advSystem.selectDialogueChoice(choiceId);
+      }
+    });
+  });
+
+  return root;
 }
+
 
 export function renderProfileModal(
   profile: GameSaveState['profile'],
