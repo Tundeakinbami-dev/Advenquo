@@ -652,35 +652,47 @@ export function renderTopNavBar(
       <div class="brand-subtitle">Global Cultural & Linguistic Adventure</div>
     </div>
 
-    <nav class="nav-tabs">
+    <nav class="nav-tabs" aria-label="Game Navigation">
       <button class="nav-tab-btn ${activeTab === 'map' ? 'active' : ''}" data-tab="map">
-        🗺️ World Map
+        <span>🗺️</span> <span>World Map</span>
       </button>
       <button class="nav-tab-btn ${activeTab === 'district' ? 'active' : ''}" data-tab="district">
-        📍 Exploration
+        <span>📍</span> <span>Exploration</span>
       </button>
       <button class="nav-tab-btn ${activeTab === 'spatial' ? 'active' : ''}" data-tab="spatial">
-        🏺 3D Encounters
+        <span>🏺</span> <span>3D Encounters</span>
       </button>
       <button class="nav-tab-btn ${activeTab === 'world_now' ? 'active' : ''}" data-tab="world_now">
-        📰 World Now
+        <span>📰</span> <span>World Now</span>
       </button>
       <button class="nav-tab-btn ${activeTab === 'passport' ? 'active' : ''}" data-tab="passport">
-        📖 Passport & Journal
+        <span>📖</span> <span>Passport</span>
       </button>
     </nav>
 
-    <div class="user-profile-badge" id="btn-user-profile" title="Edit Profile & Challenge Level">
-      <span class="profile-avatar">${state.profile.avatar}</span>
-      <div class="profile-info">
-        <span class="profile-name">${state.profile.name}</span>
-        <span class="profile-level">Level ${state.profile.guardianLevel} Guardian · ${state.profile.totalXp} XP</span>
+    <div class="nav-actions">
+      <button class="btn-enter-vr-nav interactive" id="btn-nav-enter-vr" title="Launch Meta Quest VR Experience" aria-label="Launch Meta Quest VR Experience">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+          <path d="M20.5 6h-17A2.5 2.5 0 0 0 1 8.5v7A2.5 2.5 0 0 0 3.5 18h4.7a2 2 0 0 0 1.6-.8L11 15.5a1.4 1.4 0 0 1 2 0l1.2 1.7a2 2 0 0 0 1.6.8h4.7a2.5 2.5 0 0 0 2.5-2.5v-7A2.5 2.5 0 0 0 20.5 6zM7 13.5A2.5 2.5 0 1 1 9.5 11 2.5 2.5 0 0 1 7 13.5zm10 0A2.5 2.5 0 1 1 19.5 11 2.5 2.5 0 0 1 17 13.5z"/>
+        </svg>
+        <span>Enter VR</span>
+      </button>
+
+      <div class="user-profile-badge" id="btn-user-profile" title="Edit Profile & Challenge Level" role="button" tabindex="0">
+        <span class="profile-avatar">${state.profile.avatar}</span>
+        <div class="profile-info">
+          <span class="profile-name">${state.profile.name}</span>
+          <span class="profile-level">Level ${state.profile.guardianLevel} · ${state.profile.totalXp} XP</span>
+        </div>
       </div>
     </div>
   `;
 
   bar.querySelector('#btn-brand-home')?.addEventListener('click', () => onTabSelect('map'));
   bar.querySelector('#btn-user-profile')?.addEventListener('click', onProfileClick);
+  bar.querySelector('#btn-nav-enter-vr')?.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent('advenquo-launch-vr'));
+  });
 
   bar.querySelectorAll('.nav-tab-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {
