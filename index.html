@@ -1,20 +1,276 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
+    <meta name="theme-color" content="#0b0f19" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="icon" href="data:," />
     <title>Advenquo: The World Begins at Home</title>
     <meta
       name="description"
-      content="Advenquo: Hands-first, seated-friendly VR cultural exploration game for Meta Quest and WebXR."
+      content="Advenquo: Hands-first, seated-friendly VR cultural exploration game for Meta Quest and WebXR, with responsive desktop and mobile presentation."
+    />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700&family=Nunito:wght@400;600;700&display=swap"
+      rel="stylesheet"
     />
   </head>
-  <body style="margin: 0; overflow: hidden; background-color: #0b0f19;">
+  <body>
+    <!-- 3D WebGL Canvas Container -->
     <div id="scene-container"></div>
+
+    <!-- Responsive 2D Web Overlay (Hidden inside Meta Quest VR) -->
+    <div id="web-overlay">
+      <!-- App Header / Navigation -->
+      <header class="app-header">
+        <div class="brand-group" id="brand-home-btn" role="button" tabindex="0" aria-label="Advenquo Home">
+          <div class="brand-title">Advenquo</div>
+          <div class="brand-subtitle">Yoruba Cultural Journey</div>
+        </div>
+
+        <nav class="desktop-nav" aria-label="Main Navigation">
+          <button type="button" class="nav-btn" id="nav-artefacts">Artefacts</button>
+          <button type="button" class="nav-btn" id="nav-how-to-play">How to Play</button>
+          <button type="button" class="nav-btn" id="nav-about">About</button>
+        </nav>
+
+        <div class="header-actions">
+          <div class="device-badge" id="device-badge">
+            <span class="status-dot"></span>
+            <span id="device-status-text">Detecting device…</span>
+          </div>
+
+          <button type="button" class="btn-enter-vr" id="web-enter-vr-btn" aria-label="Enter Virtual Reality">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20.5 6h-17A2.5 2.5 0 0 0 1 8.5v7A2.5 2.5 0 0 0 3.5 18h4.7a2 2 0 0 0 1.6-.8L11 15.5a1.4 1.4 0 0 1 2 0l1.2 1.7a2 2 0 0 0 1.6.8h4.7a2.5 2.5 0 0 0 2.5-2.5v-7A2.5 2.5 0 0 0 20.5 6zM7 13.5A2.5 2.5 0 1 1 9.5 11 2.5 2.5 0 0 1 7 13.5zm10 0A2.5 2.5 0 1 1 19.5 11 2.5 2.5 0 0 1 17 13.5z"/>
+            </svg>
+            <span>Enter VR</span>
+          </button>
+
+          <button type="button" class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Open Navigation Menu" aria-expanded="false">
+            <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" fill="none" aria-hidden="true">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Discovery Progress HUD -->
+      <div class="progress-hud" id="progress-hud">
+        <span class="progress-text" id="web-counter">0 / 4 Discovered</span>
+        <div class="progress-dots" aria-hidden="true">
+          <div class="progress-dot" id="dot-adire" title="Adire Cloth"></div>
+          <div class="progress-dot" id="dot-drum" title="Talking Drum"></div>
+          <div class="progress-dot" id="dot-calabash" title="Calabash Bowl"></div>
+          <div class="progress-dot" id="dot-kola" title="Kola Nut"></div>
+        </div>
+      </div>
+
+      <!-- Bottom Responsive Artefact Tray / Dock -->
+      <section class="artefact-dock" id="artefact-dock" aria-label="Cultural Artefacts Exploration">
+        <div class="dock-header">
+          <div class="dock-title-group">
+            <span class="dock-title">Sacred Artefacts</span>
+            <span class="dock-hint">— Tap or click to explore</span>
+          </div>
+        </div>
+
+        <div class="artefact-cards-container" role="list">
+          <article class="artefact-card" id="card-adire" data-fact-id="adire-cloth" role="listitem" tabindex="0">
+            <div class="card-top">
+              <span class="card-icon" aria-hidden="true">🧵</span>
+              <span class="card-status-badge" id="badge-adire">Explore</span>
+            </div>
+            <div class="card-name">Adire Cloth</div>
+            <div class="card-cultural">Indigo Resist-Dye</div>
+          </article>
+
+          <article class="artefact-card" id="card-drum" data-fact-id="talking-drum" role="listitem" tabindex="0">
+            <div class="card-top">
+              <span class="card-icon" aria-hidden="true">🥁</span>
+              <span class="card-status-badge" id="badge-drum">Explore</span>
+            </div>
+            <div class="card-name">Talking Drum</div>
+            <div class="card-cultural">Gangan of Kings</div>
+          </article>
+
+          <article class="artefact-card" id="card-calabash" data-fact-id="calabash" role="listitem" tabindex="0">
+            <div class="card-top">
+              <span class="card-icon" aria-hidden="true">🏺</span>
+              <span class="card-status-badge" id="badge-calabash">Explore</span>
+            </div>
+            <div class="card-name">Calabash Bowl</div>
+            <div class="card-cultural">Carved Igba Gourd</div>
+          </article>
+
+          <article class="artefact-card" id="card-kola" data-fact-id="kola-nut" role="listitem" tabindex="0">
+            <div class="card-top">
+              <span class="card-icon" aria-hidden="true">🌱</span>
+              <span class="card-status-badge" id="badge-kola">Explore</span>
+            </div>
+            <div class="card-name">Kola Nut</div>
+            <div class="card-cultural">Sacred Obi Blessing</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Mobile Navigation Drawer -->
+      <div class="mobile-nav-backdrop" id="mobile-nav-backdrop" aria-hidden="true">
+        <div class="mobile-nav-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+          <div class="drawer-header">
+            <div class="brand-group">
+              <div class="brand-title">Advenquo</div>
+              <div class="brand-subtitle">Yoruba Journey</div>
+            </div>
+            <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close Menu">
+              ✕
+            </button>
+          </div>
+
+          <div class="drawer-links">
+            <button type="button" class="drawer-link" id="drawer-link-artefacts">
+              <span aria-hidden="true">🏺</span>
+              <span>Yoruba Artefacts</span>
+            </button>
+            <button type="button" class="drawer-link" id="drawer-link-help">
+              <span aria-hidden="true">🎮</span>
+              <span>How to Play</span>
+            </button>
+            <button type="button" class="drawer-link" id="drawer-link-about">
+              <span aria-hidden="true">🌍</span>
+              <span>About Advenquo</span>
+            </button>
+          </div>
+
+          <div class="drawer-section">
+            <div class="device-badge" id="drawer-device-badge">
+              <span class="status-dot"></span>
+              <span id="drawer-device-text">3D Web Showcase</span>
+            </div>
+            <button type="button" class="btn-enter-vr drawer-vr-btn" id="drawer-enter-vr-btn">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20.5 6h-17A2.5 2.5 0 0 0 1 8.5v7A2.5 2.5 0 0 0 3.5 18h4.7a2 2 0 0 0 1.6-.8L11 15.5a1.4 1.4 0 0 1 2 0l1.2 1.7a2 2 0 0 0 1.6.8h4.7a2.5 2.5 0 0 0 2.5-2.5v-7A2.5 2.5 0 0 0 20.5 6zM7 13.5A2.5 2.5 0 1 1 9.5 11 2.5 2.5 0 0 1 7 13.5zm10 0A2.5 2.5 0 1 1 19.5 11 2.5 2.5 0 0 1 17 13.5z"/>
+              </svg>
+              <span>Launch VR Session</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fact Detail Modal -->
+      <div class="modal-backdrop" id="fact-modal-backdrop" aria-hidden="true">
+        <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="fact-modal-title">
+          <div class="modal-header">
+            <span class="modal-badge">DISCOVERY • YORUBA CULTURE</span>
+            <button type="button" class="modal-close-btn" id="fact-modal-close" aria-label="Close fact card">✕</button>
+          </div>
+          <h2 class="modal-title" id="fact-modal-title">Artefact Title</h2>
+          <div class="modal-cultural-word" id="fact-modal-word">Yoruba Word</div>
+          <p class="modal-body" id="fact-modal-body">Cultural description and history.</p>
+          <div class="modal-actions">
+            <button type="button" class="nav-btn interactive" id="fact-modal-ok">Continue Journey</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Completion Celebration Modal -->
+      <div class="modal-backdrop" id="completion-modal-backdrop" aria-hidden="true">
+        <div class="modal-panel celebrate-card" role="dialog" aria-modal="true" aria-labelledby="celebrate-title">
+          <div class="celebrate-tag">EXPLORATION COMPLETE</div>
+          <h2 class="celebrate-headline" id="celebrate-title">E ku oriire!</h2>
+          <p class="modal-body">
+            You have explored the foundational treasures of Yoruba heritage: the Adire cloth, the Gangan talking drum, the carved Igba calabash, and the blessed Obi kola nut.
+          </p>
+          <div class="unlocked-banner">
+            <div class="unlocked-title">NEXT DESTINATION UNLOCKED</div>
+            <div class="unlocked-dest">Nile Valley: Ancient Nubian Architecture</div>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--color-accent-sky); font-style: italic;">
+            "Discover your world. Unlock the next."
+          </p>
+          <div class="modal-actions" style="justify-content: center; margin-top: 12px;">
+            <button type="button" class="btn-enter-vr" id="celebrate-close-btn">Keep Exploring</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- How to Play Modal -->
+      <div class="modal-backdrop" id="help-modal-backdrop" aria-hidden="true">
+        <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="help-title">
+          <div class="modal-header">
+            <span class="modal-badge">GUIDE</span>
+            <button type="button" class="modal-close-btn" id="help-modal-close" aria-label="Close guide">✕</button>
+          </div>
+          <h2 class="modal-title" id="help-title">How to Play Advenquo</h2>
+          <div class="modal-body">
+            <h3 style="color: var(--color-accent-gold); margin-top: 6px; font-size: 1.05rem;">📱 Mobile & Tablet</h3>
+            <p style="margin-bottom: 12px;">
+              • Tap any artefact on the wooden table or tap the cards in the bottom tray to inspect its story and hear its chime.<br />
+              • Fully responsive layout designed for touch-first exploration.
+            </p>
+            <h3 style="color: var(--color-accent-gold); margin-top: 6px; font-size: 1.05rem;">💻 Desktop</h3>
+            <p style="margin-bottom: 12px;">
+              • Click on artefacts on the table or use the bottom navigation cards to discover all 4 cultural relics.
+            </p>
+            <h3 style="color: var(--color-accent-gold); margin-top: 6px; font-size: 1.05rem;">🥽 Meta Quest (WebXR VR)</h3>
+            <p>
+              • Put on your Meta Quest 2, 3, 3S, or Pro.<br />
+              • Tap <strong>"Enter VR"</strong> to enter the seated-friendly immersive world.<br />
+              • Point your hand and <strong>pinch</strong> (or pull the controller trigger) to discover artefacts and reveal 3D floating fact panels.
+            </p>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="nav-btn interactive" id="help-modal-ok">Got it</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Modal -->
+      <div class="modal-backdrop" id="about-modal-backdrop" aria-hidden="true">
+        <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="about-title">
+          <div class="modal-header">
+            <span class="modal-badge">ABOUT ADVENQUO</span>
+            <button type="button" class="modal-close-btn" id="about-modal-close" aria-label="Close about modal">✕</button>
+          </div>
+          <h2 class="modal-title" id="about-title">The World Begins at Home</h2>
+          <div class="modal-body">
+            <p style="margin-bottom: 12px;">
+              <strong>Advenquo</strong> is an original hands-first, seated-friendly VR cultural exploration game created for the <strong>Meta VR Start Developer Competition 2026</strong>. Built with Meta Immersive Web SDK (IWSDK), Three.js, and WebXR.
+            </p>
+            <p style="margin-bottom: 12px;">
+              In this opening journey, explore the Yoruba culture of West Africa through 4 authentic artefacts resting on an arm-reach display table: Adire resist-dyed cloth, the Gangan talking drum, the carved Igba calabash bowl, and the sacred Obi kola nut.
+            </p>
+            <p>
+              Discover all four items to unlock the Nile Valley: Ancient Nubian Architecture.
+            </p>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="nav-btn interactive" id="about-modal-ok">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- WebXR Fallback Toast -->
+      <aside class="fallback-toast" id="vr-notice-toast" role="status" aria-live="polite">
+        <span aria-hidden="true">ℹ️</span>
+        <span class="toast-text" id="toast-text">
+          WebXR immersive mode is best experienced on Meta Quest. Exploring in 3D Web Showcase.
+        </span>
+        <button type="button" class="toast-close" id="toast-close" aria-label="Dismiss notification">✕</button>
+      </aside>
+    </div>
+
+    <!-- Application Script -->
     <script type="module" src="/src/index.ts"></script>
   </body>
 </html>

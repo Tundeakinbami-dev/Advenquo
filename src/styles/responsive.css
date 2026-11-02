@@ -1,0 +1,943 @@
+/**
+ * Advenquo — Responsive Web & Mobile Stylesheet
+ * 
+ * Provides responsive presentation across desktop, tablet, and mobile (320px, 375px, 390px, 430px+)
+ * while completely preserving the immersive Meta Quest WebXR experience.
+ */
+
+:root {
+  /* Palette & Brand Tokens */
+  --color-bg-deep: #0b0f19;
+  --color-bg-surface: rgba(16, 22, 42, 0.88);
+  --color-bg-card: rgba(22, 30, 58, 0.92);
+  --color-bg-card-hover: rgba(30, 40, 78, 0.95);
+  --color-accent-gold: #f5d370;
+  --color-accent-gold-hover: #ffdf85;
+  --color-accent-blue: #1a237e;
+  --color-accent-sky: #90caf9;
+  --color-accent-indigo: #283593;
+  --color-success: #4cc38a;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.85);
+  --color-text-muted: rgba(255, 255, 255, 0.6);
+  --border-subtle: rgba(245, 211, 112, 0.22);
+  --border-focus: #f5d370;
+  --border-glow: rgba(245, 211, 112, 0.45);
+
+  /* Typography */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-ui: 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Layout & Geometry */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 9999px;
+  --touch-target-min: 44px;
+
+  /* Safe Area Insets for Mobile Notches & Bars */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  /* Elevation Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.65);
+}
+
+/* ── Reset & Base ─────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  overflow: hidden;
+  background-color: var(--color-bg-deep);
+  font-family: var(--font-ui);
+  color: var(--color-text-primary);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── 3D Scene Canvas Container ────────────────────────────── */
+#scene-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+}
+
+#scene-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* ── Web Overlay (2D Layer) ───────────────────────────────── */
+#web-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  z-index: 10;
+  pointer-events: none; /* Let empty space clicks pass to 3D canvas */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Inside Meta Quest VR: COMPLETELY HIDE 2D web elements */
+#web-overlay.in-vr {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
+/* All interactive child components must capture pointer events */
+.interactive {
+  pointer-events: auto;
+}
+
+/* ── Header / Navigation Bar ──────────────────────────────── */
+.app-header {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(var(--safe-top) + 12px) calc(var(--safe-right) + 16px) 12px calc(var(--safe-left) + 16px);
+  background: linear-gradient(180deg, rgba(11, 15, 25, 0.95) 0%, rgba(11, 15, 25, 0.7) 70%, transparent 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  gap: 12px;
+  z-index: 20;
+}
+
+.brand-group {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  user-select: none;
+}
+
+.brand-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 3.5vw, 1.75rem);
+  font-weight: 700;
+  color: var(--color-accent-gold);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-shadow: 0 2px 10px rgba(245, 211, 112, 0.3);
+}
+
+.brand-subtitle {
+  font-size: clamp(0.7rem, 2vw, 0.85rem);
+  color: var(--color-accent-sky);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Desktop Navigation Links */
+.desktop-nav {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.nav-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Header Actions */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Device awareness status pill */
+.device-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(26, 35, 126, 0.55);
+  border: 1px solid rgba(144, 202, 249, 0.3);
+  color: var(--color-accent-sky);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.device-badge .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent-gold);
+  box-shadow: 0 0 8px var(--color-accent-gold);
+}
+
+.device-badge.vr-supported .status-dot {
+  background: var(--color-success);
+  box-shadow: 0 0 8px var(--color-success);
+}
+
+/* Enter VR Action Button */
+.btn-enter-vr {
+  background: var(--color-accent-gold);
+  color: var(--color-accent-blue);
+  border: none;
+  font-family: var(--font-ui);
+  font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 10px rgba(245, 211, 112, 0.35);
+  white-space: nowrap;
+}
+
+.btn-enter-vr:hover {
+  background: var(--color-accent-gold-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(245, 211, 112, 0.5);
+}
+
+.btn-enter-vr:active {
+  transform: translateY(0);
+}
+
+.btn-enter-vr:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.btn-enter-vr svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* Mobile Hamburger Toggle Button */
+.mobile-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  padding: 8px;
+  transition: background 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.mobile-menu-toggle:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.mobile-menu-toggle svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+}
+
+/* ── Top Progress HUD ─────────────────────────────────────── */
+.progress-hud {
+  pointer-events: auto;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  margin-top: 4px;
+  user-select: none;
+  animation: fadeInDown 0.4s ease-out;
+}
+
+.progress-text {
+  font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+  font-weight: 700;
+  color: var(--color-accent-gold);
+}
+
+.progress-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.progress-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.progress-dot.active {
+  background: var(--color-accent-gold);
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 8px var(--color-accent-gold);
+  transform: scale(1.15);
+}
+
+/* ── Bottom Responsive Artefact Tray / Dock ───────────────── */
+.artefact-dock {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 12px calc(var(--safe-right) + 16px) calc(var(--safe-bottom) + 12px) calc(var(--safe-left) + 16px);
+  background: linear-gradient(0deg, rgba(11, 15, 25, 0.96) 0%, rgba(11, 15, 25, 0.82) 75%, transparent 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  gap: 8px;
+  z-index: 20;
+}
+
+.dock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.dock-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dock-title {
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
+  font-weight: 700;
+  color: var(--color-accent-gold);
+}
+
+.dock-hint {
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
+  color: var(--color-text-muted);
+}
+
+.dock-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dock-toggle-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Artefact Cards Carousel / Grid */
+.artefact-cards-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow-x: auto;
+  scrollbar-width: none; /* Hide scrollbar Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar IE/Edge */
+}
+
+.artefact-cards-container::-webkit-scrollbar {
+  display: none; /* Hide scrollbar Chrome/Safari */
+}
+
+.artefact-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 84px;
+  min-width: 125px;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.artefact-card:hover {
+  background: var(--color-bg-card-hover);
+  border-color: var(--border-focus);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.artefact-card:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.artefact-card.discovered {
+  border-color: rgba(245, 211, 112, 0.5);
+  background: rgba(26, 35, 126, 0.45);
+}
+
+.artefact-card.discovered::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-top: 24px solid var(--color-accent-gold);
+  border-left: 24px solid transparent;
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.card-icon {
+  font-size: 1.25rem;
+}
+
+.card-status-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.artefact-card.discovered .card-status-badge {
+  background: var(--color-accent-gold);
+  color: var(--color-accent-blue);
+}
+
+.card-name {
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.card-cultural {
+  font-size: 0.75rem;
+  color: var(--color-accent-sky);
+  margin-top: 2px;
+}
+
+/* ── Mobile Navigation Drawer ─────────────────────────────── */
+.mobile-nav-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mobile-nav-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.mobile-nav-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(85vw, 360px);
+  height: 100%;
+  background: var(--color-bg-deep);
+  border-left: 1px solid var(--border-subtle);
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--safe-top) + 20px) calc(var(--safe-right) + 20px) calc(var(--safe-bottom) + 20px) 20px;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+}
+
+.mobile-nav-backdrop.open .mobile-nav-drawer {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.drawer-close-btn {
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.drawer-close-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+}
+
+.drawer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-size: 1.05rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  cursor: pointer;
+  min-height: 50px;
+  transition: all 0.2s ease;
+}
+
+.drawer-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.drawer-link:focus-visible {
+  outline: 2px solid var(--border-focus);
+}
+
+.drawer-section {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.drawer-vr-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+/* ── Modals & Overlays ────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.modal-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.modal-panel {
+  background: var(--color-bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: clamp(20px, 4vw, 32px);
+  width: 100%;
+  max-width: 540px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transform: scale(0.95);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.modal-backdrop.open .modal-panel {
+  transform: scale(1);
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-badge {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-gold);
+  color: var(--color-accent-blue);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4vw, 1.85rem);
+  font-weight: 700;
+  color: var(--color-accent-gold);
+  line-height: 1.2;
+}
+
+.modal-cultural-word {
+  font-size: 0.95rem;
+  color: var(--color-accent-sky);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.modal-body {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.modal-close-btn {
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.modal-close-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* Celebration Modal Specifics */
+.celebrate-card {
+  border-color: var(--color-accent-gold);
+  text-align: center;
+}
+
+.celebrate-tag {
+  color: var(--color-accent-gold);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.celebrate-headline {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  color: #ffffff;
+  margin-top: 6px;
+}
+
+.unlocked-banner {
+  background: rgba(245, 211, 112, 0.12);
+  border: 1px solid var(--color-accent-gold);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin: 12px 0;
+}
+
+.unlocked-title {
+  color: var(--color-accent-gold);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.unlocked-dest {
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* ── Fallback Toast ───────────────────────────────────────── */
+.fallback-toast {
+  pointer-events: auto;
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + 110px);
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(16, 22, 42, 0.96);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(90vw, 480px);
+  width: max-content;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fallback-toast.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast-text {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  line-height: 1.35;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.toast-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.toast-close:focus-visible {
+  outline: 2px solid var(--border-focus);
+}
+
+/* ── Animations ───────────────────────────────────────────── */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Responsive Breakpoints ───────────────────────────────── */
+
+/* 1. Mobile Small (320px - 374px, e.g. iPhone SE 1st Gen) */
+@media screen and (max-width: 374px) {
+  .app-header {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .brand-title {
+    font-size: 1.15rem;
+  }
+  .device-badge {
+    display: none; /* Hide device badge on very small screens to fit buttons */
+  }
+  .btn-enter-vr span {
+    display: none; /* Icon only */
+  }
+  .btn-enter-vr {
+    padding: 8px 12px;
+  }
+  .artefact-cards-container {
+    grid-template-columns: repeat(4, 115px);
+    gap: 8px;
+  }
+  .artefact-card {
+    padding: 8px 10px;
+    min-height: 76px;
+  }
+  .card-name {
+    font-size: 0.78rem;
+  }
+  .card-cultural {
+    font-size: 0.68rem;
+  }
+}
+
+/* 2. Mobile Standard (375px - 429px, e.g. iPhone SE 2nd/3rd, iPhone 12/13/14) */
+@media screen and (min-width: 375px) and (max-width: 429px) {
+  .artefact-cards-container {
+    grid-template-columns: repeat(4, 130px);
+  }
+}
+
+/* 3. Mobile Large (430px - 767px, e.g. iPhone 14/15/16 Pro Max, large Androids) */
+@media screen and (min-width: 430px) and (max-width: 767px) {
+  .artefact-cards-container {
+    grid-template-columns: repeat(4, 145px);
+  }
+}
+
+/* 4. Tablet (768px - 1023px, iPads & medium tablets) */
+@media screen and (min-width: 768px) {
+  .desktop-nav {
+    display: flex;
+  }
+  .mobile-menu-toggle {
+    display: none;
+  }
+  .artefact-cards-container {
+    grid-template-columns: repeat(4, 1fr);
+    overflow-x: visible;
+  }
+  .fallback-toast {
+    bottom: calc(var(--safe-bottom) + 130px);
+  }
+}
+
+/* 5. Desktop (1024px and above) */
+@media screen and (min-width: 1024px) {
+  .app-header {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+  .artefact-dock {
+    padding-left: 32px;
+    padding-right: 32px;
+    padding-bottom: 20px;
+  }
+  .artefact-card {
+    padding: 12px 16px;
+    min-height: 92px;
+  }
+  .card-name {
+    font-size: 1rem;
+  }
+  .card-cultural {
+    font-size: 0.8rem;
+  }
+}
