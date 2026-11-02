@@ -317,8 +317,12 @@ export class GameShell {
     this.currentHintText = null;
     this.currentCompletion = null;
 
-    this.renderMissionModal();
+    this.closeAllModals();
+
+    // Transition directly into 3D adventure exploration!
+    this.setTab('spatial');
   }
+
 
   private renderMissionModal(): void {
     if (!this.modalContainer || !this.currentMission) return;

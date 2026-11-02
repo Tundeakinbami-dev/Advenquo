@@ -248,25 +248,27 @@ export class ResponsiveUISystem extends createSystem({
       const baseZ = 0.35;
       const baseY = 1.2;
 
-      if (aspect < 1.1) {
-        // Portrait mobile/tablet: increase distance and FOV proportionally so artefacts aren't clipped
-        const portraitScale = Math.min(1.1 / Math.max(aspect, 0.4), 2.2);
-        const targetZ = baseZ + (portraitScale - 1.0) * 0.42;
-        const targetY = baseY + (portraitScale - 1.0) * 0.12;
-        const targetFov = 50 + (portraitScale - 1.0) * 10;
-
-        camera.position.set(0, targetY, targetZ);
-        camera.fov = targetFov;
-      } else {
-        // Landscape / desktop
-        camera.position.set(0, baseY, baseZ);
-        camera.fov = 50;
-      }
-
       camera.aspect = aspect;
-      camera.lookAt(0, 0.95, -0.75);
       camera.updateProjectionMatrix();
+
+      // Only perform initial static pose reset if player controller is not active
+      const hasPlayerMoved = camera.position.x !== 0 || camera.position.z !== 0.35;
+      if (!hasPlayerMoved) {
+        if (aspect < 1.1) {
+          const portraitScale = Math.min(1.1 / Math.max(aspect, 0.4), 2.2);
+          const targetZ = baseZ + (portraitScale - 1.0) * 0.42;
+          const targetY = baseY + (portraitScale - 1.0) * 0.12;
+          camera.position.set(0, targetY, targetZ);
+          camera.fov = 50 + (portraitScale - 1.0) * 10;
+        } else {
+          camera.position.set(0, baseY, baseZ);
+          camera.fov = 50;
+        }
+        camera.lookAt(0, 0.95, -0.75);
+        camera.updateProjectionMatrix();
+      }
     };
+
 
     window.addEventListener('resize', update2DCamera, false);
     // Initial camera calibration

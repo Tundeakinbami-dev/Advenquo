@@ -243,7 +243,53 @@
       }
     },
     {
+      "id": "delivery-clue-scroll",
+      "name": "Dropped Delivery Receipt Scroll",
+      "content": {
+        "type": "asset",
+        "asset": "delivery-clue-scroll"
+      },
+      "transform": {
+        "position": [-1.48, 0.74, -1.35],
+        "rotationDeg": [0, -20, 0]
+      },
+      "components": {
+        "AdventureItem": {
+          "itemId": "delivery_manifest",
+          "title": "Carriers Guild Receipt #104",
+          "collected": false,
+          "isObjectiveTarget": true
+        },
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "missing-goods-crate",
+      "name": "Missing Abeokuta Indigo Dye Crate",
+      "content": {
+        "type": "asset",
+        "asset": "missing-goods-crate"
+      },
+      "transform": {
+        "position": [-3.5, 0.0, 1.8],
+        "rotationDeg": [0, 45, 0]
+      },
+      "components": {
+        "AdventureItem": {
+          "itemId": "missing_goods_crate",
+          "title": "Abeokuta Indigo Dye Crate",
+          "collected": false,
+          "isObjectiveTarget": true
+        },
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget"
+        }
+      }
+    },
+    {
       "id": "intro-panel",
+
       "name": "Intro Panel",
       "content": {
         "type": "asset",

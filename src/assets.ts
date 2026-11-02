@@ -27,6 +27,8 @@ import { buildMarketStall } from './scene-assets/market-stall.scene-asset.js';
 import { buildNpcBabaAdewale } from './scene-assets/npc-baba-adewale.scene-asset.js';
 import { buildNpcIyaAlaso } from './scene-assets/npc-iya-alaso.scene-asset.js';
 import { buildTalkingDrum } from './scene-assets/talking-drum.scene-asset.js';
+import { buildMissingGoodsCrate } from './scene-assets/missing-goods-crate.scene-asset.js';
+import { buildDeliveryClueScroll } from './scene-assets/delivery-clue-scroll.scene-asset.js';
 
 const publicAssetUrl = (filePath: string): string =>
   `${import.meta.env.BASE_URL}${filePath.replace(/^\/+/u, '')}`;
@@ -43,12 +45,15 @@ export default defineAssets({
   'npc-baba-adewale': buildNpcBabaAdewale(),
   'npc-iya-alaso': buildNpcIyaAlaso(),
 
-  // ── Procedural 3D Cultural Artifacts ────────────────────────────────────
+  // ── Procedural 3D Cultural Artifacts & Adventure Quest Items ────────────
   'display-table': buildDisplayTable(),
   'adire-cloth': buildAdireCloth(),
   'talking-drum': buildTalkingDrum(),
   calabash: buildCalabash(),
   'kola-nut': buildKolaNut(),
+  'missing-goods-crate': buildMissingGoodsCrate(),
+  'delivery-clue-scroll': buildDeliveryClueScroll(),
+
 
   // ── Spatial UI panels (UIKitML) ─────────────────────────────────────────
   'intro-panel': {

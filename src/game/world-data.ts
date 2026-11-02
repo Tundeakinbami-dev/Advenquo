@@ -33,10 +33,28 @@ export const DESTINATIONS: Destination[] = [
         description:
           'The historical core of Lagos Island. Narrow labyrinthine avenues wind past the ancestral palace of the Oba of Lagos (Iga Idunganran), master indigo dye compounds, and vibrant drum guilds echoing with centuries of oral history.',
         theme: 'Historic Heritage & Living Traditions',
-        availableMissionIds: ['mission_yoruba_greetings', 'mission_adire_drum_investigation'],
+        availableMissionIds: [
+          'mission_nigerian_market_discovery',
+          'mission_yoruba_greetings',
+          'mission_adire_drum_investigation',
+        ],
         pointsOfInterest: [
           {
+            id: 'poi_traditional_market_courtyard',
+            name: 'Ìsàlẹ̀ Èkó Artisan Courtyard Market',
+            localName: 'Ọjà Àsọ Àdìrẹ Ìsàlẹ̀ Èkó',
+            type: 'market',
+            coordinates: [65, 42],
+            description:
+              'A lively open-air market courtyard where Adire indigo fabric stalls, master drummers, and carrier guilds converge.',
+            culturalSignificance:
+              'Yoruba commerce operates on sacred elder greetings, artisan guild brotherhood, and the philosophy of Ọmọlúwàbí (noble character).',
+            linkedMissionId: 'mission_nigerian_market_discovery',
+            spatialAssetId: 'market-ground',
+          },
+          {
             id: 'poi_iga_idunganran',
+
             name: 'Iga Idunganran (Palace of the Oba)',
             localName: 'Iga Idunganran',
             type: 'heritage',
