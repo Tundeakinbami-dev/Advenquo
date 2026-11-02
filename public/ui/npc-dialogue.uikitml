@@ -1,0 +1,176 @@
+<!--
+  Advenquo — NPC Spatial Dialogue Panel.
+  Appears adjacent to interactive characters (Baba Adéwálé, Iyá Aláso)
+  when the player approaches or selects them with their controller/hand ray.
+  
+  UIKit units are centimetres: 44cm wide. Faces +Z.
+-->
+<style>
+  .root {
+    flex-direction: column;
+    width: 44;
+    background-color: rgba(14, 20, 44, 0.95);
+    border-radius: 1.4;
+    border-width: 0.15;
+    border-color: #f5d370;
+  }
+
+  .header {
+    background-color: #1a237e;
+    padding-top: 1.5;
+    padding-bottom: 1.5;
+    padding-left: 2;
+    padding-right: 2;
+    border-radius: 1.4;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .speaker-info {
+    flex-direction: column;
+    gap: 0.3;
+  }
+
+  .speaker-name {
+    font-size: 2.2;
+    font-weight: 700;
+    color: #f5d370;
+  }
+
+  .speaker-role {
+    font-size: 1.3;
+    color: #90caf9;
+  }
+
+  .status-badge {
+    background-color: rgba(245, 211, 112, 0.2);
+    border-radius: 0.8;
+    border-width: 0.1;
+    border-color: #f5d370;
+    padding-top: 0.5;
+    padding-bottom: 0.5;
+    padding-left: 1.2;
+    padding-right: 1.2;
+  }
+
+  .status-text {
+    font-size: 1.2;
+    font-weight: 600;
+    color: #f5d370;
+  }
+
+  .body {
+    padding-top: 1.8;
+    padding-bottom: 1.8;
+    padding-left: 2.2;
+    padding-right: 2.2;
+    flex-direction: column;
+    gap: 1.4;
+  }
+
+  .prompt-text {
+    font-size: 1.7;
+    color: #ffffff;
+    line-height: 1.4;
+  }
+
+  .choices-container {
+    flex-direction: column;
+    gap: 1;
+  }
+
+  .choice-btn {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 1;
+    border-width: 0.12;
+    border-color: rgba(245, 211, 112, 0.5);
+    padding-top: 1.2;
+    padding-bottom: 1.2;
+    padding-left: 1.5;
+    padding-right: 1.5;
+    flex-direction: column;
+    cursor: pointer;
+  }
+
+  .choice-label {
+    font-size: 1.45;
+    font-weight: 600;
+    color: #e0f2fe;
+    line-height: 1.35;
+  }
+
+  .feedback-container {
+    background-color: rgba(26, 35, 126, 0.8);
+    border-radius: 1;
+    border-width: 0.12;
+    border-color: #4a90d9;
+    padding-top: 1.4;
+    padding-bottom: 1.4;
+    padding-left: 1.6;
+    padding-right: 1.6;
+    flex-direction: column;
+    gap: 1;
+  }
+
+  .feedback-text {
+    font-size: 1.45;
+    color: #ffffff;
+    line-height: 1.4;
+  }
+
+  .continue-btn {
+    background-color: #f5d370;
+    border-radius: 0.8;
+    padding-top: 1;
+    padding-bottom: 1;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .continue-label {
+    font-size: 1.5;
+    font-weight: 700;
+    color: #1a237e;
+  }
+</style>
+
+<Panel class="root">
+  <div class="header">
+    <div class="speaker-info">
+      <div id="npc-name" class="speaker-name">Baba Adéwálé</div>
+      <div id="npc-role" class="speaker-role">Elder of the Courtyard</div>
+    </div>
+    <div class="status-badge">
+      <div id="npc-badge" class="status-text">INTERACTION</div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div id="npc-prompt" class="prompt-text">
+      The morning sun is rising over the courtyard. How do you greet Baba Adéwálé respectfully?
+    </div>
+
+    <div id="npc-choices" class="choices-container">
+      <div id="npc-choice-a" class="choice-btn">
+        <div id="npc-choice-a-text" class="choice-label">A: Ẹ káàárọ̀ o, Baba! (Good morning, respected father!)</div>
+      </div>
+      <div id="npc-choice-b" class="choice-btn">
+        <div id="npc-choice-b-text" class="choice-label">B: Báwo ni! (How are things!)</div>
+      </div>
+      <div id="npc-choice-c" class="choice-btn">
+        <div id="npc-choice-c-text" class="choice-label">C: Good morning, sir. I have arrived.</div>
+      </div>
+    </div>
+
+    <div id="npc-feedback" class="feedback-container" style="display: none">
+      <div id="npc-feedback-text" class="feedback-text">
+        Correct! "Ẹ" denotes the plural of respect (honorific register), acknowledging the elder's seniority.
+      </div>
+      <div id="npc-continue-btn" class="continue-btn">
+        <div class="continue-label">Continue</div>
+      </div>
+    </div>
+  </div>
+</Panel>
