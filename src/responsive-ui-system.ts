@@ -23,6 +23,7 @@ import {
 } from '@iwsdk/core';
 
 import { CulturalObject } from './cultural-object-component.js';
+import { gameShell } from './game/game-shell.js';
 
 interface ArtefactMeta {
   title: string;
@@ -71,8 +72,10 @@ export class ResponsiveUISystem extends createSystem({
   private isVRMode = false;
   private isQuestDevice = false;
   private webXRSupported = false;
+  private overlay: HTMLElement | null = null;
 
   init(): void {
+    this.overlay = document.getElementById('web-overlay');
     this._detectDeviceAndWebXR();
     this._wireNavigationAndModals();
     this._wireArtefactCards();
@@ -203,21 +206,30 @@ export class ResponsiveUISystem extends createSystem({
   }
 
   private _wireVisibilityState(): void {
-    const overlay = document.getElementById('web-overlay');
+    const handleLaunchVR = () => {
+      this._launchVRSession();
+    };
+    document.addEventListener('advenquo-launch-vr', handleLaunchVR);
+    this.cleanupFuncs.push(() => {
+      document.removeEventListener('advenquo-launch-vr', handleLaunchVR);
+    });
 
     this.cleanupFuncs.push(
       this.world.visibilityState.subscribe((state) => {
         const is2D = state === VisibilityState.NonImmersive;
         this.isVRMode = !is2D;
 
-        if (overlay) {
-          if (is2D) {
-            overlay.classList.remove('in-vr');
-          } else {
-            overlay.classList.add('in-vr');
-            this._closeAllModals();
-            this._closeMobileDrawer();
-          }
+        const overlay = document.getElementById('web-overlay');
+        const shell = document.getElementById('advenquo-shell');
+
+        if (is2D) {
+          if (overlay) overlay.classList.remove('in-vr');
+          if (shell) shell.classList.remove('in-vr');
+        } else {
+          if (overlay) overlay.classList.add('in-vr');
+          if (shell) shell.classList.add('in-vr');
+          this._closeAllModals();
+          this._closeMobileDrawer();
         }
       }),
     );
@@ -293,22 +305,26 @@ export class ResponsiveUISystem extends createSystem({
     }
   }
 
+  private _launchVRSession(): void {
+    if (this.world.xrEnabled) {
+      try {
+        this.world.launchXR();
+      } catch {
+        this._showToast(
+          'Could not enter VR. Connect a Meta Quest headset or open this URL in the Meta Quest Browser.',
+        );
+      }
+    } else {
+      this._showToast(
+        'WebXR is not active. Open this URL in the Meta Quest Browser for the immersive VR experience.',
+      );
+    }
+  }
+
   private _wireNavigationAndModals(): void {
     // Web Enter VR Buttons
     const handleEnterVR = (): void => {
-      if (this.world.xrEnabled) {
-        try {
-          this.world.launchXR();
-        } catch {
-          this._showToast(
-            'Could not enter VR. Connect a Meta Quest headset or open this URL in the Meta Quest Browser.',
-          );
-        }
-      } else {
-        this._showToast(
-          'WebXR is not active. Open this URL in the Meta Quest Browser for the immersive VR experience.',
-        );
-      }
+      this._launchVRSession();
     };
 
     document
@@ -388,6 +404,7 @@ export class ResponsiveUISystem extends createSystem({
     if (counterEl) {
       counterEl.textContent = `${count} / ${total || 4} Discovered`;
     }
+    gameShell.updateSpatialDiscovery(count);
   }
 
   private _updateArtefactCardFound(factId: string): void {
@@ -423,6 +440,7 @@ export class ResponsiveUISystem extends createSystem({
     backdrop?.classList.add('open');
     backdrop?.setAttribute('aria-hidden', 'false');
     toggle?.setAttribute('aria-expanded', 'true');
+    this.overlay?.classList.add('drawer-active');
   }
 
   private _closeMobileDrawer(): void {
@@ -431,6 +449,7 @@ export class ResponsiveUISystem extends createSystem({
     backdrop?.classList.remove('open');
     backdrop?.setAttribute('aria-hidden', 'true');
     toggle?.setAttribute('aria-expanded', 'false');
+    this.overlay?.classList.remove('drawer-active');
   }
 
   private _openModal(modalId: string): void {
@@ -438,6 +457,7 @@ export class ResponsiveUISystem extends createSystem({
     if (modal) {
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
+      this.overlay?.classList.add('modal-active');
     }
   }
 
@@ -447,6 +467,10 @@ export class ResponsiveUISystem extends createSystem({
       modal.classList.remove('open');
       modal.setAttribute('aria-hidden', 'true');
     }
+    const anyOpen = document.querySelectorAll('.modal-backdrop.open');
+    if (anyOpen.length === 0) {
+      this.overlay?.classList.remove('modal-active');
+    }
   }
 
   private _closeAllModals(): void {
@@ -455,6 +479,7 @@ export class ResponsiveUISystem extends createSystem({
       modal.classList.remove('open');
       modal.setAttribute('aria-hidden', 'true');
     }
+    this.overlay?.classList.remove('modal-active');
   }
 
   private _wireModalClose(modalBackdropId: string, buttonIds: string[]): void {

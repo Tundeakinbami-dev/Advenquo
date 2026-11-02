@@ -145,7 +145,8 @@ export class GameShell {
       this.navBarContainer.appendChild(navBar);
     }
 
-    // Handle 3D Scene visibility bridge
+    // Handle 3D Scene and Web Overlay visibility bridge
+    const webOverlay = document.getElementById('web-overlay');
     if (this.sceneContainer) {
       if (this.activeTab === 'spatial') {
         // Spatial Mode: make 3D canvas primary and fully interactive
@@ -153,12 +154,20 @@ export class GameShell {
         this.sceneContainer.style.filter = 'none';
         this.sceneContainer.style.pointerEvents = 'auto';
         this.sceneContainer.style.zIndex = '50';
+        if (webOverlay) {
+          webOverlay.style.display = 'flex';
+          const header = webOverlay.querySelector('.app-header') as HTMLElement | null;
+          if (header) header.style.display = 'none';
+        }
       } else {
         // 2D Adventure Mode: background canvas slightly dimmed
         this.sceneContainer.style.opacity = '0.2';
         this.sceneContainer.style.filter = 'blur(4px)';
         this.sceneContainer.style.pointerEvents = 'none';
         this.sceneContainer.style.zIndex = '0';
+        if (webOverlay) {
+          webOverlay.style.display = 'none';
+        }
       }
     }
 
