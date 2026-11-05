@@ -21,15 +21,16 @@ import {
   Object3D,
 } from '@iwsdk/core';
 
+import { pbrMaterialSystem } from '../systems/pbr-material-system.js';
+
 export function buildMarketStall(): Object3D {
   const root = new Object3D();
   root.name = 'MarketStall';
 
-  // Materials
-  const timberMat = new MeshStandardMaterial({
+  // Realistic PBR Materials
+  const timberMat = pbrMaterialSystem.getMaterial('african_iroko', {
     color: 0x5d4037, // Weathered wood
     roughness: 0.85,
-    metalness: 0.0,
   });
 
   const canopyMat = new MeshStandardMaterial({
@@ -44,19 +45,16 @@ export function buildMarketStall(): Object3D {
     metalness: 0.0,
   });
 
-  const counterMat = new MeshStandardMaterial({
+  const counterMat = pbrMaterialSystem.getMaterial('african_iroko', {
     color: 0x6d4c41,
-    roughness: 0.8,
+    roughness: 0.75,
   });
 
-  const clothIndigoMat = new MeshStandardMaterial({
-    color: 0x1a237e, // Deep navy/indigo Adire cloth
-    roughness: 0.9,
-  });
+  const clothIndigoMat = pbrMaterialSystem.getMaterial('indigo_adire');
 
-  const clothTealMat = new MeshStandardMaterial({
+  const clothTealMat = pbrMaterialSystem.getMaterial('indigo_adire', {
     color: 0x00695c, // Patterned turquoise/green cloth
-    roughness: 0.9,
+    roughness: 0.85,
   });
 
   // 1. Four Corner Timber Posts (2.3m high in back, 2.1m in front for slant)

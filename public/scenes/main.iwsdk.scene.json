@@ -243,6 +243,22 @@
       }
     },
     {
+      "id": "handheld-adire-sample",
+      "name": "Adire Cloth Sample — Hand Practice",
+      "content": {
+        "type": "asset",
+        "asset": "adire-cloth"
+      },
+      "transform": {
+        "position": [-0.35, 1.1, -0.7],
+        "rotationDeg": [0, 10, 0],
+        "scale": [1.35, 1.35, 1.35]
+      },
+      "components": {
+        "OneHandGrabbable": {}
+      }
+    },
+    {
       "id": "delivery-clue-scroll",
       "name": "Dropped Delivery Receipt Scroll",
       "content": {
@@ -404,6 +420,185 @@
       },
       "components": {
         "RayInteractable": {}
+      }
+    },
+    {
+      "id": "architect-studio",
+      "name": "Studio Kán Architectes (Tobi's Studio)",
+      "content": {
+        "type": "asset",
+        "asset": "architect-studio"
+      },
+      "transform": {
+        "position": [-3.8, 0, 1.2]
+      },
+      "components": {
+        "LocomotionEnvironment": {
+          "type": "static"
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "lagos_urban",
+          "name": "Yaba Tech & Transit Corridor",
+          "environmentCategory": "urban",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "construction-site",
+      "name": "Eco-Terrace Active Construction Site",
+      "content": {
+        "type": "asset",
+        "asset": "construction-site"
+      },
+      "transform": {
+        "position": [4.2, 0, 2.5]
+      },
+      "components": {
+        "LocomotionEnvironment": {
+          "type": "static"
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "lagos_urban",
+          "name": "Yaba Tech & Transit Corridor",
+          "environmentCategory": "urban",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "buka-restaurant",
+      "name": "Mama Nkechi's Buka Canteen",
+      "content": {
+        "type": "asset",
+        "asset": "buka-restaurant"
+      },
+      "transform": {
+        "position": [3.8, 0, -2.2]
+      },
+      "components": {
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "lagos_urban",
+          "name": "Yaba Tech & Transit Corridor",
+          "environmentCategory": "urban",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "npc-tobi",
+      "name": "Tobi Adeleke (Junior Architect)",
+      "content": {
+        "type": "asset",
+        "asset": "npc-tobi"
+      },
+      "transform": {
+        "position": [-3.5, 0, 1.0],
+        "rotationDeg": [0, 30, 0]
+      },
+      "components": {
+        "NPCCharacter": {
+          "characterId": "npc_tobi",
+          "name": "Tobi Adeleke",
+          "role": "Junior Architect",
+          "interactionRadius": 3.5,
+          "inDialogue": false
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "lagos_urban",
+          "name": "Yaba Tech & Transit Corridor",
+          "environmentCategory": "urban",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "npc-kunle",
+      "name": "Kunle Badmus (Lead Site Contractor)",
+      "content": {
+        "type": "asset",
+        "asset": "npc-kunle-contractor"
+      },
+      "transform": {
+        "position": [4.0, 0, 2.0],
+        "rotationDeg": [0, -45, 0]
+      },
+      "components": {
+        "NPCCharacter": {
+          "characterId": "npc_kunle",
+          "name": "Kunle Badmus",
+          "role": "Lead Site Contractor",
+          "interactionRadius": 3.5,
+          "inDialogue": false
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "lagos_urban",
+          "name": "Yaba Tech & Transit Corridor",
+          "environmentCategory": "urban",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "npc-folake",
+      "name": "Folake Coker (Senior Partner)",
+      "content": {
+        "type": "asset",
+        "asset": "npc-folake-mentor"
+      },
+      "transform": {
+        "position": [-4.2, 0, 1.8],
+        "rotationDeg": [0, 60, 0]
+      },
+      "components": {
+        "NPCCharacter": {
+          "characterId": "npc_folake",
+          "name": "Folake Coker",
+          "role": "Senior Partner",
+          "interactionRadius": 3.5,
+          "inDialogue": false
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "lagos_urban",
+          "name": "Yaba Tech & Transit Corridor",
+          "environmentCategory": "urban",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "lagos-street-infrastructure",
+      "name": "Lagos Street Infrastructure & Utility Grid",
+      "content": {
+        "type": "asset",
+        "asset": "lagos-street-infrastructure"
+      },
+      "transform": {
+        "position": [0, 0, 0]
+      },
+      "components": {
+        "LocomotionEnvironment": {
+          "type": "static"
+        },
+        "LocationAnchor": {
+          "locationId": "lagos_urban",
+          "name": "Yaba Tech & Transit Corridor",
+          "environmentCategory": "urban",
+          "isActive": false,
+          "isDiscovered": false
+        }
       }
     }
   ]

@@ -19,6 +19,9 @@ import type {
 import type { ChoiceEvaluationResult, MissionCompletionResult } from './mission-engine.js';
 import { AdventureMissionSystem } from '../adventure-mission-system.js';
 import { PlayerControllerSystem } from '../player-controller-system.js';
+import { WorldStreamingSystem } from '../world-streaming-system.js';
+import { timeOfDaySystem } from '../systems/time-of-day-system.js';
+import { weatherSystem } from '../systems/weather-system.js';
 
 export function injectAppStyles(): void {
 
@@ -639,10 +642,10 @@ export function injectAppStyles(): void {
     /* ── Adventure 3D HUD Styles ────────────────────────── */
     .advenquo-adventure-hud-root {
       position: absolute;
-      top: 0;
+      top: 78px;
       left: 0;
       width: 100vw;
-      height: 100vh;
+      height: calc(100vh - 78px);
       pointer-events: none;
       display: flex;
       flex-direction: column;
@@ -905,7 +908,7 @@ export function renderTopNavBar(
         <span>📍</span> <span>Exploration</span>
       </button>
       <button class="nav-tab-btn ${activeTab === 'spatial' ? 'active' : ''}" data-tab="spatial">
-        <span>🏺</span> <span>3D Encounters</span>
+        <span>🌍</span> <span>3D World</span>
       </button>
       <button class="nav-tab-btn ${activeTab === 'world_now' ? 'active' : ''}" data-tab="world_now">
         <span>📰</span> <span>World Now</span>
@@ -959,77 +962,236 @@ export function renderGlobalMapView(
   container.className = 'view-card-max';
 
   const selectedDest = destinations.find((d) => d.id === selectedDestinationId) || destinations[0];
+  const worldStreaming = WorldStreamingSystem.getInstance();
+  const currentLocId = worldStreaming ? worldStreaming.getCurrentLocationId() : 'nigerian_market';
+
+  // 4 Playable Nigerian Environments on Interactive Regional Map
+  const mapNodes = [
+    {
+      id: 'nigerian_market',
+      districtId: 'isale_eko',
+      name: 'Ìsàlẹ̀ Èkó Artisan Market',
+      localName: 'Ọjà Ìsàlẹ̀ Èkó',
+      category: 'market',
+      icon: '🛍️',
+      color: '#f5d370',
+      x: 48,
+      y: 52,
+      desc: 'Historic indigo dyeing vats, Gángan talking drum guilds & elder veranda.',
+    },
+    {
+      id: 'lagos_urban',
+      districtId: 'yaba',
+      name: 'Yaba Tech & Transit Corridor',
+      localName: 'Yaba Silicon Lagoon',
+      category: 'urban',
+      icon: '🚌',
+      color: '#38bdf8',
+      x: 35,
+      y: 26,
+      desc: 'CcHUB innovation studios, Danfo buses & smart transit shelters.',
+    },
+    {
+      id: 'heritage_iga',
+      districtId: 'heritage_iga',
+      name: 'Iga Idunganran Royal Palace',
+      localName: 'Iga Idúngànrán',
+      category: 'heritage',
+      icon: '👑',
+      color: '#eab308',
+      x: 58,
+      y: 45,
+      desc: 'Ancient Oba’s throne dais, carved iroko pillars & royal bronze leopards.',
+    },
+    {
+      id: 'beach_waterfront',
+      districtId: 'beach_waterfront',
+      name: 'Tarkwa Bay Coastal Haven',
+      localName: 'Etíkun Tarkwa',
+      category: 'natural',
+      icon: '🏖️',
+      color: '#34d399',
+      x: 65,
+      y: 82,
+      desc: 'Atlantic surf, artisanal fishing canoes, coconut palms & marine conservation.',
+    },
+  ];
 
   container.innerHTML = `
     <div style="background: var(--bg-panel); border: 1px solid var(--border-panel); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 20px;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
         <div>
-          <h2 style="font-size: 24px; color: var(--gold-accent); margin: 0 0 6px 0;">Interactive World Atlas</h2>
-          <p style="font-size: 14px; color: var(--text-muted); margin: 0;">Select a destination to explore its cultural quarters, languages, and living history.</p>
+          <h2 style="font-size: 24px; color: var(--gold-accent); margin: 0 0 6px 0;">Interactive World Atlas & Regional Navigation</h2>
+          <p style="font-size: 14px; color: var(--text-muted); margin: 0;">Explore connected Nigerian environments, open-world transit links, and global expansion destinations.</p>
         </div>
-        <span style="background: rgba(245, 211, 112, 0.1); border: 1px solid var(--gold-accent); color: var(--gold-accent); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
-          Inaugural Destination: Nigeria
-        </span>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <span style="background: rgba(245, 211, 112, 0.1); border: 1px solid var(--gold-accent); color: var(--gold-accent); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+            4 Connected Playable Locations
+          </span>
+          <button class="btn-gold" id="btn-quick-enter-world" style="padding: 7px 16px; font-size: 13px;">
+            Enter Living 3D World 🌍 →
+          </button>
+        </div>
       </div>
 
-      <!-- Stylized Interactive Territory Map Grid -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
-        ${destinations
-          .map(
-            (dest) => `
-          <div class="destination-card" data-dest-id="${dest.id}" style="
-            background: ${dest.id === selectedDestinationId ? 'rgba(245, 211, 112, 0.08)' : 'var(--bg-card)'};
-            border: 1px solid ${dest.id === selectedDestinationId ? 'var(--gold-accent)' : 'rgba(255, 255, 255, 0.08)'};
-            border-radius: 12px;
-            padding: 16px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            transition: all 0.2s ease;
-          ">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 16px; font-weight: 700; color: var(--text-main);">${dest.name}</span>
-              <span style="
-                font-size: 10px;
-                font-weight: 700;
-                padding: 2px 8px;
-                border-radius: 4px;
-                background: ${dest.status === 'PLAYABLE' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(156, 163, 175, 0.2)'};
-                color: ${dest.status === 'PLAYABLE' ? 'var(--tag-verified)' : '#9ca3af'};
-              ">
-                ${dest.status === 'PLAYABLE' ? '● PLAYABLE' : 'PREVIEW ONLY'}
-              </span>
-            </div>
-            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4; margin: 0;">${dest.description}</p>
-            <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-dim);">
-              <span>Region: ${dest.regionName}</span>
-              ${dest.districts.length > 0 ? `<span style="color: var(--indigo-accent); font-weight: 600;">${dest.districts.length} Districts Available</span>` : ''}
-            </div>
+      <!-- Interactive Regional Map of Lagos (SVG Visual Map Canvas) -->
+      <div style="position: relative; width: 100%; min-height: 380px; background: #060b18; border: 1px solid rgba(74, 144, 217, 0.3); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 16px;">
+        <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <!-- Stylized Lagoon & Ocean Waters -->
+          <rect x="0" y="0" width="100" height="100" fill="#060c1c" />
+          <!-- Lagos Lagoon Waterway -->
+          <path d="M 0 35 Q 35 30 50 48 Q 65 60 100 50 L 100 100 L 0 100 Z" fill="#08182f" opacity="0.8" />
+          <!-- Atlantic Ocean Swell -->
+          <path d="M 0 70 Q 50 65 100 75 L 100 100 L 0 100 Z" fill="#062244" opacity="0.9" />
+
+          <!-- Connecting Travel Routes -->
+          <!-- Route: Yaba to Nigerian Market (Danfo Bus Bridge) -->
+          <line x1="35" y1="26" x2="48" y2="52" stroke="#38bdf8" stroke-width="0.8" stroke-dasharray="1.5, 1" />
+          <!-- Route: Market to Palace (Archway Path) -->
+          <line x1="48" y1="52" x2="58" y2="45" stroke="#f5d370" stroke-width="0.9" />
+          <!-- Route: Market to Tarkwa Bay (Harbour Ferry) -->
+          <line x1="48" y1="52" x2="65" y2="82" stroke="#34d399" stroke-width="0.8" stroke-dasharray="2, 1" />
+          <!-- Route: Palace to Tarkwa Bay (Marina Jetty Ferry) -->
+          <line x1="58" y1="45" x2="65" y2="82" stroke="#34d399" stroke-width="0.8" stroke-dasharray="2, 1" />
+        </svg>
+
+        <!-- Route Labels & Transit Legend -->
+        <div style="z-index: 2; display: flex; justify-content: space-between; align-items: center; background: rgba(8, 12, 22, 0.85); padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08); font-size: 11px; color: var(--text-muted); backdrop-filter: blur(8px);">
+          <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+            <span>🚌 <strong>Eko Bridge Transit:</strong> Yaba ↔ Ìsàlẹ̀ Èkó (12 min)</span>
+            <span>🚶 <strong>Palace Archway:</strong> Market ↔ Iga Idunganran (3 min)</span>
+            <span>⛵ <strong>Harbour Ferry:</strong> CMS ↔ Tarkwa Bay (15 min)</span>
           </div>
-        `,
-          )
-          .join('')}
+          <span style="color: var(--gold-accent); font-weight: 700;">Click any destination node to travel</span>
+        </div>
+
+        <!-- Destination Interactive Nodes -->
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto;">
+          ${mapNodes
+            .map((node) => {
+              const isCurrent = node.id === currentLocId;
+              return `
+              <div class="map-interactive-node" data-loc-id="${node.id}" style="
+                position: absolute;
+                left: ${node.x}%;
+                top: ${node.y}%;
+                transform: translate(-50%, -50%);
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                transition: transform 0.2s ease;
+                z-index: 10;
+              ">
+                <div style="
+                  width: 44px;
+                  height: 44px;
+                  border-radius: 50%;
+                  background: ${isCurrent ? '#f5d370' : '#101a30'};
+                  border: 2px solid ${node.color};
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 20px;
+                  box-shadow: 0 0 16px ${isCurrent ? 'rgba(245, 211, 112, 0.7)' : 'rgba(0,0,0,0.5)'};
+                ">
+                  ${node.icon}
+                </div>
+                <div style="
+                  background: rgba(8, 14, 28, 0.92);
+                  border: 1px solid ${isCurrent ? 'var(--gold-accent)' : 'rgba(255,255,255,0.15)'};
+                  padding: 3px 8px;
+                  border-radius: 6px;
+                  text-align: center;
+                  white-space: nowrap;
+                  backdrop-filter: blur(6px);
+                ">
+                  <div style="font-size: 11px; font-weight: 700; color: ${isCurrent ? 'var(--gold-accent)' : '#fff'};">
+                    ${node.name} ${isCurrent ? '📍 (Here)' : ''}
+                  </div>
+                  <div style="font-size: 9px; color: var(--text-muted);">${node.localName}</div>
+                </div>
+              </div>
+            `;
+            })
+            .join('')}
+        </div>
+
+        <!-- Map Footer: Quick Travel Bar -->
+        <div style="z-index: 2; display: flex; justify-content: space-between; align-items: center; background: rgba(8, 12, 22, 0.88); padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border-panel); backdrop-filter: blur(8px);">
+          <div style="font-size: 12px; color: var(--text-main);">
+            Currently at: <strong style="color: var(--gold-accent);">${worldStreaming?.getCurrentLocation().name || 'Nigeria'}</strong>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-travel-quick" data-loc-id="nigerian_market" style="background: rgba(245, 211, 112, 0.15); border: 1px solid #f5d370; color: #f5d370; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+              🛍️ Market
+            </button>
+            <button class="btn-travel-quick" data-loc-id="lagos_urban" style="background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+              🚌 Yaba
+            </button>
+            <button class="btn-travel-quick" data-loc-id="heritage_iga" style="background: rgba(234, 179, 8, 0.15); border: 1px solid #eab308; color: #eab308; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+              👑 Palace
+            </button>
+            <button class="btn-travel-quick" data-loc-id="beach_waterfront" style="background: rgba(52, 211, 153, 0.15); border: 1px solid #34d399; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+              🏖️ Tarkwa Bay
+            </button>
+          </div>
+        </div>
       </div>
 
-      <!-- Selected Destination Overview Banner -->
-      <div style="background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-        <div style="max-width: 650px;">
-          <h3 style="font-size: 18px; color: var(--gold-accent); margin: 0 0 6px 0;">Destination: ${selectedDest.name}</h3>
-          <p style="font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.4;">${selectedDest.description}</p>
+      <!-- Global Expansion Destinations (International Architecture) -->
+      <div>
+        <h3 style="font-size: 16px; color: var(--text-main); margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;">
+          🌐 Global Expansion World Map
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px;">
+          ${destinations
+            .map(
+              (dest) => `
+            <div class="destination-card" data-dest-id="${dest.id}" style="
+              background: ${dest.id === selectedDestinationId ? 'rgba(245, 211, 112, 0.08)' : 'var(--bg-card)'};
+              border: 1px solid ${dest.id === selectedDestinationId ? 'var(--gold-accent)' : 'rgba(255, 255, 255, 0.08)'};
+              border-radius: 10px;
+              padding: 14px;
+              cursor: pointer;
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+            ">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 14px; font-weight: 700; color: var(--text-main);">${dest.name}</span>
+                <span style="
+                  font-size: 9px;
+                  font-weight: 700;
+                  padding: 2px 6px;
+                  border-radius: 4px;
+                  background: ${dest.status === 'PLAYABLE' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(156, 163, 175, 0.2)'};
+                  color: ${dest.status === 'PLAYABLE' ? 'var(--tag-verified)' : '#9ca3af'};
+                ">
+                  ${dest.status === 'PLAYABLE' ? '● 4 LOCATIONS' : 'PREVIEW'}
+                </span>
+              </div>
+              <p style="font-size: 11px; color: var(--text-muted); line-height: 1.35; margin: 0;">${dest.description}</p>
+            </div>
+          `,
+            )
+            .join('')}
         </div>
-        ${
-          selectedDest.status === 'PLAYABLE'
-            ? `<button class="btn-gold" id="btn-enter-destination">
-                Explore Districts (${selectedDest.districts.length}) →
-              </button>`
-            : `<button class="btn-secondary" disabled style="opacity: 0.6; cursor: not-allowed;">
-                Locked in Preview
-              </button>`
-        }
       </div>
     </div>
   `;
+
+  // Wire node travel clicks
+  container.querySelectorAll('.map-interactive-node, .btn-travel-quick').forEach((el) => {
+    el.addEventListener('click', (e) => {
+      const locId = (e.currentTarget as HTMLElement).getAttribute('data-loc-id');
+      if (locId) {
+        WorldStreamingSystem.getInstance()?.travelTo(locId);
+        onEnterDestination('nigeria');
+      }
+    });
+  });
 
   container.querySelectorAll('.destination-card').forEach((card) => {
     card.addEventListener('click', (e) => {
@@ -1038,8 +1200,8 @@ export function renderGlobalMapView(
     });
   });
 
-  container.querySelector('#btn-enter-destination')?.addEventListener('click', () => {
-    onEnterDestination(selectedDestinationId);
+  container.querySelector('#btn-quick-enter-world')?.addEventListener('click', () => {
+    onEnterDestination('nigeria');
   });
 
   return container;
@@ -1742,12 +1904,15 @@ export function renderSpatialHUD(
   discoveredCount: number,
   totalCount: number,
   onReturnToExploration: () => void,
+  onOpenWorldMap?: () => void,
 ): HTMLElement {
   const root = document.createElement('div');
   root.className = 'advenquo-adventure-hud-root';
 
   const advSystem = AdventureMissionSystem.getInstance();
   const playerController = PlayerControllerSystem.getInstance();
+  const worldStreaming = WorldStreamingSystem.getInstance();
+  const currentLoc = worldStreaming?.getCurrentLocation();
   const objective = advSystem ? advSystem.getActiveObjective() : null;
   const dialogue = advSystem ? advSystem.getActiveDialogue() : null;
   const inventory = advSystem ? advSystem.getInventory() : [];
@@ -1765,15 +1930,38 @@ export function renderSpatialHUD(
     <!-- Top Adventure Navigation & Objective Bar -->
     <div class="adventure-top-bar">
       <div style="display: flex; flex-direction: column; gap: 8px; pointer-events: auto;">
-        <button class="btn-gold" id="btn-spatial-return" style="font-size: 13px; padding: 8px 14px; gap: 6px;">
-          ← District Overview
-        </button>
-        <div style="font-size: 12px; font-weight: 700; color: var(--gold-accent); background: rgba(12, 18, 34, 0.85); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-panel); backdrop-filter: blur(8px);">
-          🏺 Artifacts: <span id="spatial-counter">${discoveredCount} / ${totalCount}</span>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <button class="btn-gold" id="btn-spatial-world-map" style="font-size: 13px; padding: 7px 12px; gap: 6px; background: rgba(74, 144, 217, 0.25); border: 1px solid var(--indigo-accent); color: var(--text-main);">
+            🗺️ World Map
+          </button>
+          <button class="btn-gold" id="btn-spatial-travel" style="font-size: 13px; padding: 7px 12px; gap: 6px; background: rgba(16, 185, 129, 0.25); border: 1px solid var(--tag-verified); color: var(--text-main);">
+            🚀 Travel
+          </button>
+          <button class="btn-gold" id="btn-spatial-mode" style="font-size: 13px; padding: 7px 12px; gap: 6px; background: rgba(245, 211, 112, 0.15); border: 1px solid var(--gold-accent); color: var(--gold-accent);">
+            🧭 Free Explore
+          </button>
+          <button class="btn-gold" id="btn-spatial-time" style="font-size: 13px; padding: 7px 12px; gap: 6px; background: rgba(251, 146, 60, 0.25); border: 1px solid #fb923c; color: #ffedd5;">
+            ☀️ Time
+          </button>
+          <button class="btn-gold" id="btn-spatial-weather" style="font-size: 13px; padding: 7px 12px; gap: 6px; background: rgba(56, 189, 248, 0.25); border: 1px solid #38bdf8; color: #e0f2fe;">
+            🌦️ Weather
+          </button>
+          <button class="btn-gold" id="btn-spatial-return" style="font-size: 13px; padding: 7px 12px; gap: 6px;">
+            📍 District
+          </button>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <div style="font-size: 12px; font-weight: 700; color: var(--gold-accent); background: rgba(12, 18, 34, 0.85); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-panel); backdrop-filter: blur(8px);">
+            🏺 Artifacts: <span id="spatial-counter">${discoveredCount} / ${totalCount}</span>
+          </div>
+          <div id="spatial-location-chip" style="font-size: 12px; font-weight: 600; color: #a5b4fc; background: rgba(12, 18, 34, 0.85); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-panel); backdrop-filter: blur(8px);">
+            📍 ${currentLoc ? currentLoc.name : 'Nigeria'}
+          </div>
         </div>
       </div>
 
       <!-- Objective Tracker Card -->
+      <div id="adventure-objective-tracker-wrap">
       ${
         objective
           ? `
@@ -1791,12 +1979,12 @@ export function renderSpatialHUD(
             <span id="adventure-distance-label">
               ${compassArrow} ${distance > 0 ? `${distance}m away` : 'At location'}
             </span>
-
           </div>
         </div>
       `
           : ''
       }
+      </div>
 
       <!-- Satchel Bag & Controls Guide -->
       <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; pointer-events: auto;">
@@ -1804,8 +1992,34 @@ export function renderSpatialHUD(
           🎒 Satchel (${inventory.length})
         </button>
         <div class="adventure-controls-hint">
-          ⌨️ WASD to Walk • Mouse Drag to Look • [E] Interact
+          ⌨️ WASD/Arrows to Walk • Shift to Run • Mouse Drag to Look • [E] Interact
         </div>
+      </div>
+    </div>
+
+    <!-- Quick Travel Drawer -->
+    <div id="spatial-travel-drawer" class="adventure-satchel-drawer" style="left: 20px; right: auto; width: 330px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-panel); padding-bottom: 8px; margin-bottom: 4px;">
+        <strong style="color: var(--gold-accent); font-size: 14px;">🚀 Open-World Travel</strong>
+        <span style="font-size: 11px; color: var(--text-muted);">4 Destinations</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button class="btn-travel-dest" data-loc-id="nigerian_market" style="text-align: left; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 8px; cursor: pointer; color: var(--text-main); transition: all 0.2s ease;">
+          <div style="font-weight: 700; font-size: 13px; color: var(--gold-accent);">🛍️ Ìsàlẹ̀ Èkó Artisan Market</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Adire dyers, master drummers & elder veranda</div>
+        </button>
+        <button class="btn-travel-dest" data-loc-id="lagos_urban" style="text-align: left; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 8px; cursor: pointer; color: var(--text-main); transition: all 0.2s ease;">
+          <div style="font-weight: 700; font-size: 13px; color: #38bdf8;">🚌 Yaba Tech & Transit Corridor</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Danfo bus, CcHUB innovation studio & transit shelter</div>
+        </button>
+        <button class="btn-travel-dest" data-loc-id="heritage_iga" style="text-align: left; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 8px; cursor: pointer; color: var(--text-main); transition: all 0.2s ease;">
+          <div style="font-weight: 700; font-size: 13px; color: #eab308;">👑 Iga Idunganran Royal Palace</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Ancestral carved iroko columns, royal throne & bronze leopards</div>
+        </button>
+        <button class="btn-travel-dest" data-loc-id="beach_waterfront" style="text-align: left; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 8px; cursor: pointer; color: var(--text-main); transition: all 0.2s ease;">
+          <div style="font-weight: 700; font-size: 13px; color: #34d399;">🏖️ Tarkwa Bay Coastal Haven</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Coconut palms, artisanal fishing canoes & ocean cabanas</div>
+        </button>
       </div>
     </div>
 
@@ -1893,10 +2107,85 @@ export function renderSpatialHUD(
   // Wire events
   root.querySelector('#btn-spatial-return')?.addEventListener('click', onReturnToExploration);
 
+  root.querySelector('#btn-spatial-world-map')?.addEventListener('click', () => {
+    if (onOpenWorldMap) {
+      onOpenWorldMap();
+    } else {
+      onReturnToExploration();
+    }
+  });
+
+  root.querySelector('#btn-spatial-time')?.addEventListener('click', () => {
+    const newLighting = timeOfDaySystem.cycleNextTime();
+    worldStreaming?.updateAtmosphericLighting();
+    worldStreaming?.showToast(
+      `☀️ Time: ${newLighting.timeOfDay.toUpperCase().replace('_', ' ')}`,
+      `Sun elevation: ${newLighting.sunElevation}°. Atmospheric lighting updated.`,
+      3.0,
+    );
+  });
+
+  root.querySelector('#btn-spatial-weather')?.addEventListener('click', () => {
+    const newWeather = weatherSystem.cycleNextWeather();
+    worldStreaming?.updateAtmosphericLighting();
+    worldStreaming?.showToast(
+      `🌦️ Weather: ${newWeather.name}`,
+      `${newWeather.description}`,
+      3.0,
+    );
+  });
+
   const satchelBtn = root.querySelector('#btn-adventure-satchel');
   const satchelDrawer = root.querySelector('#adventure-satchel-drawer');
   satchelBtn?.addEventListener('click', () => {
     satchelDrawer?.classList.toggle('open');
+    root.querySelector('#spatial-travel-drawer')?.classList.remove('open');
+  });
+
+  const travelBtn = root.querySelector('#btn-spatial-travel');
+  const travelDrawer = root.querySelector('#spatial-travel-drawer');
+  travelBtn?.addEventListener('click', () => {
+    travelDrawer?.classList.toggle('open');
+    satchelDrawer?.classList.remove('open');
+  });
+
+  root.querySelectorAll('.btn-travel-dest').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const locId = (e.currentTarget as HTMLElement).getAttribute('data-loc-id');
+      if (locId) {
+        WorldStreamingSystem.getInstance()?.travelTo(locId);
+        travelDrawer?.classList.remove('open');
+        const locChip = root.querySelector('#spatial-location-chip');
+        const updatedLoc = WorldStreamingSystem.getInstance()?.getCurrentLocation();
+        if (locChip && updatedLoc) {
+          locChip.textContent = `📍 ${updatedLoc.name}`;
+        }
+      }
+    });
+  });
+
+  let isFreeExploration = false;
+  const modeBtn = root.querySelector('#btn-spatial-mode');
+  const objectiveWrap = root.querySelector('#adventure-objective-tracker-wrap') as HTMLElement | null;
+  modeBtn?.addEventListener('click', () => {
+    isFreeExploration = !isFreeExploration;
+    if (isFreeExploration) {
+      modeBtn.textContent = '🎯 Quest Mode';
+      if (objectiveWrap) objectiveWrap.style.display = 'none';
+      WorldStreamingSystem.getInstance()?.showToast(
+        '🧭 Free Exploration Active',
+        'Explore freely, inspect landmarks, and talk to residents without compulsory objectives.',
+        3.0,
+      );
+    } else {
+      modeBtn.textContent = '🧭 Free Explore';
+      if (objectiveWrap) objectiveWrap.style.display = 'block';
+      WorldStreamingSystem.getInstance()?.showToast(
+        '🎯 Adventure Objectives Active',
+        'Follow compass waypoints and complete local missions.',
+        3.0,
+      );
+    }
   });
 
   const actionPromptBtn = root.querySelector('#btn-adventure-action');

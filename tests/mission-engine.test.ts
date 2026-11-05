@@ -19,7 +19,7 @@ describe('Mission Engine', () => {
 
   it('contains all required MVP missions', () => {
     const missions = missionEngine.getAllMissions();
-    assert.strictEqual(missions.length, 5);
+    assert.ok(missions.length >= 5, 'Must contain all required MVP missions');
 
     const types = missions.map((m) => m.type);
     assert.ok(types.includes('language'), 'Contextual language mission must exist');

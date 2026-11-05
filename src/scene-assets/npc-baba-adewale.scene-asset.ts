@@ -20,11 +20,13 @@ import {
   TorusGeometry,
 } from '@iwsdk/core';
 
+import { pbrMaterialSystem } from '../systems/pbr-material-system.js';
+
 export function buildNpcBabaAdewale(): Object3D {
   const root = new Object3D();
   root.name = 'NpcBabaAdewale';
 
-  // Materials
+  // Realistic PBR Materials
   const agbadaMat = new MeshStandardMaterial({
     color: 0x880e4f, // Rich deep maroon / royal crimson
     roughness: 0.85,
@@ -37,11 +39,7 @@ export function buildNpcBabaAdewale(): Object3D {
     metalness: 0.3,
   });
 
-  const skinMat = new MeshStandardMaterial({
-    color: 0x4a2c11, // Rich deep brown skin tone
-    roughness: 0.75,
-    metalness: 0.0,
-  });
+  const skinMat = pbrMaterialSystem.getMaterial('human_skin_dark');
 
   const coralMat = new MeshStandardMaterial({
     color: 0xd84315, // Polished red-orange coral beads
@@ -61,6 +59,7 @@ export function buildNpcBabaAdewale(): Object3D {
   const lowerRobeGeo = new CylinderGeometry(0.38, 0.45, 0.55, 14);
   const lowerRobe = new Mesh(lowerRobeGeo, agbadaMat);
   lowerRobe.position.set(0, seatY + 0.22, 0.05);
+  lowerRobe.castShadow = true;
   root.add(lowerRobe);
 
   // 2. Torso & Flowing Agbada Robe
@@ -68,12 +67,14 @@ export function buildNpcBabaAdewale(): Object3D {
   const torso = new Mesh(torsoGeo, agbadaMat);
   torso.position.set(0, seatY + 0.68, 0);
   torso.scale.set(1.15, 1, 0.85); // Wider shoulders
+  torso.castShadow = true;
   root.add(torso);
 
   // Broad draped Agbada shoulder folds
   const shoulderFoldsGeo = new BoxGeometry(0.85, 0.4, 0.45);
   const shoulderFolds = new Mesh(shoulderFoldsGeo, agbadaMat);
   shoulderFolds.position.set(0, seatY + 0.75, 0);
+  shoulderFolds.castShadow = true;
   root.add(shoulderFolds);
 
   // Gold Embroidered Neckline
@@ -100,6 +101,7 @@ export function buildNpcBabaAdewale(): Object3D {
   const head = new Mesh(headGeo, skinMat);
   head.position.set(0, seatY + 1.08, 0);
   head.scale.set(0.95, 1.1, 1);
+  head.castShadow = true;
   root.add(head);
 
   // 4. Traditional Fila (Cap)
@@ -107,6 +109,7 @@ export function buildNpcBabaAdewale(): Object3D {
   const fila = new Mesh(filaGeo, filaMat);
   fila.position.set(0.02, seatY + 1.18, -0.01);
   fila.rotation.z = -0.15; // Dignified elder slant to the side
+  fila.castShadow = true;
   root.add(fila);
 
   // 5. Forearms and Hands resting on knees
@@ -117,6 +120,7 @@ export function buildNpcBabaAdewale(): Object3D {
   const leftArm = new Mesh(armGeo, agbadaMat);
   leftArm.position.set(-0.28, seatY + 0.58, 0.22);
   leftArm.rotation.set(Math.PI / 3, 0, -0.2);
+  leftArm.castShadow = true;
   root.add(leftArm);
 
   const leftHand = new Mesh(handGeo, skinMat);
@@ -127,6 +131,7 @@ export function buildNpcBabaAdewale(): Object3D {
   const rightArm = new Mesh(armGeo, agbadaMat);
   rightArm.position.set(0.28, seatY + 0.58, 0.22);
   rightArm.rotation.set(Math.PI / 3, 0, 0.2);
+  rightArm.castShadow = true;
   root.add(rightArm);
 
   const rightHand = new Mesh(handGeo, skinMat);

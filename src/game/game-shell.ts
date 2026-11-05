@@ -13,6 +13,7 @@ import { DESTINATIONS } from './world-data.js';
 import { getAllCombinedStories, WORLD_NOW_STORIES } from './world-now-data.js';
 import { bootstrapLiveWorldEngine } from '../live-world/bootstrap.js';
 import { worldEngineApi } from '../live-world/service/world-engine-api.js';
+import { WorldStreamingSystem } from '../world-streaming-system.js';
 import type {
   ActiveMissionState,
   Destination,
@@ -99,9 +100,9 @@ export class GameShell {
     this.hudContainer = this.rootElement.querySelector('#advenquo-hud-host');
     this.modalContainer = this.rootElement.querySelector('#advenquo-modal-host');
 
-    // Default to map or district
+    // Default directly to 3D living world exploration
     const state = storage.getState();
-    this.activeTab = 'map';
+    this.activeTab = 'spatial';
 
     // Bootstrap Global Live World Engine
     bootstrapLiveWorldEngine().then(() => {
@@ -110,11 +111,8 @@ export class GameShell {
 
     this.render();
 
-    // Check if onboarding is needed (first-time player prompt)
-    if (state.profile.totalXp === 0 && !sessionStorage.getItem('advenquo_onboarded')) {
-      this.openProfileModal();
-      sessionStorage.setItem('advenquo_onboarded', 'true');
-    }
+    // Mark session onboarded so player enters 3D world directly without popups
+    sessionStorage.setItem('advenquo_onboarded', 'true');
   }
 
   public setTab(tab: NavigationTab): void {
@@ -183,6 +181,7 @@ export class GameShell {
           this.spatialDiscoveredCount,
           this.spatialTotalCount,
           () => this.setTab('district'),
+          () => this.setTab('map'),
         );
         this.hudContainer.appendChild(hud);
       } else {
@@ -213,12 +212,28 @@ export class GameShell {
               state.selectedDistrictId,
               (districtId) => {
                 storage.setSelectedLocation(dest.id, districtId);
+                const locMap: Record<string, string> = {
+                  isale_eko: 'nigerian_market',
+                  yaba: 'lagos_urban',
+                  heritage_iga: 'heritage_iga',
+                  beach_waterfront: 'beach_waterfront',
+                };
+                const locId = locMap[districtId] || districtId;
+                WorldStreamingSystem.getInstance()?.travelTo(locId);
                 this.render();
               },
               (poi) => this.openPOIModal(poi),
               (missionId) => this.startMission(missionId),
               (assetId) => {
                 storage.setActiveSpatialEncounter(assetId);
+                const locMap: Record<string, string> = {
+                  isale_eko: 'nigerian_market',
+                  yaba: 'lagos_urban',
+                  heritage_iga: 'heritage_iga',
+                  beach_waterfront: 'beach_waterfront',
+                };
+                const locId = locMap[state.selectedDistrictId] || 'nigerian_market';
+                WorldStreamingSystem.getInstance()?.travelTo(locId);
                 this.setTab('spatial');
               },
             );

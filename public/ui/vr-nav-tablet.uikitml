@@ -302,6 +302,9 @@
       <div id="tab-btn-missions" class="tab-btn tab-btn-active">
         <div id="tab-lbl-missions" class="tab-label tab-label-active">Missions</div>
       </div>
+      <div id="tab-btn-travel" class="tab-btn">
+        <div id="tab-lbl-travel" class="tab-label">World Map</div>
+      </div>
       <div id="tab-btn-worldnow" class="tab-btn">
         <div id="tab-lbl-worldnow" class="tab-label">World Now</div>
       </div>
@@ -380,6 +383,34 @@
         <div class="vocab-term">Yoruba Greeting Protocol</div>
         <div id="tablet-vocab-preview" class="vocab-gloss">
           "Ẹ káàárọ̀ o" — Good morning (Elder Honorific with respect prefix "Ẹ")
+        </div>
+      </div>
+    </div>
+
+    <div id="view-travel" class="settings-view" style="display: none">
+      <div class="section-title">Connected World Map & Travel</div>
+      <div class="setting-row">
+        <div class="setting-label">1. Ìsàlẹ̀ Èkó Artisan Market</div>
+        <div id="btn-travel-market" class="toggle-btn">
+          <div id="lbl-travel-market" class="toggle-btn-label">Travel Here</div>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">2. Yaba Tech Corridor (Danfo)</div>
+        <div id="btn-travel-urban" class="toggle-btn">
+          <div id="lbl-travel-urban" class="toggle-btn-label">Travel Here</div>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">3. Iga Idunganran Palace</div>
+        <div id="btn-travel-palace" class="toggle-btn">
+          <div id="lbl-travel-palace" class="toggle-btn-label">Travel Here</div>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">4. Tarkwa Bay Beach (Ferry)</div>
+        <div id="btn-travel-beach" class="toggle-btn">
+          <div id="lbl-travel-beach" class="toggle-btn-label">Travel Here</div>
         </div>
       </div>
     </div>

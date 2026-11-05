@@ -17,6 +17,8 @@ import {
   VisibilityState,
 } from '@iwsdk/core';
 
+import { CinematicCameraSystem } from './systems/cinematic-camera-system.js';
+
 export interface ObjectiveTarget {
   name: string;
   position: Vector3;
@@ -240,6 +242,13 @@ export class PlayerControllerSystem extends createSystem({}) {
     return this.currentBearingToTarget;
   }
 
+  public setBoundaryLimits(minX: number, maxX: number, minZ: number, maxZ: number): void {
+    this.minX = minX;
+    this.maxX = maxX;
+    this.minZ = minZ;
+    this.maxZ = maxZ;
+  }
+
   public teleportTo(x: number, z: number, yaw = 0): void {
     const camera = this.world.camera;
     if (camera) {
@@ -278,21 +287,35 @@ export class PlayerControllerSystem extends createSystem({}) {
       }
 
       // 3. Apply translation with collision & boundaries
-      if (Math.abs(moveX) > 0.01 || Math.abs(moveZ) > 0.01) {
+      const isPlayerMoving = Math.abs(moveX) > 0.01 || Math.abs(moveZ) > 0.01;
+      const cinematicCam = CinematicCameraSystem.getInstance();
+      if (cinematicCam) {
+        cinematicCam.setMoving(isPlayerMoving);
+      }
+
+      if (isPlayerMoving) {
+        const isRunning = Boolean(
+          this.keysDown['ShiftLeft'] ||
+          this.keysDown['ShiftRight'] ||
+          this.keysDown['shift'] ||
+          this.keysDown['Shift'],
+        );
+        const activeSpeed = isRunning ? this.walkSpeed * 1.8 : this.walkSpeed;
+
         this.moveVelocity.set(0, 0, 0);
         this.moveVelocity.addScaledVector(this.forwardVec, moveZ);
         this.moveVelocity.addScaledVector(this.rightVec, moveX);
-        this.moveVelocity.normalize().multiplyScalar(this.walkSpeed * Math.min(delta, 0.1));
+        this.moveVelocity.normalize().multiplyScalar(activeSpeed * Math.min(delta, 0.1));
 
         let newX = camera.position.x + this.moveVelocity.x;
         let newZ = camera.position.z + this.moveVelocity.z;
 
-        // Courtyard perimeter clamp
+        // Dynamic perimeter clamp
         newX = Math.max(this.minX, Math.min(this.maxX, newX));
         newZ = Math.max(this.minZ, Math.min(this.maxZ, newZ));
 
-        // Prevent walking through veranda back wall (z < -4.2) unless on path
-        if (newZ < -4.1) {
+        // Prevent walking through market veranda back wall (z < -4.1) when in market boundaries
+        if (this.minX >= -7 && this.maxX <= 7 && newZ < -4.1) {
           newZ = -4.1;
         }
 
@@ -301,11 +324,13 @@ export class PlayerControllerSystem extends createSystem({}) {
         camera.position.y = this.playerHeight;
       }
 
-      // 4. Update camera rotation from yaw & pitch
-      camera.rotation.order = 'YXZ';
-      camera.rotation.y = this.currentYaw;
-      camera.rotation.x = this.currentPitch;
-      camera.rotation.z = 0;
+      // 4. Update camera rotation from yaw & pitch (unless cinematic camera is active)
+      if (!cinematicCam || cinematicCam.getMode() === 'exploration') {
+        camera.rotation.order = 'YXZ';
+        camera.rotation.y = this.currentYaw;
+        camera.rotation.x = this.currentPitch;
+        camera.rotation.z = 0;
+      }
 
       // Keep this.player.position synchronized for proximity systems
       if (this.player) {

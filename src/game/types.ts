@@ -231,5 +231,6 @@ export interface GameSaveState {
   activeMission: ActiveMissionState | null;
   selectedDestinationId: string;
   selectedDistrictId: string;
+  selectedLocationId?: string;
   activeSpatialEncounterId: string | null;
 }
