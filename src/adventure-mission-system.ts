@@ -22,6 +22,7 @@ import { NPCCharacter } from './npc-component.js';
 import { CulturalObject } from './cultural-object-component.js';
 import { AdventureItem } from './adventure-mission-component.js';
 import { PlayerControllerSystem } from './player-controller-system.js';
+import { CharacterAnimationSystem } from './character-animation-system.js';
 import { storage } from './game/storage.js';
 
 export interface AdventureInventoryItem {
@@ -367,6 +368,7 @@ export class AdventureMissionSystem extends createSystem({
           culturalNote: 'Tobi is sourcing locally made shade screens as part of a passive-cooling design, so the market shipment is tied directly to his construction schedule.',
           choices: [
             { id: 'tobi_help', text: 'I’ll ask Iyá Aláso and trace the guild receipt.', feedback: 'Tobi shares the consignment number: 104. “Thank you. Let’s find where it was left before we decide how to adjust the crew’s schedule.”', isCorrect: true, advanceStage: 'STAGE_1_TALK_TRADER' },
+            { id: 'tobi_injury_check', text: 'Was anyone hurt when the timber shifted?', feedback: 'Tobi winces in remembered stress: “A handler bruised an arm leaping clear, but thankfully no one was crushed.”', isCorrect: true },
             { id: 'tobi_plan', text: 'Let’s locate the shipment first, then choose a safe schedule.', feedback: 'Tobi nods. “Agreed. I’ll hold the shade-screen installation until we know what arrived.”', isCorrect: true, advanceStage: 'STAGE_1_TALK_TRADER' },
             { id: 'tobi_later', text: 'I’d like to explore the market first; I may come back to this.', feedback: '“Of course. Take your time in the market; I’ll be here if you decide to help.”', isCorrect: true },
           ],
@@ -528,10 +530,14 @@ export class AdventureMissionSystem extends createSystem({
     if (choice.decisionId) {
       this.decisionId = choice.decisionId;
     }
+    if (choice.id === 'tobi_injury_check') {
+      CharacterAnimationSystem.getInstance()?.triggerPain('npc_tobi');
+    }
     if (choice.advanceStage) {
       this._setStage(choice.advanceStage);
 
       if (this.currentStage === 'STAGE_8_COMPLETED') {
+        CharacterAnimationSystem.getInstance()?.triggerJump('npc_tobi');
         this._completeAdventure(choice.feedback);
       }
     }

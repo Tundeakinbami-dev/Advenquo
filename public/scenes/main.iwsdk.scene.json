@@ -510,6 +510,11 @@
           "interactionRadius": 3.5,
           "inDialogue": false
         },
+        "CharacterAnimation": {
+          "characterId": "npc_tobi",
+          "state": "idle",
+          "rigType": "auto"
+        },
         "RayInteractable": {},
         "LocationAnchor": {
           "locationId": "nigerian_market",
@@ -627,6 +632,11 @@
           "movingForward": true,
           "destinationX": 1.8,
           "destinationZ": 0.6
+        },
+        "CharacterAnimation": {
+          "characterId": "moving-pedestrian-urban",
+          "state": "walking",
+          "rigType": "auto"
         },
         "LocationAnchor": {
           "locationId": "lagos_urban",
