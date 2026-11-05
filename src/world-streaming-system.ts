@@ -38,7 +38,6 @@ import { storage } from './game/storage.js';
 import { environmentManager } from './systems/environment-manager.js';
 import { interactionManager } from './systems/interaction-manager.js';
 import { discoveryManager } from './systems/discovery-manager.js';
-import { npcManager } from './systems/npc-manager.js';
 
 export interface TravelTransitionEvent {
   fromLocationId: string;
@@ -394,14 +393,5 @@ export class WorldStreamingSystem extends createSystem({
       }
     }
 
-    // Update walking pedestrian routines in urban corridor
-    if (this.currentLocationId === 'lagos_urban') {
-      const pedEntity = this.world.getSceneObject('moving-pedestrian-urban');
-      if (pedEntity && pedEntity.visible) {
-        const coords = npcManager.updateRoutines(delta);
-        pedEntity.position.x = coords.x;
-        pedEntity.position.z = coords.z;
-      }
-    }
   }
 }
