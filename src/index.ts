@@ -18,6 +18,7 @@ import { CinematicCameraSystem } from './systems/cinematic-camera-system.js';
 import { PlayerControllerSystem } from './player-controller-system.js';
 import { WorldStreamingSystem } from './world-streaming-system.js';
 import { NpcAnimationSystem } from './npc-animation-system.js';
+import { NPCMovementSystem } from './npc-movement-system.js';
 import { DiscoverySystem } from './discovery-system.js';
 import { AdventureMissionSystem } from './adventure-mission-system.js';
 import { ResponsiveUISystem } from './responsive-ui-system.js';
@@ -34,6 +35,7 @@ World.create(
   world.registerSystem(CinematicCameraSystem);
   world.registerSystem(PlayerControllerSystem);
   world.registerSystem(WorldStreamingSystem);
+  world.registerSystem(NPCMovementSystem);
   world.registerSystem(NpcAnimationSystem);
   world.registerSystem(DiscoverySystem);
   world.registerSystem(AdventureMissionSystem);

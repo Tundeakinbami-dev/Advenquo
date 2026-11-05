@@ -600,6 +600,42 @@
           "isDiscovered": false
         }
       }
+    },
+    {
+      "id": "moving-pedestrian-urban",
+      "name": "Yaba Commuter",
+      "content": {
+        "type": "asset",
+        "asset": "moving-pedestrian"
+      },
+      "transform": {
+        "position": [-1.8, 0.08, 0.6]
+      },
+      "components": {
+        "NPCMovement": {
+          "actorId": "yaba-commuter-01",
+          "role": "commuter",
+          "state": "walking",
+          "activity": "Walking along the Yaba corridor",
+          "enabled": true,
+          "speed": 0.8,
+          "startX": -1.8,
+          "startZ": 0.6,
+          "endX": 1.8,
+          "endZ": 0.6,
+          "progress": 0,
+          "movingForward": true,
+          "destinationX": 1.8,
+          "destinationZ": 0.6
+        },
+        "LocationAnchor": {
+          "locationId": "lagos_urban",
+          "name": "Yaba Tech & Transit Corridor",
+          "environmentCategory": "urban",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
     }
   ]
 }
