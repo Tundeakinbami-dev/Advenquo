@@ -22,6 +22,7 @@ import { PlayerControllerSystem } from '../player-controller-system.js';
 import { WorldStreamingSystem } from '../world-streaming-system.js';
 import { timeOfDaySystem } from '../systems/time-of-day-system.js';
 import { weatherSystem } from '../systems/weather-system.js';
+import { storage } from './storage.js';
 
 export function injectAppStyles(): void {
 
@@ -1916,6 +1917,7 @@ export function renderSpatialHUD(
   const objective = advSystem ? advSystem.getActiveObjective() : null;
   const dialogue = advSystem ? advSystem.getActiveDialogue() : null;
   const inventory = advSystem ? advSystem.getInventory() : [];
+  let isFreeExploration = (storage.getState().explorationMode ?? 'free_exploration') === 'free_exploration';
   const distance = playerController ? Math.round(playerController.getDistanceToTarget() * 10) / 10 : 0;
   const bearing = playerController ? playerController.getBearingToTarget() : 0;
   const isNearTarget = distance > 0 && distance <= (objective?.targetRadius || 3.2);
@@ -1938,7 +1940,7 @@ export function renderSpatialHUD(
             🚀 Travel
           </button>
           <button class="btn-gold" id="btn-spatial-mode" style="font-size: 13px; padding: 7px 12px; gap: 6px; background: rgba(245, 211, 112, 0.15); border: 1px solid var(--gold-accent); color: var(--gold-accent);">
-            🧭 Free Explore
+            ${isFreeExploration ? '🎯 Quest Mode' : '🧭 Free Explore'}
           </button>
           <button class="btn-gold" id="btn-spatial-time" style="font-size: 13px; padding: 7px 12px; gap: 6px; background: rgba(251, 146, 60, 0.25); border: 1px solid #fb923c; color: #ffedd5;">
             ☀️ Time
@@ -1961,7 +1963,7 @@ export function renderSpatialHUD(
       </div>
 
       <!-- Objective Tracker Card -->
-      <div id="adventure-objective-tracker-wrap">
+      <div id="adventure-objective-tracker-wrap" style="display: ${isFreeExploration ? 'none' : 'block'};">
       ${
         objective
           ? `
@@ -1992,7 +1994,7 @@ export function renderSpatialHUD(
           🎒 Satchel (${inventory.length})
         </button>
         <div class="adventure-controls-hint">
-          ⌨️ WASD/Arrows to Walk • Shift to Run • Mouse Drag to Look • [E] Interact
+          Point at Tobi, a market resident or clue, then pinch to interact. Desktop: click or press E nearby.
         </div>
       </div>
     </div>
@@ -2095,7 +2097,7 @@ export function renderSpatialHUD(
       `
           : isNearTarget
             ? `
-        <button class="adventure-action-prompt" id="btn-adventure-action">
+        <button class="adventure-action-prompt" id="btn-adventure-action" style="display: ${isFreeExploration ? 'none' : 'flex'};">
           <span>✨ [ E ] Interact with ${objective?.targetName}</span>
         </button>
       `
@@ -2164,22 +2166,26 @@ export function renderSpatialHUD(
     });
   });
 
-  let isFreeExploration = false;
   const modeBtn = root.querySelector('#btn-spatial-mode');
   const objectiveWrap = root.querySelector('#adventure-objective-tracker-wrap') as HTMLElement | null;
+  const actionPromptBtn = root.querySelector('#btn-adventure-action') as HTMLElement | null;
   modeBtn?.addEventListener('click', () => {
     isFreeExploration = !isFreeExploration;
     if (isFreeExploration) {
+      storage.setExplorationMode('free_exploration');
       modeBtn.textContent = '🎯 Quest Mode';
       if (objectiveWrap) objectiveWrap.style.display = 'none';
+      if (actionPromptBtn) actionPromptBtn.style.display = 'none';
       WorldStreamingSystem.getInstance()?.showToast(
         '🧭 Free Exploration Active',
         'Explore freely, inspect landmarks, and talk to residents without compulsory objectives.',
         3.0,
       );
     } else {
+      storage.setExplorationMode('adventure_mission');
       modeBtn.textContent = '🧭 Free Explore';
       if (objectiveWrap) objectiveWrap.style.display = 'block';
+      if (actionPromptBtn) actionPromptBtn.style.display = 'flex';
       WorldStreamingSystem.getInstance()?.showToast(
         '🎯 Adventure Objectives Active',
         'Follow compass waypoints and complete local missions.',
@@ -2188,7 +2194,6 @@ export function renderSpatialHUD(
     }
   });
 
-  const actionPromptBtn = root.querySelector('#btn-adventure-action');
   actionPromptBtn?.addEventListener('click', () => {
     advSystem?.triggerNearbyInteraction();
   });

@@ -1,7 +1,20 @@
 <style>
+  @font-face {
+    font-family: 'Noto Sans Yoruba';
+    src: url('../fonts/NotoSans-Yoruba.ttf') format('truetype');
+    font-weight: 400;
+  }
+
+  @font-face {
+    font-family: 'Noto Sans Yoruba';
+    src: url('../fonts/NotoSans-Yoruba.ttf') format('truetype');
+    font-weight: 700;
+  }
+
   .root {
     flex-direction: column;
     width: 48;
+    font-family: 'Noto Sans Yoruba';
     background-color: rgba(10, 16, 36, 0.96);
     border-radius: 1.4;
     border-width: 0.15;
@@ -93,11 +106,13 @@
   .mission-card-title {
     font-size: 1.6;
     font-weight: 700;
+    font-family: 'Noto Sans Yoruba';
     color: #ffffff;
   }
 
   .mission-card-desc {
     font-size: 1.35;
+    font-family: 'Noto Sans Yoruba';
     color: #cbd5e1;
     line-height: 1.35;
   }
@@ -141,6 +156,7 @@
   .news-badge-text {
     font-size: 1.1;
     font-weight: 700;
+    font-family: 'Noto Sans Yoruba';
     color: #0a1024;
   }
 
@@ -214,6 +230,7 @@
 
   .vocab-gloss {
     font-size: 1.3;
+    font-family: 'Noto Sans Yoruba';
     color: #ffffff;
   }
 
@@ -237,6 +254,7 @@
   .setting-label {
     font-size: 1.45;
     font-weight: 600;
+    font-family: 'Noto Sans Yoruba';
     color: #ffffff;
   }
 
@@ -291,6 +309,7 @@
   .news-nav-label {
     font-size: 1.25;
     font-weight: 700;
+    font-family: 'Noto Sans Yoruba';
     color: #f5d370;
   }
 </style>
@@ -341,7 +360,7 @@
     <div id="view-worldnow" class="world-now-view" style="display: none">
       <div style="flex-direction: row; justify-content: space-between; align-items: center;">
         <div id="tablet-news-badge" class="news-badge">
-          <div id="tablet-news-badge-text" class="news-badge-text">VERIFIED REPORT • 2026</div>
+        <div id="tablet-news-badge-text" class="news-badge-text">VERIFIED REPORT | 2026</div>
         </div>
         <div id="tablet-news-counter" style="font-size: 1.1; color: #f5d370; font-weight: 700;">Story 1 / 3</div>
       </div>
@@ -356,10 +375,10 @@
       </div>
       <div style="flex-direction: row; gap: 1.2; margin-top: 0.8;">
         <div id="btn-news-prev" class="news-nav-btn">
-          <div class="news-nav-label">← Prev Story</div>
+          <div class="news-nav-label">Prev Story</div>
         </div>
         <div id="btn-news-next" class="news-nav-btn">
-          <div class="news-nav-label">Next Story →</div>
+          <div class="news-nav-label">Next Story</div>
         </div>
       </div>
     </div>
@@ -382,7 +401,7 @@
       <div class="vocab-card">
         <div class="vocab-term">Yoruba Greeting Protocol</div>
         <div id="tablet-vocab-preview" class="vocab-gloss">
-          "Ẹ káàárọ̀ o" — Good morning (Elder Honorific with respect prefix "Ẹ")
+          "Ẹ káàárọ̀ o": Good morning (Elder Honorific with respect prefix "Ẹ")
         </div>
       </div>
     </div>

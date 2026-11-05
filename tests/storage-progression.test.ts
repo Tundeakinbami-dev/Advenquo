@@ -26,6 +26,15 @@ describe('Storage & Progression Engine', () => {
     assert.strictEqual(state.passport.journal.length, 0);
     assert.strictEqual(state.selectedDestinationId, 'nigeria');
     assert.strictEqual(state.selectedDistrictId, 'isale_eko');
+    assert.strictEqual(state.explorationMode, 'free_exploration');
+  });
+
+  it('persists the player-selected exploration mode', () => {
+    storage.setExplorationMode('adventure_mission');
+    assert.strictEqual(storage.getState().explorationMode, 'adventure_mission');
+
+    storage.setExplorationMode('free_exploration');
+    assert.strictEqual(storage.getState().explorationMode, 'free_exploration');
   });
 
   it('updates player profile cleanly', () => {

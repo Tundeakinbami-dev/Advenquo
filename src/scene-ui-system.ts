@@ -22,7 +22,6 @@ import {
 } from '@iwsdk/core';
 
 import { CulturalObject } from './cultural-object-component.js';
-import { gameShell } from './game/game-shell.js';
 
 /** How long (seconds) a fact panel stays visible before auto-hiding */
 const FACT_PANEL_DURATION = 8;
@@ -136,7 +135,7 @@ export class SceneUISystem extends createSystem({
       this.counterEl?.setProperties({
         text: `${discoveredCount} / ${total} discovered`,
       } as never);
-      gameShell.updateSpatialDiscovery(discoveredCount);
+      void import('./game/game-shell.js').then(({ gameShell }) => gameShell.updateSpatialDiscovery(discoveredCount));
     }
 
     // Show completion panel the first time all objects are discovered

@@ -24,7 +24,6 @@ import { ResponsiveUISystem } from './responsive-ui-system.js';
 import { SceneUISystem } from './scene-ui-system.js';
 import { NpcDialogueSystem } from './npc-dialogue-system.js';
 import { VRTabletSystem } from './vr-tablet-system.js';
-import { gameShell } from './game/game-shell.js';
 import { worldManager } from './systems/world-manager.js';
 
 World.create(
@@ -42,7 +41,10 @@ World.create(
   world.registerSystem(ResponsiveUISystem);
   world.registerSystem(NpcDialogueSystem);
   world.registerSystem(VRTabletSystem);
-  gameShell.init();
+  // Keep the non-immersive map, news and passport shell out of the initial
+  // Quest startup chunk. The spatial experience is available before this UI
+  // module and its supporting data are requested.
+  void import('./game/game-shell.js').then(({ gameShell }) => gameShell.init());
   (window as any).__worldManager = worldManager;
 });
 

@@ -160,7 +160,7 @@ describe('VR Experience & Immersive Systems', () => {
     assert.strictEqual(config.world.features.locomotion.turningMethod, 'snap');
     assert.strictEqual(config.world.features.locomotion.comfortAssistLevel, 0.5);
     assert.strictEqual(config.world.features.locomotion.enableJumping, false);
-    assert.strictEqual(config.world.features.grabbing, true);
+    assert.strictEqual(config.world.features.grabbing.useHandPinchForGrab, true);
     assert.strictEqual(config.world.features.physics, true);
     assert.strictEqual(config.dev.emulator.device, 'metaQuest3');
   });

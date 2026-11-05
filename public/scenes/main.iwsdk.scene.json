@@ -499,7 +499,7 @@
         "asset": "npc-tobi"
       },
       "transform": {
-        "position": [-3.5, 0, 1.0],
+        "position": [-4.8, 0, 0.5],
         "rotationDeg": [0, 30, 0]
       },
       "components": {
@@ -512,10 +512,10 @@
         },
         "RayInteractable": {},
         "LocationAnchor": {
-          "locationId": "lagos_urban",
-          "name": "Yaba Tech & Transit Corridor",
-          "environmentCategory": "urban",
-          "isActive": false,
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
           "isDiscovered": false
         }
       }

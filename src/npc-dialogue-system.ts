@@ -22,9 +22,10 @@ import {
 } from '@iwsdk/core';
 
 import { NPCCharacter } from './npc-component.js';
+import { AdventureMissionSystem } from './adventure-mission-system.js';
 import { missionEngine } from './game/mission-engine.js';
-import { gameShell } from './game/game-shell.js';
 import { CinematicCameraSystem } from './systems/cinematic-camera-system.js';
+import { loadYorubaFontFamilies } from './yoruba-font.js';
 
 export class NpcDialogueSystem extends createSystem({
   npcs: { required: [NPCCharacter] },
@@ -54,11 +55,15 @@ export class NpcDialogueSystem extends createSystem({
   private activeChoiceIds: string[] = [];
   private canAdvance = false;
   private isCompletedState = false;
+  private isAdventureDialogue = false;
 
   init(): void {
     // 1. Locate dialogue panel
     this.dialoguePanel = this.world.getSceneObject<UIKitMLAsset>('npc-dialogue-panel') ?? null;
     if (this.dialoguePanel) {
+      void loadYorubaFontFamilies().then((fontFamilies) => {
+        this.dialoguePanel?.document.rootElement.setProperties({ fontFamilies } as never);
+      }).catch((error: unknown) => console.error('Yoruba font atlas failed to load:', error));
       this.nameEl = this.dialoguePanel.getElementById<UIKit.Text>('npc-name');
       this.roleEl = this.dialoguePanel.getElementById<UIKit.Text>('npc-role');
       this.promptEl = this.dialoguePanel.getElementById<UIKit.Text>('npc-prompt');
@@ -119,6 +124,10 @@ export class NpcDialogueSystem extends createSystem({
 
       for (const entity of this.queries.npcs.entities) {
         if (!entity.object3D) continue;
+        const characterId = entity.getValue(NPCCharacter, 'characterId');
+        // Tobi and Iyá are opened by an intentional ray/pinch or the nearby-action prompt.
+        // Other NPCs retain the existing proximity dialogue behavior.
+        if (characterId === 'npc_tobi' || characterId === 'iya-alaso') continue;
         entity.object3D.getWorldPosition(this.tempVec);
         const dist = this.playerPos.distanceTo(this.tempVec);
         const radius = entity.getValue(NPCCharacter, 'interactionRadius') || 3.0;
@@ -138,6 +147,19 @@ export class NpcDialogueSystem extends createSystem({
   public startDialogueWithNPC(npcId: string, npcPosition: Vector3): void {
     this.activeNpcId = npcId;
     CinematicCameraSystem.getInstance()?.enterConversationFraming(npcPosition, npcId);
+
+    if (npcId === 'npc_tobi' || npcId === 'iya-alaso') {
+      this.isAdventureDialogue = true;
+      AdventureMissionSystem.getInstance()?.interactWithNPC(npcId);
+      this._renderAdventureDialogue();
+      if (this.dialoguePanel) {
+        this.dialoguePanel.position.set(npcPosition.x + 0.65, Math.max(1.2, npcPosition.y + 0.6), npcPosition.z + 0.2);
+        this.dialoguePanel.lookAt(this.playerPos.x || 0, this.dialoguePanel.position.y, this.playerPos.z || 0);
+        this.dialoguePanel.visible = true;
+      }
+      return;
+    }
+    this.isAdventureDialogue = false;
 
     // Match NPC to current active or relevant mission
     if (npcId === 'baba-adewale') {
@@ -193,6 +215,7 @@ export class NpcDialogueSystem extends createSystem({
 
     // Hide feedback box initially for new step
     this.feedbackContainer?.setProperties({ display: 'none' });
+    this.continueBtn?.setProperties({ display: 'flex' });
     this.canAdvance = false;
 
     // Populate choices
@@ -228,6 +251,16 @@ export class NpcDialogueSystem extends createSystem({
     const choiceId = this.activeChoiceIds[choiceIndex];
     if (!choiceId) return;
 
+    if (this.isAdventureDialogue) {
+      AdventureMissionSystem.getInstance()?.selectDialogueChoice(choiceId);
+      if (AdventureMissionSystem.getInstance()?.getActiveDialogue()) {
+        this._renderAdventureDialogue();
+      } else {
+        this.closeDialogue();
+      }
+      return;
+    }
+
     const currentStep = missionEngine.getCurrentStep(this.currentMissionId);
     if (!currentStep) return;
 
@@ -254,7 +287,28 @@ export class NpcDialogueSystem extends createSystem({
     }
     this.activeNpcId = null;
     this.isCompletedState = false;
+    this.isAdventureDialogue = false;
     CinematicCameraSystem.getInstance()?.exitConversationFraming();
+  }
+
+  private _renderAdventureDialogue(): void {
+    const dialogue = AdventureMissionSystem.getInstance()?.getActiveDialogue();
+    if (!dialogue) return;
+    this.nameEl?.setProperties({ text: dialogue.characterName } as never);
+    this.roleEl?.setProperties({ text: dialogue.characterRole } as never);
+    this.promptEl?.setProperties({
+      text: dialogue.culturalNote ? `${dialogue.speech}\n\n${dialogue.culturalNote}` : dialogue.speech,
+    } as never);
+    this.feedbackContainer?.setProperties({ display: 'none' });
+    this.continueBtn?.setProperties({ display: 'none' });
+    this.activeChoiceIds = dialogue.choices.map((choice) => choice.id);
+    const containers = [this.choiceAContainer, this.choiceBContainer, this.choiceCContainer];
+    const labels = [this.choiceAText, this.choiceBText, this.choiceCText];
+    for (let index = 0; index < containers.length; index++) {
+      const choice = dialogue.choices[index];
+      containers[index]?.setProperties({ display: choice ? 'flex' : 'none' });
+      if (choice) labels[index]?.setProperties({ text: `${String.fromCharCode(65 + index)}: ${choice.text}` } as never);
+    }
   }
 
   private _handleContinue(): void {
@@ -278,7 +332,7 @@ export class NpcDialogueSystem extends createSystem({
       missionEngine.completeMission(this.currentMissionId);
       this._showCompletionState();
       // Synchronize gameShell
-      gameShell.render();
+      void import('./game/game-shell.js').then(({ gameShell }) => gameShell.render());
     }
   }
 

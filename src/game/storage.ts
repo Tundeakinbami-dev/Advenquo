@@ -12,6 +12,8 @@ import type {
   SkillMastery,
   CulturePassport,
   ActiveMissionState,
+  AdventureProgress,
+  ExplorationMode,
 } from './types.js';
 
 const STORAGE_KEY = 'advenquo_save_state_v1';
@@ -58,6 +60,8 @@ export function createInitialState(): GameSaveState {
     skills: createDefaultSkills(),
     passport: createDefaultPassport(),
     activeMission: null,
+    adventureProgress: null,
+    explorationMode: 'free_exploration',
     selectedDestinationId: 'nigeria',
     selectedDistrictId: 'isale_eko',
     activeSpatialEncounterId: null,
@@ -212,6 +216,18 @@ export class GameStorage {
   public setActiveMission(missionState: ActiveMissionState | null): void {
     const state = this.getState();
     state.activeMission = missionState;
+    this.save(state);
+  }
+
+  public setAdventureProgress(progress: AdventureProgress | null): void {
+    const state = this.getState();
+    state.adventureProgress = progress;
+    this.save(state);
+  }
+
+  public setExplorationMode(mode: ExplorationMode): void {
+    const state = this.getState();
+    state.explorationMode = mode;
     this.save(state);
   }
 
