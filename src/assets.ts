@@ -84,6 +84,50 @@ export default defineAssets({
   'interactive-door': buildInteractiveDoor(),
   'moving-pedestrian': buildMovingPedestrian(),
 
+  // Licensed scenery: original Kenney Nature Kit GLBs (CC0).
+  // Source hashes and license: public/assets/third-party/kenney-nature/.
+  'scenery-palm-tall': {
+    url: publicAssetUrl('assets/third-party/kenney-nature/tree_palmDetailedTall.glb'),
+    type: AssetType.GLTF,
+    name: 'Courtyard Palm — Tall',
+  },
+  'scenery-palm-short': {
+    url: publicAssetUrl('assets/third-party/kenney-nature/tree_palmDetailedShort.glb'),
+    type: AssetType.GLTF,
+    name: 'Courtyard Palm — Short',
+  },
+  'scenery-bush': {
+    url: publicAssetUrl('assets/third-party/kenney-nature/plant_bushDetailed.glb'),
+    type: AssetType.GLTF,
+    name: 'Courtyard Shrub',
+  },
+  'scenery-grass': {
+    url: publicAssetUrl('assets/third-party/kenney-nature/grass_large.glb'),
+    type: AssetType.GLTF,
+    name: 'Courtyard Grass',
+  },
+  'scenery-rock': {
+    url: publicAssetUrl('assets/third-party/kenney-nature/rock_smallA.glb'),
+    type: AssetType.GLTF,
+    name: 'Courtyard Rock',
+  },
+  'scenery-flat-rock': {
+    url: publicAssetUrl('assets/third-party/kenney-nature/rock_smallFlatA.glb'),
+    type: AssetType.GLTF,
+    name: 'Courtyard Flat Rock',
+  },
+
+  'scenery-bench': {
+    url: publicAssetUrl('assets/third-party/kenney-furniture/bench.glb'),
+    type: AssetType.GLTF,
+    name: 'Courtyard Wooden Bench',
+  },
+  'scenery-potted-plant': {
+    url: publicAssetUrl('assets/third-party/kenney-furniture/pottedPlant.glb'),
+    type: AssetType.GLTF,
+    name: 'Veranda Potted Plant',
+  },
+
   // ── 1. Traditional Nigerian Market (Ìsàlẹ̀ Èkó) ───────────────────────────
   'market-ground': buildMarketGround(),
   'courtyard-veranda': buildCourtyardVeranda(),
