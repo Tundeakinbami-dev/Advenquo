@@ -31,6 +31,9 @@ export class CinematicCameraSystem extends createSystem({}) {
   private currentLookTarget = new Vector3();
   private targetLookTarget = new Vector3();
   private scratchVec = new Vector3();
+  private savedExplorationCameraPosition = new Vector3();
+  private hasSavedExplorationPose = false;
+  private restoringExplorationPose = false;
 
   // Head bob state
   private bobElapsed = 0;
@@ -66,6 +69,18 @@ export class CinematicCameraSystem extends createSystem({}) {
     npcName: string,
     npcHeight = 1.68,
   ): void {
+    const camera = this.world.camera;
+    if (camera instanceof PerspectiveCamera) {
+      // Camera transforms are local to the persistent player rig. Save that
+      // local pose so closing dialogue can return to first-person correctly.
+      this.savedExplorationCameraPosition.copy(camera.position);
+      this.hasSavedExplorationPose = true;
+      camera.updateWorldMatrix(true, false);
+      camera.getWorldPosition(this.currentCamPos);
+      camera.getWorldDirection(this.scratchVec);
+      this.currentLookTarget.copy(this.currentCamPos).addScaledVector(this.scratchVec, 4);
+    }
+    this.restoringExplorationPose = false;
     this.mode = 'conversation';
     this.dialogueTargetName = npcName;
     this.dialogueTargetPos.copy(npcWorldPos);
@@ -83,6 +98,10 @@ export class CinematicCameraSystem extends createSystem({}) {
       npcWorldPos.y + npcHeight - 0.15,
       npcWorldPos.z + 1.65,
     );
+    if (camera?.parent) {
+      camera.parent.updateWorldMatrix(true, false);
+      camera.parent.worldToLocal(this.targetCamPos);
+    }
 
     this.transitionAlpha = 0.0;
   }
@@ -93,6 +112,7 @@ export class CinematicCameraSystem extends createSystem({}) {
   public exitConversationFraming(): void {
     this.mode = 'exploration';
     this.transitionAlpha = 0.0;
+    this.restoringExplorationPose = this.hasSavedExplorationPose;
   }
 
   /**
@@ -121,6 +141,15 @@ export class CinematicCameraSystem extends createSystem({}) {
       camera.position.lerp(this.targetCamPos, smoothT * 0.15);
       this.currentLookTarget.lerp(this.targetLookTarget, smoothT * 0.2);
       camera.lookAt(this.currentLookTarget);
+    } else if (this.restoringExplorationPose) {
+      this.transitionAlpha = Math.min(1.0, this.transitionAlpha + delta * 3.2);
+      if (this.transitionAlpha >= 1.0) {
+        camera.position.copy(this.savedExplorationCameraPosition);
+        this.restoringExplorationPose = false;
+        this.hasSavedExplorationPose = false;
+      } else {
+        camera.position.lerp(this.savedExplorationCameraPosition, Math.min(1, delta * 8));
+      }
     } else {
       // Exploration Mode: Add natural walking head-bob
       if (this.isMoving) {
