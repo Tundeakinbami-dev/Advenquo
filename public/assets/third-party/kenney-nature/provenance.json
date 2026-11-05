@@ -1,0 +1,49 @@
+{
+  "source": "https://opengameart.org/content/nature-kit",
+  "creatorPage": "https://kenney.nl/assets/nature-kit",
+  "download": "https://opengameart.org/sites/default/files/Nature%20Kit%20%282.1%29.zip",
+  "sha256": "fa7974a0d342bfe63c38664ba9f8ec1a4aab8ea25f099bdc56870e33588c4d9d",
+  "creator": "Kenney",
+  "pack": "Nature Kit 2.1",
+  "license": "CC0-1.0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "files": [
+    {
+      "file": "tree_palmDetailedTall.glb",
+      "archivePath": "Models/GLTF format/tree_palmDetailedTall.glb",
+      "sha256": "2cbea0f9621cde884c63a7b4ad787bda1d051fa27ef3c66b9f2b65328dc53683",
+      "bytes": 28204
+    },
+    {
+      "file": "tree_palmDetailedShort.glb",
+      "archivePath": "Models/GLTF format/tree_palmDetailedShort.glb",
+      "sha256": "bc1013aaacca3bdd116ad1cded4f9499f008fe3056e760f3238be05aa21ff9f2",
+      "bytes": 28212
+    },
+    {
+      "file": "plant_bushDetailed.glb",
+      "archivePath": "Models/GLTF format/plant_bushDetailed.glb",
+      "sha256": "2e0487020d68ccf664435db9d829c78ae00e6d2785ee3ec10b9f89cc70a10406",
+      "bytes": 10172
+    },
+    {
+      "file": "grass_large.glb",
+      "archivePath": "Models/GLTF format/grass_large.glb",
+      "sha256": "af49a595624abca7249824eeefb944d4baf974abeeb5b16110d175da3563d6cd",
+      "bytes": 18504
+    },
+    {
+      "file": "rock_smallA.glb",
+      "archivePath": "Models/GLTF format/rock_smallA.glb",
+      "sha256": "df9fff9d711e61370e8df0caa2514c89b8f8a8dc6c6fafaf4eb2ec79c5ae07c1",
+      "bytes": 3044
+    },
+    {
+      "file": "rock_smallFlatA.glb",
+      "archivePath": "Models/GLTF format/rock_smallFlatA.glb",
+      "sha256": "40ceafacfaabb0f04f93688fd8696c1464c65512bef219e1459c1f238cbbbe21",
+      "bytes": 3300
+    }
+  ],
+  "modifications": "None. Original GLB bytes; scene transforms set scale in meters."
+}
