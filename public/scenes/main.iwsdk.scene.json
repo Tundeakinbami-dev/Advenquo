@@ -646,6 +646,798 @@
           "isDiscovered": false
         }
       }
+    },
+    {
+      "id": "courtyard-palm-west",
+      "name": "Courtyard Palm West",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-palm-tall",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          -5.5,
+          0.14,
+          -4.2
+        ],
+        "rotationDeg": [
+          0,
+          20,
+          0
+        ],
+        "scale": [
+          2.8,
+          2.8,
+          2.8
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-palm-east",
+      "name": "Courtyard Palm East",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-palm-tall",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          5.5,
+          0.15,
+          -3.8
+        ],
+        "rotationDeg": [
+          0,
+          -25,
+          0
+        ],
+        "scale": [
+          3.0,
+          3.0,
+          3.0
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-palm-southwest",
+      "name": "Courtyard Palm Southwest",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-palm-short",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          -5.8,
+          0.135,
+          3.8
+        ],
+        "rotationDeg": [
+          0,
+          50,
+          0
+        ],
+        "scale": [
+          2.7,
+          2.7,
+          2.7
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-palm-southeast",
+      "name": "Courtyard Palm Southeast",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-palm-short",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          5.6,
+          0.125,
+          2.6
+        ],
+        "rotationDeg": [
+          0,
+          -40,
+          0
+        ],
+        "scale": [
+          2.5,
+          2.5,
+          2.5
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-shrub-west",
+      "name": "Courtyard Shrub West",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-bush",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          -5.0,
+          0.08,
+          -4.25
+        ],
+        "rotationDeg": [
+          0,
+          15,
+          0
+        ],
+        "scale": [
+          1.6,
+          1.6,
+          1.6
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-shrub-east",
+      "name": "Courtyard Shrub East",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-bush",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          5.0,
+          0.09,
+          -3.9
+        ],
+        "rotationDeg": [
+          0,
+          70,
+          0
+        ],
+        "scale": [
+          1.8,
+          1.8,
+          1.8
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-shrub-west-gate",
+      "name": "Courtyard Shrub West Gate",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-bush",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          -5.9,
+          0.07,
+          3.1
+        ],
+        "rotationDeg": [
+          0,
+          30,
+          0
+        ],
+        "scale": [
+          1.4,
+          1.4,
+          1.4
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-shrub-east-gate",
+      "name": "Courtyard Shrub East Gate",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-bush",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          5.7,
+          0.08,
+          3.5
+        ],
+        "rotationDeg": [
+          0,
+          55,
+          0
+        ],
+        "scale": [
+          1.6,
+          1.6,
+          1.6
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-rock-west",
+      "name": "Courtyard Rock West",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-rock",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          -5.15,
+          0.1,
+          -3.5
+        ],
+        "rotationDeg": [
+          0,
+          35,
+          0
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-rock-east",
+      "name": "Courtyard Rock East",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-rock",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          5.05,
+          0.08,
+          -3.1
+        ],
+        "rotationDeg": [
+          0,
+          115,
+          0
+        ],
+        "scale": [
+          1.6,
+          1.6,
+          1.6
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-flat-rock-west",
+      "name": "Courtyard Flat Rock West",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-flat-rock",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          -4.7,
+          0.09,
+          -3.8
+        ],
+        "rotationDeg": [
+          0,
+          25,
+          0
+        ],
+        "scale": [
+          1.8,
+          1.8,
+          1.8
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-flat-rock-east",
+      "name": "Courtyard Flat Rock East",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-flat-rock",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          4.65,
+          0.1,
+          -3.5
+        ],
+        "rotationDeg": [
+          0,
+          80,
+          0
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-grass-west-a",
+      "name": "Courtyard Grass West A",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-grass",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          -5.5,
+          0.06,
+          -3.25
+        ],
+        "rotationDeg": [
+          0,
+          20,
+          0
+        ],
+        "scale": [
+          1.2,
+          1.2,
+          1.2
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-grass-west-b",
+      "name": "Courtyard Grass West B",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-grass",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          -4.7,
+          0.05,
+          -4.7
+        ],
+        "rotationDeg": [
+          0,
+          60,
+          0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-grass-east-a",
+      "name": "Courtyard Grass East A",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-grass",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          5.7,
+          0.06,
+          -3.0
+        ],
+        "rotationDeg": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          1.2,
+          1.2,
+          1.2
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-grass-east-b",
+      "name": "Courtyard Grass East B",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-grass",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          4.9,
+          0.055,
+          -4.6
+        ],
+        "rotationDeg": [
+          0,
+          35,
+          0
+        ],
+        "scale": [
+          1.1,
+          1.1,
+          1.1
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-grass-gate-west",
+      "name": "Courtyard Grass Gate West",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-grass",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          -5.15,
+          0.06,
+          3.8
+        ],
+        "rotationDeg": [
+          0,
+          45,
+          0
+        ],
+        "scale": [
+          1.2,
+          1.2,
+          1.2
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-grass-gate-east",
+      "name": "Courtyard Grass Gate East",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-grass",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          5.0,
+          0.06,
+          3.2
+        ],
+        "rotationDeg": [
+          0,
+          130,
+          0
+        ],
+        "scale": [
+          1.2,
+          1.2,
+          1.2
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-bench-west",
+      "name": "Courtyard Bench West",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-bench",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          -4.8,
+          0,
+          -2.5
+        ],
+        "rotationDeg": [
+          0,
+          90,
+          0
+        ],
+        "scale": [
+          2,
+          2,
+          2
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-bench-east",
+      "name": "Courtyard Bench East",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-bench",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          4.8,
+          0,
+          0.7
+        ],
+        "rotationDeg": [
+          0,
+          -90,
+          0
+        ],
+        "scale": [
+          2,
+          2,
+          2
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-pot-west",
+      "name": "Courtyard Pot West",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-potted-plant",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          -3.6,
+          0,
+          -4.4
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1.3,
+          1.3,
+          1.3
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "courtyard-pot-east",
+      "name": "Courtyard Pot East",
+      "content": {
+        "type": "asset",
+        "asset": "scenery-potted-plant",
+        "castShadow": false,
+        "receiveShadow": true
+      },
+      "transform": {
+        "position": [
+          3.6,
+          0,
+          -4.4
+        ],
+        "rotationDeg": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1.3,
+          1.3,
+          1.3
+        ]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": false
+        }
+      }
     }
   ]
 }
