@@ -18,6 +18,8 @@ import {
   Object3D,
 } from '@iwsdk/core';
 
+import { pbrMaterialSystem } from '../systems/pbr-material-system.js';
+
 function buildGroundTexture(): CanvasTexture | null {
   if (typeof document === 'undefined') return null;
 
@@ -51,11 +53,11 @@ function buildGroundTexture(): CanvasTexture | null {
     }
   }
 
-  // Fine noise / sand grain overlay
+  // Deterministic fine noise / sand grain overlay
   ctx.fillStyle = 'rgba(215, 175, 140, 0.12)';
   for (let i = 0; i < 400; i++) {
-    const px = Math.floor(Math.random() * size);
-    const py = Math.floor(Math.random() * size);
+    const px = ((i * 137) ^ (i * 257)) % size;
+    const py = ((i * 193) ^ (i * 389)) % size;
     ctx.fillRect(px, py, 2, 2);
   }
 
@@ -71,11 +73,13 @@ export function buildMarketGround(): Object3D {
   root.name = 'MarketGround';
 
   const texture = buildGroundTexture();
+  const normalMap = pbrMaterialSystem.generateProceduralNormalMap('laterite_soil');
   const groundMat = new MeshStandardMaterial({
     color: 0x8d6e63,
-    roughness: 0.95,
+    roughness: 0.92,
     metalness: 0.05,
     map: texture,
+    normalMap,
   });
 
   // Main walkable ground slab (16m × 0.2m × 16m)

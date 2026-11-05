@@ -152,6 +152,80 @@ export const DESTINATIONS: Destination[] = [
           },
         ],
       },
+      {
+        id: 'heritage_iga',
+        destinationId: 'nigeria',
+        name: 'Iga Idunganran Royal Palace',
+        localName: 'Iga Idúngànrán (Oba of Lagos Citadel)',
+        tagline: 'Imperial Seat of Yoruba Monarchs, Benin Bronzes & Ancestral Shrines',
+        description:
+          'The ancient ceremonial citadel and palace compound of the Oba of Lagos, founded in the 15th century. Majestic hand-carved iroko columns depict royal guardians, bronze leopard sculptures flank the throne dais, and sacred courtyards preserve royal rites.',
+        theme: 'Sacred Royalty & Architectural Heritage',
+        availableMissionIds: ['mission_royal_coronation_heritage', 'mission_yoruba_greetings'],
+        pointsOfInterest: [
+          {
+            id: 'poi_throne_dais',
+            name: 'Royal Audience Throne & Benin Bronze Leopards',
+            localName: 'Àtẹ Ọba Èkó',
+            type: 'heritage',
+            coordinates: [45, 30],
+            description:
+              'The elevated crimson-velvet throne dais guarded by two authentic cast Benin bronze leopards, symbolizing royal dignity and eternal vigilance.',
+            culturalSignificance:
+              'The Oba exercises spiritual stewardship and communal mediation from this seat, preserving uninterrupted lineage traditions dating to King Ado.',
+            spatialAssetId: 'palace-throne-dais',
+          },
+          {
+            id: 'poi_iroko_pillars',
+            name: 'Ancestral Carved Iroko Columns',
+            localName: 'Òpó Igi Ìrókò Àwọn Baba Nlá',
+            type: 'heritage',
+            coordinates: [50, 60],
+            description:
+              'Towering columns of seasoned hardwood carved with genealogical reliefs of warriors, priestesses, and sacred animals supporting the palace architrave.',
+            culturalSignificance:
+              'Yoruba architecture acts as living historical archive; the carvings encode treaty triumphs, lineage genealogies, and sacred proverbs.',
+            spatialAssetId: 'palace-pillars',
+          },
+        ],
+      },
+      {
+        id: 'beach_waterfront',
+        destinationId: 'nigeria',
+        name: 'Tarkwa Bay Coastal Haven',
+        localName: 'Etíkun Tarkwa (Atlantic Haven & Breakwater)',
+        tagline: 'Atlantic Surf, Coconut Groves, Artisanal Canoes & Marine Ecology',
+        description:
+          'A serene, sheltered coastal island paradise at the entrance of Lagos harbour. Golden sands meet rolling Atlantic waves beneath rustling coconut palms, where artisanal fishermen pull colorful wooden canoes onto the shore and marine conservationists monitor coastal ecosystems.',
+        theme: 'Coastal Culture, Marine Ecology & Traditions',
+        availableMissionIds: ['mission_coastal_ecology_tarkwa', 'mission_blue_line_future'],
+        pointsOfInterest: [
+          {
+            id: 'poi_fishing_canoes',
+            name: 'Artisanal Wooden Canoe Fleet',
+            localName: 'Ọkọ̀ Ojú Omi Àwọn Apẹja',
+            type: 'craft',
+            coordinates: [35, 45],
+            description:
+              'Hand-hewn timber fishing canoes painted in vibrant coastal blues and reds, fitted with traditional nets and carved wooden steering paddles.',
+            culturalSignificance:
+              'Generations of coastal families sustain sustainable net fishing, navigating the Atlantic swell and Lagos lagoon waterways.',
+            spatialAssetId: 'fishing-canoe',
+          },
+          {
+            id: 'poi_coconut_grove',
+            name: 'Tarkwa Bay Coconut Palms & Cabanas',
+            localName: 'Agbon Etí Omi',
+            type: 'craft',
+            coordinates: [65, 55],
+            description:
+              'Sheltered palm groves and bamboo-thatched cabanas overlooking the Atlantic breakwater where travellers and locals gather to rest.',
+            culturalSignificance:
+              'The coconut palm represents hospitality, nourishment, and environmental coastal protection against Atlantic tidal surges.',
+            spatialAssetId: 'coconut-palm',
+          },
+        ],
+      },
     ],
   },
   {

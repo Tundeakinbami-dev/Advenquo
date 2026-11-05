@@ -43,7 +43,7 @@ describe('Primary Player Journey Integration', () => {
     const nigeria = DESTINATIONS.find((d) => d.id === 'nigeria');
     assert.ok(nigeria);
     assert.strictEqual(nigeria.status, 'PLAYABLE');
-    assert.strictEqual(nigeria.districts.length, 2);
+    assert.strictEqual(nigeria.districts.length, 4);
 
     storage.setSelectedLocation('nigeria', 'isale_eko');
     assert.strictEqual(storage.getState().selectedDestinationId, 'nigeria');

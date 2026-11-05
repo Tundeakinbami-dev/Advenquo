@@ -24,7 +24,7 @@ describe('VR Experience & Immersive Systems', () => {
 
   it('provides all 5 required core mission types for the VR adventure', () => {
     const missions = missionEngine.getAllMissions();
-    assert.strictEqual(missions.length, 5);
+    assert.ok(missions.length >= 5, 'Must contain all 5 required core mission types');
 
     const missionA = missions.find((m) => m.id === 'mission_yoruba_greetings');
     const missionB = missions.find((m) => m.id === 'mission_adire_purchase');

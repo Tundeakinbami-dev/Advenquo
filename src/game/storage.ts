@@ -219,7 +219,28 @@ export class GameStorage {
     const state = this.getState();
     state.selectedDestinationId = destinationId;
     state.selectedDistrictId = districtId;
+    state.selectedLocationId = districtId;
     this.save(state);
+  }
+
+  public recordDiscovery(locationId: string, category: string): void {
+    const state = this.getState();
+    const stampId = `stamp_${locationId}`;
+    const exists = state.passport.stamps.some((s) => s.id === stampId);
+    if (!exists) {
+      state.passport.stamps.push({
+        id: stampId,
+        name: locationId.replace(/_/g, ' ').toUpperCase(),
+        category: 'geography',
+        destinationId: 'nigeria',
+        districtId: locationId,
+        icon: '📍',
+        unlockedAt: new Date().toISOString(),
+        description: `Discovered and explored ${locationId}`,
+      });
+      this.addXp(50);
+      this.save(state);
+    }
   }
 
   public setActiveSpatialEncounter(encounterId: string | null): void {

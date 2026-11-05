@@ -24,6 +24,7 @@ import {
 import { NPCCharacter } from './npc-component.js';
 import { missionEngine } from './game/mission-engine.js';
 import { gameShell } from './game/game-shell.js';
+import { CinematicCameraSystem } from './systems/cinematic-camera-system.js';
 
 export class NpcDialogueSystem extends createSystem({
   npcs: { required: [NPCCharacter] },
@@ -52,6 +53,7 @@ export class NpcDialogueSystem extends createSystem({
   // Active step dialogue choices cache
   private activeChoiceIds: string[] = [];
   private canAdvance = false;
+  private isCompletedState = false;
 
   init(): void {
     // 1. Locate dialogue panel
@@ -135,12 +137,19 @@ export class NpcDialogueSystem extends createSystem({
 
   public startDialogueWithNPC(npcId: string, npcPosition: Vector3): void {
     this.activeNpcId = npcId;
+    CinematicCameraSystem.getInstance()?.enterConversationFraming(npcPosition, npcId);
 
     // Match NPC to current active or relevant mission
     if (npcId === 'baba-adewale') {
       this.currentMissionId = 'mission_yoruba_greetings';
     } else if (npcId === 'iya-alaso') {
-      this.currentMissionId = 'mission_adire_purchase';
+      this.currentMissionId = 'mission_adire_drum_investigation';
+    } else if (npcId === 'driver-kehinde') {
+      this.currentMissionId = 'mission_lagoon_transit';
+    } else if (npcId === 'chief-eletu') {
+      this.currentMissionId = 'mission_yoruba_greetings';
+    } else if (npcId === 'captain-femi') {
+      this.currentMissionId = 'mission_blue_line_future';
     }
 
     // Ensure mission is started in missionEngine
@@ -239,7 +248,21 @@ export class NpcDialogueSystem extends createSystem({
     }
   }
 
+  public closeDialogue(): void {
+    if (this.dialoguePanel) {
+      this.dialoguePanel.visible = false;
+    }
+    this.activeNpcId = null;
+    this.isCompletedState = false;
+    CinematicCameraSystem.getInstance()?.exitConversationFraming();
+  }
+
   private _handleContinue(): void {
+    if (this.isCompletedState) {
+      this.closeDialogue();
+      return;
+    }
+
     if (!this.canAdvance) {
       // Allow retry by hiding feedback
       this.feedbackContainer?.setProperties({ display: 'none' });
@@ -260,6 +283,7 @@ export class NpcDialogueSystem extends createSystem({
   }
 
   private _showCompletionState(): void {
+    this.isCompletedState = true;
     this.promptEl?.setProperties({
       text: 'Ẹ ṣeé púpọ̀! (Thank you very much!) You have completed this dialogue with deep cultural respect and understanding.',
     } as never);
