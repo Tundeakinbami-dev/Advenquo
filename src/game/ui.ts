@@ -1948,6 +1948,12 @@ export function renderSpatialHUD(
           <button class="btn-gold" id="btn-spatial-weather" style="font-size: 13px; padding: 7px 12px; gap: 6px; background: rgba(56, 189, 248, 0.25); border: 1px solid #38bdf8; color: #e0f2fe;">
             🌦️ Weather
           </button>
+          <button class="btn-gold" id="btn-spatial-jump" title="Trigger Standing Jump (J key)" style="font-size: 13px; padding: 7px 12px; gap: 6px; background: rgba(168, 85, 247, 0.25); border: 1px solid #c084fc; color: #f3e8ff;">
+            🦘 Jump (J)
+          </button>
+          <button class="btn-gold" id="btn-spatial-pain" title="Trigger Pain Gesture (P key)" style="font-size: 13px; padding: 7px 12px; gap: 6px; background: rgba(239, 68, 68, 0.25); border: 1px solid #f87171; color: #fee2e2;">
+            ⚡ Pain (P)
+          </button>
           <button class="btn-gold" id="btn-spatial-return" style="font-size: 13px; padding: 7px 12px; gap: 6px;">
             📍 District
           </button>
@@ -2135,6 +2141,18 @@ export function renderSpatialHUD(
       `${newWeather.description}`,
       3.0,
     );
+  });
+
+  root.querySelector('#btn-spatial-jump')?.addEventListener('click', () => {
+    void import('../character-animation-system.js').then(({ CharacterAnimationSystem }) => {
+      CharacterAnimationSystem.getInstance()?.triggerJump('npc_tobi');
+    });
+  });
+
+  root.querySelector('#btn-spatial-pain')?.addEventListener('click', () => {
+    void import('../character-animation-system.js').then(({ CharacterAnimationSystem }) => {
+      CharacterAnimationSystem.getInstance()?.triggerPain('npc_tobi');
+    });
   });
 
   const satchelBtn = root.querySelector('#btn-adventure-satchel');

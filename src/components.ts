@@ -9,6 +9,7 @@ import { defineComponents } from '@iwsdk/core';
 import { CulturalObject } from './cultural-object-component.js';
 import { NPCCharacter } from './npc-component.js';
 import { NPCMovement } from './npc-movement-component.js';
+import { CharacterAnimation } from './character-animation-component.js';
 import { AdventureState, AdventureItem } from './adventure-mission-component.js';
 import {
   LocationAnchor,
@@ -21,6 +22,7 @@ export default defineComponents([
   CulturalObject,
   NPCCharacter,
   NPCMovement,
+  CharacterAnimation,
   AdventureState,
   AdventureItem,
   LocationAnchor,
