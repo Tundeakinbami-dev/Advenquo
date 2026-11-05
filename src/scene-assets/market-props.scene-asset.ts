@@ -13,10 +13,15 @@
 import {
   BoxGeometry,
   CylinderGeometry,
+  Euler,
+  InstancedMesh,
+  Matrix4,
   Mesh,
   MeshStandardMaterial,
   Object3D,
+  Quaternion,
   SphereGeometry,
+  Vector3,
 } from '@iwsdk/core';
 
 export function buildMarketProps(): Object3D {
@@ -107,12 +112,19 @@ export function buildMarketProps(): Object3D {
 
   // Yams inside basket 1
   const yamGeo = new CylinderGeometry(0.045, 0.04, 0.35, 8);
+  const yams = new InstancedMesh(yamGeo, yamMat, 3);
+  yams.name = 'YamsInBasket';
   for (let i = 0; i < 3; i++) {
-    const yam = new Mesh(yamGeo, yamMat);
-    yam.position.set(0.08 + (i - 1) * 0.08, 0.2, 0.35);
-    yam.rotation.set(0.2, (i - 1) * 0.3, 0.1);
-    root.add(yam);
+    const transform = new Matrix4().compose(
+      new Vector3(0.08 + (i - 1) * 0.08, 0.2, 0.35),
+      new Quaternion().setFromEuler(new Euler(0.2, (i - 1) * 0.3, 0.1)),
+      new Vector3(1, 1, 1),
+    );
+    yams.setMatrixAt(i, transform);
   }
+  yams.instanceMatrix.needsUpdate = true;
+  yams.computeBoundingSphere();
+  root.add(yams);
 
   // Second basket with ripe plantains
   const basket2 = new Mesh(basketGeo, basketMat);
@@ -120,12 +132,19 @@ export function buildMarketProps(): Object3D {
   root.add(basket2);
 
   const plantainGeo = new CylinderGeometry(0.025, 0.02, 0.26, 8);
+  const plantains = new InstancedMesh(plantainGeo, plantainMat, 4);
+  plantains.name = 'PlantainsInBasket';
   for (let j = 0; j < 4; j++) {
-    const plantain = new Mesh(plantainGeo, plantainMat);
-    plantain.position.set(-0.35 + (j - 1.5) * 0.06, 0.21, 0.4);
-    plantain.rotation.set(0.15, (j - 1.5) * 0.25, 0.3);
-    root.add(plantain);
+    const transform = new Matrix4().compose(
+      new Vector3(-0.35 + (j - 1.5) * 0.06, 0.21, 0.4),
+      new Quaternion().setFromEuler(new Euler(0.15, (j - 1.5) * 0.25, 0.3)),
+      new Vector3(1, 1, 1),
+    );
+    plantains.setMatrixAt(j, transform);
   }
+  plantains.instanceMatrix.needsUpdate = true;
+  plantains.computeBoundingSphere();
+  root.add(plantains);
 
   // 4. Brass Balance Scale on table / counter
   const scaleBaseGeo = new CylinderGeometry(0.06, 0.08, 0.02, 10);

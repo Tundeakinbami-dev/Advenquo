@@ -35,7 +35,6 @@ export class PlayerControllerSystem extends createSystem({}) {
   // Position & Orientation
   private currentYaw = 0; // Radians
   private currentPitch = 0; // Radians (clamped -60° to +60°)
-  private playerHeight = 1.6; // Meters
   private walkSpeed = 3.6; // Meters/sec
 
   // Boundary limits (Ìsàlẹ̀ Èkó courtyard)
@@ -86,10 +85,10 @@ export class PlayerControllerSystem extends createSystem({}) {
       }),
     );
 
-    // Initial desktop camera position
     const camera = this.world.camera;
     if (camera instanceof PerspectiveCamera) {
-      camera.position.set(0, this.playerHeight, 1.2);
+      // The camera is a child of the persistent player rig. Keep its local
+      // headset/eye offset intact and move the player origin below.
       this.currentYaw = 0;
       this.currentPitch = 0;
     }
@@ -107,30 +106,55 @@ export class PlayerControllerSystem extends createSystem({}) {
       this.keysDown[e.key.toLowerCase()] = false;
     };
 
+    const onWindowBlur = (): void => {
+      this.keysDown = {};
+      this.isPointerDragging = false;
+      this.touchMoveActive = false;
+      this.touchMoveDeltaX = 0;
+      this.touchMoveDeltaY = 0;
+      this.touchLookActive = false;
+    };
+
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', onWindowBlur);
 
     this.cleanupFuncs.push(() => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', onWindowBlur);
     });
 
     // Attach Mouse Look Drag Listeners to Scene Container
     const sceneContainer = document.getElementById('scene-container');
     if (sceneContainer) {
       const onMouseDown = (e: MouseEvent): void => {
-        // Left click drag or right click drag to look around
-        if (e.button === 0 || e.button === 2) {
+        // Pointer lock gives desktop FPS-style look; retain drag-look as a
+        // fallback for browsers that decline the request.
+        if (e.button === 0 && !this.isImmersiveXR) {
           this.isPointerDragging = true;
           this.lastPointerX = e.clientX;
           this.lastPointerY = e.clientY;
+          if (document.pointerLockElement !== sceneContainer) {
+            // Embedded preview frames may reject pointer lock. Keep the
+            // drag-look fallback active and consume that expected rejection.
+            try {
+              const lockRequest = sceneContainer.requestPointerLock?.();
+              if (lockRequest) void lockRequest.catch(() => {
+                this.isPointerDragging = true;
+              });
+            } catch {
+              this.isPointerDragging = true;
+            }
+          }
         }
       };
 
       const onMouseMove = (e: MouseEvent): void => {
-        if (!this.isPointerDragging || this.isImmersiveXR) return;
-        const dx = e.clientX - this.lastPointerX;
-        const dy = e.clientY - this.lastPointerY;
+        if ((!this.isPointerDragging && document.pointerLockElement !== sceneContainer) || this.isImmersiveXR) return;
+        const locked = document.pointerLockElement === sceneContainer;
+        const dx = locked ? e.movementX : e.clientX - this.lastPointerX;
+        const dy = locked ? e.movementY : e.clientY - this.lastPointerY;
         this.lastPointerX = e.clientX;
         this.lastPointerY = e.clientY;
 
@@ -147,14 +171,26 @@ export class PlayerControllerSystem extends createSystem({}) {
         this.isPointerDragging = false;
       };
 
+      const onPointerLockChange = (): void => {
+        this.isPointerDragging = document.pointerLockElement === sceneContainer;
+      };
+
       sceneContainer.addEventListener('mousedown', onMouseDown);
       window.addEventListener('mousemove', onMouseMove);
       window.addEventListener('mouseup', onMouseUp);
+      document.addEventListener('pointerlockchange', onPointerLockChange);
+      const onEscape = (e: KeyboardEvent): void => {
+        if (e.key === 'Escape' && document.pointerLockElement === sceneContainer) document.exitPointerLock();
+      };
+      window.addEventListener('keydown', onEscape);
 
       this.cleanupFuncs.push(() => {
         sceneContainer.removeEventListener('mousedown', onMouseDown);
         window.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('pointerlockchange', onPointerLockChange);
+        window.removeEventListener('keydown', onEscape);
+        if (document.pointerLockElement === sceneContainer) document.exitPointerLock();
       });
 
       // Touch controls for Mobile Exploration
@@ -252,12 +288,15 @@ export class PlayerControllerSystem extends createSystem({}) {
   public teleportTo(x: number, z: number, yaw = 0): void {
     const camera = this.world.camera;
     if (camera) {
-      camera.position.set(x, this.playerHeight, z);
       this.currentYaw = yaw;
       this.currentPitch = 0;
+      camera.rotation.order = 'YXZ';
+      camera.rotation.x = 0;
+      camera.rotation.y = 0;
     }
     if (this.player) {
       this.player.position.set(x, 0, z);
+      this.player.rotation.y = yaw;
     }
   }
 
@@ -307,8 +346,10 @@ export class PlayerControllerSystem extends createSystem({}) {
         this.moveVelocity.addScaledVector(this.rightVec, moveX);
         this.moveVelocity.normalize().multiplyScalar(activeSpeed * Math.min(delta, 0.1));
 
-        let newX = camera.position.x + this.moveVelocity.x;
-        let newZ = camera.position.z + this.moveVelocity.z;
+        const player = this.player;
+        if (!player) return;
+        let newX = player.position.x + this.moveVelocity.x;
+        let newZ = player.position.z + this.moveVelocity.z;
 
         // Dynamic perimeter clamp
         newX = Math.max(this.minX, Math.min(this.maxX, newX));
@@ -319,30 +360,25 @@ export class PlayerControllerSystem extends createSystem({}) {
           newZ = -4.1;
         }
 
-        camera.position.x = newX;
-        camera.position.z = newZ;
-        camera.position.y = this.playerHeight;
+        player.position.x = newX;
+        player.position.z = newZ;
       }
 
       // 4. Update camera rotation from yaw & pitch (unless cinematic camera is active)
       if (!cinematicCam || cinematicCam.getMode() === 'exploration') {
+        if (this.player) this.player.rotation.y = this.currentYaw;
         camera.rotation.order = 'YXZ';
-        camera.rotation.y = this.currentYaw;
+        camera.rotation.y = 0;
         camera.rotation.x = this.currentPitch;
         camera.rotation.z = 0;
-      }
-
-      // Keep this.player.position synchronized for proximity systems
-      if (this.player) {
-        this.player.position.set(camera.position.x, 0, camera.position.z);
       }
     }
 
     // 5. Update distance and bearing to active objective target
     if (this.activeTarget) {
       const currentPos = this.isImmersiveXR && this.player?.head
-        ? this.player.head.position
-        : camera.position;
+        ? this.player.head.getWorldPosition(this.targetVec)
+        : this.player?.position ?? camera.position;
 
       const dx = this.activeTarget.position.x - currentPos.x;
       const dz = this.activeTarget.position.z - currentPos.z;

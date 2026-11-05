@@ -102,7 +102,8 @@ export class WorldStreamingSystem extends createSystem({
 
     // Initial environment setup after a frame to let scene graph finish mounting
     setTimeout(() => {
-      this.applyActiveLocationState(this.currentLocationId, false);
+      // Apply that location's world-space player spawn and movement bounds too.
+      this.applyActiveLocationState(this.currentLocationId, true);
     }, 100);
 
     // React to player interacting with doors, vehicles, landmarks, artifacts, and travel props
