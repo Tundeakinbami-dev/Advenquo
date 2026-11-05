@@ -1,0 +1,23 @@
+{
+  "source": "https://kenney.nl/assets/furniture-kit",
+  "sha256": "e67652d0932cee41683f74711c03d3e192a2af9979ef8e6b237711f5482d46b0",
+  "creator": "Kenney",
+  "pack": "Furniture Kit 2.0",
+  "license": "CC0-1.0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "files": [
+    {
+      "file": "bench.glb",
+      "archivePath": "Models/GLTF format/bench.glb",
+      "sha256": "ba05a6d23a5a5a44da016757632070e47ff7587ce10e2f6d6d52328b4cf5489b",
+      "bytes": 10756
+    },
+    {
+      "file": "pottedPlant.glb",
+      "archivePath": "Models/GLTF format/pottedPlant.glb",
+      "sha256": "5b760eda2766f75fda36b2c5df652a1662f82981ef64cd8fa7fe7bcd386b3a15",
+      "bytes": 7576
+    }
+  ],
+  "modifications": "None. Original GLB bytes; scene transforms set scale in meters."
+}
