@@ -16,6 +16,7 @@
 import {
   createSystem,
   Pressed,
+  Quaternion,
   UIKit,
   UIKitMLAsset,
   Vector3,
@@ -36,6 +37,9 @@ export class NpcDialogueSystem extends createSystem({
   private currentMissionId: string = 'mission_yoruba_greetings';
   private tempVec = new Vector3();
   private playerPos = new Vector3();
+  private playerForward = new Vector3();
+  private cameraPos = new Vector3();
+  private playerRotation = new Quaternion();
 
   // Cached UIKit elements
   private nameEl: UIKit.Text | null = null;
@@ -108,7 +112,8 @@ export class NpcDialogueSystem extends createSystem({
       this.queries.interacted.subscribe('qualify', (entity) => {
         const charId = entity.getValue(NPCCharacter, 'characterId');
         if (charId && entity.object3D) {
-          this.startDialogueWithNPC(charId, entity.object3D.position);
+          entity.object3D.getWorldPosition(this.tempVec);
+          this.startDialogueWithNPC(charId, this.tempVec);
         }
       }),
     );
@@ -120,10 +125,15 @@ export class NpcDialogueSystem extends createSystem({
     if (!this.dialoguePanel?.visible) {
       if (this.player?.head) {
         this.player.head.getWorldPosition(this.playerPos);
+      } else if (this.world.camera) {
+        // In desktop mode the persistent player rig may not expose an XR head
+        // pose. The camera's world position is the correct viewer position;
+        // its local position cannot be compared directly with NPC world poses.
+        this.world.camera.getWorldPosition(this.playerPos);
       }
 
       for (const entity of this.queries.npcs.entities) {
-        if (!entity.object3D) continue;
+        if (!entity.object3D || !entity.object3D.visible) continue;
         const characterId = entity.getValue(NPCCharacter, 'characterId');
         // Tobi and Iyá are opened by an intentional ray/pinch or the nearby-action prompt.
         // Other NPCs retain the existing proximity dialogue behavior.
@@ -132,7 +142,18 @@ export class NpcDialogueSystem extends createSystem({
         const dist = this.playerPos.distanceTo(this.tempVec);
         const radius = entity.getValue(NPCCharacter, 'interactionRadius') || 3.0;
 
-        if (dist <= radius) {
+        // Keep the boundary exclusive: the initial player origin can sit
+        // exactly on an NPC's radius before WorldStreaming applies the saved
+        // location spawn a moment after startup.
+        if (dist < radius - 0.05) {
+          if (this.world.camera) {
+            this.world.camera.getWorldQuaternion(this.playerRotation);
+            this.playerForward.set(0, 0, -1).applyQuaternion(this.playerRotation);
+          } else {
+            this.playerForward.set(0, 0, -1);
+          }
+          this.tempVec.sub(this.playerPos).normalize();
+          if (this.playerForward.dot(this.tempVec) < 0.5) continue;
           const charId = entity.getValue(NPCCharacter, 'characterId');
           // Start dialogue when in close range
           if (charId && charId !== this.activeNpcId) {
@@ -146,6 +167,9 @@ export class NpcDialogueSystem extends createSystem({
 
   public startDialogueWithNPC(npcId: string, npcPosition: Vector3): void {
     this.activeNpcId = npcId;
+    const cameraTarget = this.world.camera
+      ? this.world.camera.getWorldPosition(this.cameraPos)
+      : this.playerPos;
     CinematicCameraSystem.getInstance()?.enterConversationFraming(npcPosition, npcId);
 
     if (npcId === 'npc_tobi' || npcId === 'iya-alaso') {
@@ -154,7 +178,7 @@ export class NpcDialogueSystem extends createSystem({
       this._renderAdventureDialogue();
       if (this.dialoguePanel) {
         this.dialoguePanel.position.set(npcPosition.x + 0.65, Math.max(1.2, npcPosition.y + 0.6), npcPosition.z + 0.2);
-        this.dialoguePanel.lookAt(this.playerPos.x || 0, this.dialoguePanel.position.y, this.playerPos.z || 0);
+        this.dialoguePanel.lookAt(cameraTarget.x, this.dialoguePanel.position.y, cameraTarget.z);
         this.dialoguePanel.visible = true;
       }
       return;
@@ -188,9 +212,9 @@ export class NpcDialogueSystem extends createSystem({
         npcPosition.z + 0.2,
       );
       this.dialoguePanel.lookAt(
-        this.playerPos.x || 0,
+        cameraTarget.x,
         this.dialoguePanel.position.y,
-        this.playerPos.z || 0,
+        cameraTarget.z,
       );
       this.dialoguePanel.visible = true;
     }
