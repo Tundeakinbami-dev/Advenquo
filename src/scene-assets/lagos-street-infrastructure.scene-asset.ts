@@ -72,16 +72,19 @@ export function buildLagosStreetInfrastructure(): Object3D {
 
   // 1. Asphalt Roadway & Laterite Dirt Shoulder (6.0m x 2.4m)
   const roadSlab = new Mesh(new BoxGeometry(6.0, 0.08, 1.8), asphaltMat);
+  roadSlab.name = 'AsphaltRoadway';
   roadSlab.position.set(0, 0.04, 0.6);
   root.add(roadSlab);
 
   const lateriteShoulder = new Mesh(new BoxGeometry(6.0, 0.06, 0.8), soilMat);
+  lateriteShoulder.name = 'LateriteShoulder';
   lateriteShoulder.position.set(0, 0.03, -0.6);
   root.add(lateriteShoulder);
 
   // 2. Concrete Stormwater Drainage Gutter (along Z = -0.15)
   // Trench floor
   const trenchFloor = new Mesh(new BoxGeometry(6.0, 0.04, 0.45), concreteMat);
+  trenchFloor.name = 'StormwaterDrainGutter';
   trenchFloor.position.set(0, -0.15, -0.15);
   root.add(trenchFloor);
 
@@ -99,6 +102,7 @@ export function buildLagosStreetInfrastructure(): Object3D {
   const bridgeSlabGeo = new BoxGeometry(0.85, 0.08, 0.55);
   for (let bx of [-1.8, 1.8]) {
     const bridge = new Mesh(bridgeSlabGeo, concreteMat);
+    bridge.name = 'PedestrianCrossingSlabs';
     bridge.position.set(bx, 0.08, -0.15);
     root.add(bridge);
   }
@@ -108,12 +112,14 @@ export function buildLagosStreetInfrastructure(): Object3D {
   for (let i = 0; i < 10; i++) {
     const curbMat = i % 2 === 0 ? curbBlackMat : curbWhiteMat;
     const curb = new Mesh(curbGeo, curbMat);
+    curb.name = 'PaintedSafetyCurbs';
     curb.position.set(-2.25 + i * 0.5, 0.1, 0.12);
     root.add(curb);
   }
 
   // 4. Concrete Utility Power Pole (NEPA / EKEDC Pole) at X = -2.2, Z = -0.7
   const pole = new Mesh(new CylinderGeometry(0.12, 0.16, 5.8, 12), concreteMat);
+  pole.name = 'ConcretePowerPole';
   pole.position.set(-2.2, 2.9, -0.7);
   root.add(pole);
 
@@ -150,6 +156,7 @@ export function buildLagosStreetInfrastructure(): Object3D {
 
   // 5. Pole-Mounted Distribution Transformer
   const transformer = new Mesh(new BoxGeometry(0.5, 0.65, 0.45), transformerMat);
+  transformer.name = 'StepDownTransformer';
   transformer.position.set(-2.2, 3.4, -0.42);
   root.add(transformer);
 
@@ -163,6 +170,7 @@ export function buildLagosStreetInfrastructure(): Object3D {
 
   // 6. Tropical Roadside Neem Tree (Dogonyaro) at X = 2.4, Z = -0.7
   const treeTrunk = new Mesh(new CylinderGeometry(0.08, 0.12, 2.4, 8), pbrMaterialSystem.getMaterial('african_iroko'));
+  treeTrunk.name = 'RoadsideVegetation';
   treeTrunk.position.set(2.4, 1.2, -0.7);
   root.add(treeTrunk);
 

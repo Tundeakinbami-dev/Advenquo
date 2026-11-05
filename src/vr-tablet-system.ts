@@ -28,6 +28,7 @@ import { storage } from './game/storage.js';
 import { getAllCombinedStories } from './game/world-now-data.js';
 import { WorldStreamingSystem } from './world-streaming-system.js';
 import { PlayerControllerSystem } from './player-controller-system.js';
+import { loadYorubaFontFamilies } from './yoruba-font.js';
 
 export class VRTabletSystem extends createSystem({}) {
   private tablet: UIKitMLAsset | null = null;
@@ -92,6 +93,9 @@ export class VRTabletSystem extends createSystem({}) {
   init(): void {
     this.tablet = this.world.getSceneObject<UIKitMLAsset>('vr-nav-tablet') ?? null;
     if (!this.tablet) return;
+    void loadYorubaFontFamilies().then((fontFamilies) => {
+      this.tablet?.document.rootElement.setProperties({ fontFamilies } as never);
+    }).catch((error: unknown) => console.error('Yoruba font atlas failed to load:', error));
 
     // Cache views
     this.viewMissions = this.tablet.getElementById('view-missions');

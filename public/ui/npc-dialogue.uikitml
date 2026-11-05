@@ -6,9 +6,22 @@
   UIKit units are centimetres: 44cm wide. Faces +Z.
 -->
 <style>
+  @font-face {
+    font-family: 'Noto Sans Yoruba';
+    src: url('../fonts/NotoSans-Yoruba.ttf') format('truetype');
+    font-weight: 400;
+  }
+
+  @font-face {
+    font-family: 'Noto Sans Yoruba';
+    src: url('../fonts/NotoSans-Yoruba.ttf') format('truetype');
+    font-weight: 700;
+  }
+
   .root {
     flex-direction: column;
     width: 44;
+    font-family: 'Noto Sans Yoruba';
     background-color: rgba(14, 20, 44, 0.95);
     border-radius: 1.4;
     border-width: 0.15;
@@ -35,6 +48,7 @@
   .speaker-name {
     font-size: 2.2;
     font-weight: 700;
+    font-family: 'Noto Sans Yoruba';
     color: #f5d370;
   }
 
@@ -96,6 +110,7 @@
   .choice-label {
     font-size: 1.45;
     font-weight: 600;
+    font-family: 'Noto Sans Yoruba';
     color: #e0f2fe;
     line-height: 1.35;
   }

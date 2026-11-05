@@ -13,19 +13,16 @@
  */
 
 import {
-  AudioUtils,
   createSystem,
   Pressed,
-  RayInteractable,
   Vector3,
 } from '@iwsdk/core';
 
 import { NPCCharacter } from './npc-component.js';
 import { CulturalObject } from './cultural-object-component.js';
-import { AdventureItem, AdventureState } from './adventure-mission-component.js';
+import { AdventureItem } from './adventure-mission-component.js';
 import { PlayerControllerSystem } from './player-controller-system.js';
 import { storage } from './game/storage.js';
-import { gameShell } from './game/game-shell.js';
 
 export interface AdventureInventoryItem {
   id: string;
@@ -46,6 +43,8 @@ export type AdventureStage =
   | 'STAGE_7_RETURN_DELIVERY'
   | 'STAGE_8_COMPLETED';
 
+const ADVENTURE_ID = 'mission_nigerian_market_discovery';
+
 export interface ActiveObjectiveInfo {
   stage: AdventureStage;
   title: string;
@@ -61,6 +60,7 @@ export class AdventureMissionSystem extends createSystem({
   adventureItems: { required: [AdventureItem] },
   interactedItems: { required: [AdventureItem, Pressed] },
   interactedNpcs: { required: [NPCCharacter, Pressed] },
+  interactedCulturalObjects: { required: [CulturalObject, Pressed] },
 }) {
   private static instance: AdventureMissionSystem | null = null;
   public static getInstance(): AdventureMissionSystem | null {
@@ -70,11 +70,13 @@ export class AdventureMissionSystem extends createSystem({
   // Active Adventure State
   private currentStage: AdventureStage = 'STAGE_0_ARRIVE';
   private inventory: AdventureInventoryItem[] = [];
+  private decisionId: string | null = null;
   private playerPos = new Vector3();
   private tempVec = new Vector3();
 
   // Known target positions in Ìsàlẹ̀ Èkó courtyard scene
   private readonly POS_IYA_ALASO = new Vector3(2.65, 0, -1.4);
+  private readonly POS_TOBI = new Vector3(-4.8, 0, 0.5);
   private readonly POS_BABA_ADEWALE = new Vector3(0, 0, -3.8);
   private readonly POS_DRUM_CIRCLE = new Vector3(-2.11, 0.76, -1.45);
   private readonly POS_CLUE_SCROLL = new Vector3(-1.48, 0.74, -1.35);
@@ -93,6 +95,7 @@ export class AdventureMissionSystem extends createSystem({
       yorubaTerm?: string;
       isCorrect: boolean;
       advanceStage?: AdventureStage;
+      decisionId?: string;
     }>;
   } | null = null;
 
@@ -102,9 +105,26 @@ export class AdventureMissionSystem extends createSystem({
   init(): void {
     AdventureMissionSystem.instance = this;
 
-    // Load any saved inventory
     const savedState = storage.getState();
-    if (savedState.activeMission?.completedStepIds.includes('step_collected_crate')) {
+    const savedAdventure = savedState.adventureProgress;
+    this.currentStage = savedAdventure?.missionId === ADVENTURE_ID && this._isAdventureStage(savedAdventure.stage)
+      ? savedAdventure.stage
+      : savedState.activeMission?.completedStepIds.includes('step_collected_crate')
+        ? 'STAGE_7_RETURN_DELIVERY'
+        : 'STAGE_0_ARRIVE';
+    this.decisionId = savedAdventure?.decisionId ?? null;
+
+    if (savedAdventure?.inventoryItemIds.includes('delivery_manifest')) {
+      this.inventory.push({
+        id: 'delivery_manifest',
+        name: 'Carriers Guild Receipt #104',
+        icon: '📜',
+        description: 'Receipt #104 traces the missing market consignment to the storage shed behind the district signpost.',
+        acquiredAt: new Date().toISOString(),
+      });
+      this._markAdventureItemCollected('delivery_manifest');
+    }
+    if (savedAdventure?.inventoryItemIds.includes('missing_goods_crate') || this.currentStage === 'STAGE_7_RETURN_DELIVERY') {
       this.inventory.push({
         id: 'missing_goods_crate',
         name: 'Abeokuta Indigo Dye Crate',
@@ -112,10 +132,11 @@ export class AdventureMissionSystem extends createSystem({
         description: 'Rare Abeokuta indigo cakes bound in raffia twine with an artisan wax seal.',
         acquiredAt: new Date().toISOString(),
       });
-      this.currentStage = 'STAGE_7_RETURN_DELIVERY';
-    } else {
-      this.currentStage = 'STAGE_1_TALK_TRADER';
+      this._markAdventureItemCollected('missing_goods_crate');
+      const recoveredCrate = this.world.getSceneObject('missing-goods-crate');
+      if (recoveredCrate) recoveredCrate.visible = false;
     }
+    this._saveProgress();
 
     this._updateNavigationTarget();
 
@@ -132,6 +153,18 @@ export class AdventureMissionSystem extends createSystem({
       this.queries.interactedNpcs.subscribe('qualify', (entity) => {
         const charId = entity.getValue(NPCCharacter, 'characterId');
         if (charId) this.interactWithNPC(charId);
+      }),
+    );
+
+    // The talking drum is an environmental clue as well as a cultural artifact.
+    this.cleanupFuncs.push(
+      this.queries.interactedCulturalObjects.subscribe('qualify', (entity) => {
+        if (
+          this.currentStage === 'STAGE_3_DRUM_CIRCLE' &&
+          entity.getValue(CulturalObject, 'factId') === 'talking-drum'
+        ) {
+          this._discoverDrumClue();
+        }
       }),
     );
 
@@ -168,11 +201,20 @@ export class AdventureMissionSystem extends createSystem({
   public getActiveObjective(): ActiveObjectiveInfo {
     switch (this.currentStage) {
       case 'STAGE_0_ARRIVE':
+        return {
+          stage: this.currentStage,
+          title: 'The Missing Shipment',
+          instruction: 'Meet Tobi, the junior architect coordinating a sustainable market-side construction project.',
+          targetName: 'Tobi Adeleke (Project Architect)',
+          targetPosition: this.POS_TOBI,
+          targetRadius: 3.2,
+          hint: 'Find Tobi by the market approach and ask which construction materials have gone missing.',
+        };
       case 'STAGE_1_TALK_TRADER':
         return {
           stage: this.currentStage,
           title: 'The Missing Shipment',
-          instruction: 'Speak with trader Iyá Aláso at the Adire textile stall.',
+          instruction: 'Ask Iyá Aláso what she knows about the shipment Tobi arranged through the market guild.',
           targetName: 'Iyá Aláso (Textile Stall)',
           targetPosition: this.POS_IYA_ALASO,
           targetRadius: 3.2,
@@ -227,12 +269,12 @@ export class AdventureMissionSystem extends createSystem({
       case 'STAGE_7_RETURN_DELIVERY':
         return {
           stage: this.currentStage,
-          title: 'Restoring the Harvest',
-          instruction: 'Return the Abeokuta indigo dye crate to Iyá Aláso at her textile stall.',
-          targetName: 'Iyá Aláso (Adire Stall)',
-          targetPosition: this.POS_IYA_ALASO,
+          title: 'Resolve the Site Delay',
+          instruction: 'Bring the recovered consignment to Tobi and decide how the crew should proceed.',
+          targetName: 'Tobi Adeleke (Project Architect)',
+          targetPosition: this.POS_TOBI,
           targetRadius: 3.2,
-          hint: 'Carry the recovered crate back to Iyá Aláso so the morning dye vats can be prepared.',
+          hint: 'Return the shipment to Tobi at the market approach. He is waiting to plan the construction work safely.',
         };
 
       case 'STAGE_8_COMPLETED':
@@ -240,7 +282,7 @@ export class AdventureMissionSystem extends createSystem({
         return {
           stage: 'STAGE_8_COMPLETED',
           title: 'Adventure Completed!',
-          instruction: 'You have solved the mystery of the missing delivery and earned trader respect.',
+          instruction: 'You traced the shipment with Tobi and Iyá Aláso, then agreed on a plan for the delayed construction work.',
           targetName: 'Courtyard Center',
           targetPosition: new Vector3(0, 0, 0),
           targetRadius: 5.0,
@@ -254,7 +296,7 @@ export class AdventureMissionSystem extends createSystem({
    */
   public interactWithItem(itemId: string): void {
     if (itemId === 'delivery_manifest') {
-      if (this.currentStage === 'STAGE_3_DRUM_CIRCLE' || this.currentStage === 'STAGE_4_INSPECT_CLUE') {
+      if (this.currentStage === 'STAGE_4_INSPECT_CLUE') {
         // Collect clue receipt
         if (!this.inventory.some((i) => i.id === 'delivery_manifest')) {
           this.inventory.push({
@@ -266,14 +308,14 @@ export class AdventureMissionSystem extends createSystem({
           });
         }
 
+        this._markAdventureItemCollected(itemId);
+
         this._showToast(
           '📜 Clue Discovered: Delivery Receipt #104',
           'Note reads: "Dye crate dropped off near the storage shed behind the district signpost."',
         );
 
-        this.currentStage = 'STAGE_5_LOCATE_GOODS';
-        this._updateNavigationTarget();
-        this._refreshHUD();
+        this._setStage('STAGE_5_LOCATE_GOODS');
       } else {
         this._showToast('📜 Carrier Manifest', 'A guild receipt mentioning Abeokuta indigo dye.');
       }
@@ -292,6 +334,7 @@ export class AdventureMissionSystem extends createSystem({
             acquiredAt: new Date().toISOString(),
           });
         }
+        this._markAdventureItemCollected(itemId);
 
         // Hide the world mesh or show collected feedback
         const crateSceneObj = this.world.getSceneObject('missing-goods-crate');
@@ -301,12 +344,10 @@ export class AdventureMissionSystem extends createSystem({
 
         this._showToast(
           '📦 Mission Item Collected!',
-          'Abeokuta Indigo Dye Crate added to inventory! Return it to Iyá Aláso.',
+          'Abeokuta Indigo Dye Crate added to inventory! Take it back to Tobi to plan the delayed installation.',
         );
 
-        this.currentStage = 'STAGE_7_RETURN_DELIVERY';
-        this._updateNavigationTarget();
-        this._refreshHUD();
+        this._setStage('STAGE_7_RETURN_DELIVERY');
       } else {
         this._showToast('📦 Storage Crate', 'A heavy wooden crate sealed with an Abeokuta dye emblem.');
       }
@@ -314,58 +355,92 @@ export class AdventureMissionSystem extends createSystem({
   }
 
   /**
-   * Evaluates interactions with NPCs (Iyá Aláso, Baba Adéwálé).
+   * Route all characters through the same active shipment adventure.
    */
   public interactWithNPC(characterId: string): void {
-    if (characterId === 'iya-alaso') {
-      if (this.currentStage === 'STAGE_0_ARRIVE' || this.currentStage === 'STAGE_1_TALK_TRADER') {
+    if (characterId === 'npc_tobi') {
+      if (this.currentStage === 'STAGE_0_ARRIVE') {
+        this.activeDialogueData = {
+          characterName: 'Tobi Adeleke',
+          characterRole: '27-year-old Junior Architect · Ìsàlẹ̀ Èkó Market Project',
+          speech: 'Ẹ káàárọ̀. I’m Tobi, a junior architect coordinating the market-side shade workshop. Our crew is waiting on a consignment of Abeokuta indigo and Adire stencils for the locally made cooling screens. The carrier missed the handoff, and the installation is holding up the build. Iyá Aláso knows the market guild routes—could you ask what she has heard?',
+          culturalNote: 'Tobi is sourcing locally made shade screens as part of a passive-cooling design, so the market shipment is tied directly to his construction schedule.',
+          choices: [
+            { id: 'tobi_help', text: 'I’ll ask Iyá Aláso and trace the guild receipt.', feedback: 'Tobi shares the consignment number: 104. “Thank you. Let’s find where it was left before we decide how to adjust the crew’s schedule.”', isCorrect: true, advanceStage: 'STAGE_1_TALK_TRADER' },
+            { id: 'tobi_plan', text: 'Let’s locate the shipment first, then choose a safe schedule.', feedback: 'Tobi nods. “Agreed. I’ll hold the shade-screen installation until we know what arrived.”', isCorrect: true, advanceStage: 'STAGE_1_TALK_TRADER' },
+            { id: 'tobi_later', text: 'I’d like to explore the market first; I may come back to this.', feedback: '“Of course. Take your time in the market; I’ll be here if you decide to help.”', isCorrect: true },
+          ],
+        };
+        this._refreshHUD();
+      } else if (this.currentStage === 'STAGE_7_RETURN_DELIVERY') {
+        this.activeDialogueData = {
+          characterName: 'Tobi Adeleke',
+          characterRole: 'Junior Architect · Project Materials Lead',
+          speech: 'You found the consignment. The crew can finish the cooling screens, but we need to decide how to handle the delay. We can pause the affected work and verify every stencil and indigo batch before installation, or use the verified stock already on site for the first screens while Iyá prepares the recovered shipment for the next section.',
+          culturalNote: 'Both plans keep unverified materials out of the structure. The choice changes which part of the project waits and what the crew checks next.',
+          choices: [
+            { id: 'decision_verify_first', decisionId: 'verify-first', text: 'Pause this section; verify the recovered batch before fitting it.', feedback: 'Tobi records a short hold on this section and checks each piece with Iyá. The installation slips, but the full screen set is traceable before it is fitted.', isCorrect: true, advanceStage: 'STAGE_8_COMPLETED' },
+            { id: 'decision_phase_work', decisionId: 'phase-with-verified-stock', text: 'Use only the verified stock already on site; reserve this shipment for the next section.', feedback: 'Tobi keeps the crew on the first section using verified stock, then schedules Iyá’s recovered batch for the next one. The build moves forward while the new materials remain separate until checked.', isCorrect: true, advanceStage: 'STAGE_8_COMPLETED' },
+          ],
+        };
+        this._refreshHUD();
+      } else if (this.currentStage === 'STAGE_8_COMPLETED') {
+        this.activeDialogueData = {
+          characterName: 'Tobi Adeleke', characterRole: 'Junior Architect',
+          speech: this.decisionId === 'verify-first'
+            ? 'The batch is checked and the crew has a clear revised schedule. Thank you for helping me keep the installation accountable.'
+            : 'The first screens are moving ahead with verified stock, and the recovered consignment is booked for the next section. Thank you for helping us keep the work moving safely.',
+          choices: [{ id: 'tobi_done', text: 'I’m glad we could make a plan together.', feedback: 'Tobi thanks you and invites you to explore the completed market shade screens as the project progresses.', isCorrect: true }],
+        };
+        this._refreshHUD();
+      } else {
+        const clue = this.inventory.some((item) => item.id === 'delivery_manifest')
+          ? 'The receipt points to the storage shed. Bring the recovered shipment back here and we can agree on a safe work plan.'
+          : this.inventory.some((item) => item.id === 'drum-clue')
+            ? 'You noticed the carrier stopped at the drum circle. Check the guild receipt beside it; the drop-off is written there.'
+            : 'Iyá can trace the guild route. Once we know where the carrier left the consignment, I can plan the work around verified materials.';
+        this.activeDialogueData = {
+          characterName: 'Tobi Adeleke', characterRole: 'Junior Architect · Market Construction Project', speech: clue,
+          choices: [{ id: 'tobi_continue', text: 'I’ll keep following the shipment trail.', feedback: 'Tobi points you back to the current objective.', isCorrect: true }],
+        };
+        this._refreshHUD();
+      }
+    } else if (characterId === 'iya-alaso') {
+      if (this.currentStage === 'STAGE_1_TALK_TRADER') {
         this.activeDialogueData = {
           characterName: 'Iyá Aláso',
           characterRole: 'Master Adire Artisan & Market Trader',
           speech:
-            'Ẹ kárọ̀ o, ọmọ mi! (Good morning, my child!) Thank goodness you stopped by. My morning indigo dye vats are steaming, but the carrier who was transporting our Abeokuta dye consignment has not arrived. Can you help me find it?',
+            'Ẹ káàárọ̀, ọmọ mi. Tobi sent you? I prepared the indigo and stencils for his cooling screens, but the guild carrier never checked in. I remember the courier stopping at the talking-drum table before the receipt was dropped. The receipt should tell us where the crate was left.',
           culturalNote:
-            'Adire fabric requires natural indigo (ẹlú) leaves mixed with fermented ash water. Missing a morning dye cycle ruins the entire batch.',
+            'Iyá Aláso is an experienced Adire artisan. She prepared the locally sourced finishings and recognizes the guild carrier’s route.',
           choices: [
             {
-              id: 'c1',
-              text: 'Ẹ jọ̀wọ́, Iyá! Where should I begin searching?',
+              id: 'iya_trace',
+              text: 'I’ll inspect the drum table, then read the guild receipt.',
               feedback:
-                'Iyá Aláso nods warmly: "Ẹ jọ̀wọ́ shows noble home training! Ask Baba Adéwálé on the palace veranda. Every carrier passes his stool."',
+                'Iyá nods. “That is where the carrier paused. Look for the receipt beside the drum; it records the handoff.”',
               yorubaTerm: 'Ẹ jọ̀wọ́ (Please / Courtesy)',
               isCorrect: true,
               advanceStage: 'STAGE_2_SEEK_ELDER',
             },
             {
-              id: 'c2',
-              text: 'Don’t worry, I’ll search the whole market for you!',
+              id: 'iya_ask_guild',
+              text: 'Could you tell me which guild handled the consignment?',
               feedback:
-                'She smiles: "Your enthusiasm is wonderful! But an explorer needs direction: speak with Baba Adéwálé on the veranda first."',
+                '“The carriers’ guild recorded it as consignment 104. The drum table is your best lead; the receipt will show the drop-off.”',
               isCorrect: true,
-              advanceStage: 'STAGE_2_SEEK_ELDER',
+              advanceStage: 'STAGE_3_DRUM_CIRCLE',
             },
           ],
         };
         this._refreshHUD();
-      } else if (this.currentStage === 'STAGE_7_RETURN_DELIVERY') {
-        // Player returns with the crate!
+      } else if (this.currentStage === 'STAGE_0_ARRIVE') {
         this.activeDialogueData = {
-          characterName: 'Iyá Aláso',
-          characterRole: 'Master Adire Artisan & Market Trader',
-          speech:
-            'Oṣé púpọ̀! (Thank you so very much!) You found our Abeokuta indigo crate! The vats will be saved and our apprentice has learned his lesson. You carry the true spirit of Ọmọlúwàbí (noble character)!',
-          culturalNote:
-            'In Yoruba philosophy, Ọmọlúwàbí signifies courage, humility, respect for community, and integrity.',
+          characterName: 'Iyá Aláso', characterRole: 'Master Adire Artisan & Market Trader',
+          speech: 'Tobi is coordinating the cooling-screen build near the market. He asked me to prepare the locally made finishings. Please meet him first so he can give you the consignment number and the reason the work is waiting.',
           choices: [
-            {
-              id: 'finish',
-              text: 'A dúpẹ́, Iyá Aláso! (We give thanks!) It was an honor to help.',
-              feedback:
-                'Iyá Aláso hands you an artisan indigo sash and awards your explorer passport with the Ọmọlúwàbí stamp!',
-              yorubaTerm: 'A dúpẹ́ (We give thanks)',
-              isCorrect: true,
-              advanceStage: 'STAGE_8_COMPLETED',
-            },
+            { id: 'iya_meet_tobi', text: 'I’ll meet Tobi and ask for the details.', feedback: 'Iyá points toward the market approach, where Tobi is waiting.', isCorrect: true },
           ],
         };
         this._refreshHUD();
@@ -373,13 +448,18 @@ export class AdventureMissionSystem extends createSystem({
         this.activeDialogueData = {
           characterName: 'Iyá Aláso',
           characterRole: 'Master Adire Artisan & Market Trader',
-          speech:
-            'Have you spoken with Baba Adéwálé yet? He sits by the veranda and watches the carriers arrive.',
+          speech: this.currentStage === 'STAGE_7_RETURN_DELIVERY'
+            ? 'The recovered materials are ready for Tobi. He is waiting to decide how to reschedule the cooling-screen work.'
+            : this.inventory.some((item) => item.id === 'delivery_manifest')
+              ? 'That receipt confirms the crate is at the storage shed behind the district signpost. Please bring it back to Tobi so he can plan the installation.'
+              : this.inventory.some((item) => item.id === 'drum-clue')
+                ? 'The carrier paused at the drum table. The guild receipt left beside it should name the drop-off point.'
+                : 'The drum guild table is the carrier’s last known stop. Check there for the guild receipt.',
           choices: [
             {
               id: 'ok',
-              text: 'I am on my way now, Iyá.',
-              feedback: 'Go well! May your steps find the path.',
+              text: 'I’ll follow the lead and return to Tobi.',
+              feedback: 'Iyá wishes you well and asks you to bring Tobi the receipt and shipment details.',
               isCorrect: true,
             },
           ],
@@ -445,12 +525,14 @@ export class AdventureMissionSystem extends createSystem({
     const choice = this.activeDialogueData.choices.find((c) => c.id === choiceId);
     if (!choice) return;
 
+    if (choice.decisionId) {
+      this.decisionId = choice.decisionId;
+    }
     if (choice.advanceStage) {
-      this.currentStage = choice.advanceStage;
-      this._updateNavigationTarget();
+      this._setStage(choice.advanceStage);
 
       if (this.currentStage === 'STAGE_8_COMPLETED') {
-        this._completeAdventure();
+        this._completeAdventure(choice.feedback);
       }
     }
 
@@ -475,6 +557,8 @@ export class AdventureMissionSystem extends createSystem({
     if (target && distance < (target.radius || 3.0)) {
       if (target.name.includes('Iyá Aláso')) {
         this.interactWithNPC('iya-alaso');
+      } else if (target.name.includes('Tobi')) {
+        this.interactWithNPC('npc_tobi');
       } else if (target.name.includes('Baba Adéwálé')) {
         this.interactWithNPC('baba-adewale');
       } else if (target.name.includes('Receipt') || target.name.includes('Manifest')) {
@@ -482,14 +566,7 @@ export class AdventureMissionSystem extends createSystem({
       } else if (target.name.includes('Crate') || target.name.includes('Dye')) {
         this.interactWithItem('missing_goods_crate');
       } else if (target.name.includes('Talking Drum')) {
-        // Drum inspection clue
-        this._showToast(
-          '🥁 Talking Drum Cadence',
-          'The master drummer points with his curved mallet: "The carrier dropped a receipt right by the calabash bowls!"',
-        );
-        this.currentStage = 'STAGE_4_INSPECT_CLUE';
-        this._updateNavigationTarget();
-        this._refreshHUD();
+        this._discoverDrumClue();
       }
     }
   }
@@ -506,7 +583,52 @@ export class AdventureMissionSystem extends createSystem({
     });
   }
 
-  private _completeAdventure(): void {
+  private _setStage(stage: AdventureStage): void {
+    this.currentStage = stage;
+    this._saveProgress();
+    this._updateNavigationTarget();
+    this._refreshHUD();
+  }
+
+  private _isAdventureStage(stage: string): stage is AdventureStage {
+    return [
+      'STAGE_0_ARRIVE', 'STAGE_1_TALK_TRADER', 'STAGE_2_SEEK_ELDER',
+      'STAGE_3_DRUM_CIRCLE', 'STAGE_4_INSPECT_CLUE', 'STAGE_5_LOCATE_GOODS',
+      'STAGE_6_COLLECT_GOODS', 'STAGE_7_RETURN_DELIVERY', 'STAGE_8_COMPLETED',
+    ].includes(stage);
+  }
+
+  private _markAdventureItemCollected(itemId: string): void {
+    for (const entity of this.queries.adventureItems.entities) {
+      if (entity.getValue(AdventureItem, 'itemId') === itemId) {
+        entity.setValue(AdventureItem, 'collected', true);
+      }
+    }
+  }
+
+  private _discoverDrumClue(): void {
+    if (this.currentStage !== 'STAGE_3_DRUM_CIRCLE') return;
+    if (!this.inventory.some((item) => item.id === 'drum-clue')) {
+      this.inventory.push({
+        id: 'drum-clue', name: 'Carrier’s Drum Signal', icon: '🥁',
+        description: 'The carrier stopped to hear the drum guild. A guild receipt nearby records where the consignment was left.',
+        acquiredAt: new Date().toISOString(),
+      });
+    }
+    this._setStage('STAGE_4_INSPECT_CLUE');
+    this._showToast('🥁 Clue noticed', 'The drum circle drew the carrier off route. Inspect the receipt beside the display table.');
+  }
+
+  private _saveProgress(): void {
+    storage.setAdventureProgress({
+      missionId: ADVENTURE_ID,
+      stage: this.currentStage,
+      decisionId: this.decisionId,
+      inventoryItemIds: this.inventory.map((item) => item.id),
+    });
+  }
+
+  private _completeAdventure(outcomeFeedback: string): void {
     const now = new Date().toISOString();
 
     // 1. Award Stamp
@@ -585,7 +707,7 @@ export class AdventureMissionSystem extends createSystem({
       title: 'Artisan Guilds and Trade Protocols of Ìsàlẹ̀ Èkó',
       category: 'Culture & Commerce',
       summary:
-        'Traditional Yoruba markets operate on sophisticated trade guilds, trust networks, and linguistic protocols where respect is the currency of exchange.',
+        `You helped Tobi and Iyá Aláso trace the missing cooling-screen shipment. ${outcomeFeedback}`,
       verifiedFact:
         'Abeokuta has been the epicenter of Adire indigo production since the 19th century, utilizing natural cassava starch (ẹ̀kọ) and wild indigo (Indigofera tinctoria).',
       sourceAttribution: 'Lagos State Ministry of Arts & Culture; Nigerian National Museum.',
@@ -593,7 +715,7 @@ export class AdventureMissionSystem extends createSystem({
     };
 
     // Save to storage
-    storage.recordMissionCompletion('mission_nigerian_market_discovery', stamp, vocab, journal);
+    storage.recordMissionCompletion(ADVENTURE_ID, stamp, vocab, journal);
     storage.advanceSkills({
       languageComprehension: 25,
       culturalInterpretation: 30,
@@ -607,9 +729,10 @@ export class AdventureMissionSystem extends createSystem({
       celebratePanel.visible = true;
     }
 
+    this._saveProgress();
     this._showToast(
-      '🏆 Mission Complete: Market Rescuer!',
-      '+250 XP earned! Stamp "Ọmọlúwàbí" & 6 Yoruba phrases unlocked in your Passport Journal!',
+      '🏆 Mission Complete: The Missing Shipment',
+      `+250 XP earned. ${this.decisionId === 'verify-first' ? 'The recovered batch will be checked before the delayed section resumes.' : 'The crew can proceed with verified stock while this consignment is reserved for the next section.'} Passport stamp and Yoruba vocabulary unlocked.`,
     );
   }
 
@@ -623,7 +746,7 @@ export class AdventureMissionSystem extends createSystem({
   }
 
   private _refreshHUD(): void {
-    gameShell.render();
+    void import('./game/game-shell.js').then(({ gameShell }) => gameShell.render());
   }
 
   update(delta: number): void {

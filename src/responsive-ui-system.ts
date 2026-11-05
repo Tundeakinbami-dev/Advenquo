@@ -23,7 +23,6 @@ import {
 } from '@iwsdk/core';
 
 import { CulturalObject } from './cultural-object-component.js';
-import { gameShell } from './game/game-shell.js';
 
 interface ArtefactMeta {
   title: string;
@@ -406,7 +405,7 @@ export class ResponsiveUISystem extends createSystem({
     if (counterEl) {
       counterEl.textContent = `${count} / ${total || 4} Discovered`;
     }
-    gameShell.updateSpatialDiscovery(count);
+    void import('./game/game-shell.js').then(({ gameShell }) => gameShell.updateSpatialDiscovery(count));
   }
 
   private _updateArtefactCardFound(factId: string): void {

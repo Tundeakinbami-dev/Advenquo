@@ -6,6 +6,7 @@
  */
 
 export type ChallengeLevel = 'explorer' | 'apprentice' | 'scholar';
+export type ExplorationMode = 'free_exploration' | 'adventure_mission';
 
 export type InterestTag = 'arts' | 'language' | 'geography' | 'history' | 'innovation' | 'ecology';
 
@@ -223,12 +224,22 @@ export interface ActiveMissionState {
   startedAt: string;
 }
 
+/** Story progress for the in-world market adventure, stored alongside the main save. */
+export interface AdventureProgress {
+  missionId: string;
+  stage: string;
+  decisionId: string | null;
+  inventoryItemIds: string[];
+}
+
 export interface GameSaveState {
   version: number;
   profile: PlayerProfile;
   skills: SkillMastery;
   passport: CulturePassport;
   activeMission: ActiveMissionState | null;
+  adventureProgress?: AdventureProgress | null;
+  explorationMode?: ExplorationMode;
   selectedDestinationId: string;
   selectedDistrictId: string;
   selectedLocationId?: string;
