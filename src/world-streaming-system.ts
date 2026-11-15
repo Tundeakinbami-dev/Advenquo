@@ -32,12 +32,16 @@ import {
 import { LocationAnchor, InteractiveDoor } from './location-component.js';
 import { CulturalObject } from './cultural-object-component.js';
 import { PlayerControllerSystem } from './player-controller-system.js';
+import { LocomotionComfortSystem } from './locomotion-comfort-system.js';
+import { VRTabletSystem } from './vr-tablet-system.js';
 import { PLAYABLE_LOCATIONS } from './world/location-data.js';
 import type { LocationDefinition } from './world/location-types.js';
 import { storage } from './game/storage.js';
 import { environmentManager } from './systems/environment-manager.js';
 import { interactionManager } from './systems/interaction-manager.js';
 import { discoveryManager } from './systems/discovery-manager.js';
+import { spatialAudioManager } from './audio/spatial-audio-manager.js';
+import type { EnvironmentLocationId } from './audio/types.js';
 
 export interface TravelTransitionEvent {
   fromLocationId: string;
@@ -167,13 +171,15 @@ export class WorldStreamingSystem extends createSystem({
     const travelTime = route?.travelTimeDesc || 'Arriving shortly';
     const scenicNote = route?.scenicNote || `Travelling to ${targetDef.name}`;
 
-    // Play chime sound cue
+    // Play chime sound cue & crossfade spatial audio soundscape
     for (const entity of this.queries.locationEntities.entities) {
       if (entity.getValue(LocationAnchor, 'locationId') === this.currentLocationId) {
         AudioUtils.play(entity);
         break;
       }
     }
+    spatialAudioManager.switchSoundscape(targetLocationId as EnvironmentLocationId, 1.2);
+    spatialAudioManager.playDiscoveryCue();
 
     // Trigger travel transition toast
     let methodIcon = '🚶';
@@ -240,12 +246,26 @@ export class WorldStreamingSystem extends createSystem({
         playerController.teleportTo(spawnX, spawnZ, spawnYawRad);
       }
 
+      // Update LocomotionComfortSystem boundaries so it does not clamp to market
+      const comfortSystem = this.world.getSystem(LocomotionComfortSystem);
+      if (comfortSystem && locDef.boundaryLimits) {
+        comfortSystem.setBoundaryLimits(
+          locDef.boundaryLimits.minX,
+          locDef.boundaryLimits.maxX,
+          locDef.boundaryLimits.minZ,
+          locDef.boundaryLimits.maxZ,
+        );
+      }
+
       // Update LocomotionSystem (WebXR / VR)
       this.tempSpawnVec.set(spawnX, 0, spawnZ);
       const locomotionSystem = this.world.getSystem(LocomotionSystem);
       if (locomotionSystem) {
         locomotionSystem.setPlayerPosition(this.tempSpawnVec);
       }
+
+      // Ensure VR Navigation Tablet is positioned in front of player at new destination
+      VRTabletSystem.getInstance()?.repositionInFrontOfPlayer();
     }
   }
 

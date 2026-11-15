@@ -49,3 +49,13 @@ export * from './player-journal-system.js';
 export * from './pbr-material-system.js';
 export * from './cinematic-camera-system.js';
 export * from './quality-profile-system.js';
+export * from './cinematic-lighting-system.js';
+export * from './vr-performance-monitor.js';
+export * from '../animation/character-model-loader.js';
+
+// Spatial Audio & Environmental Soundscape Systems
+export * from './spatial-audio-system.js';
+export * from '../audio/types.js';
+export * from '../audio/spatial-audio-manager.js';
+export * from '../audio/procedural-audio-engine.js';
+

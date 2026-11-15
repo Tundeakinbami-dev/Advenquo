@@ -2,14 +2,15 @@
  * Advenquo — Cinematic NPC Procedural Animation & Articulation System.
  *
  * Implements high-fidelity, naturalistic real-time animations for human NPCs:
- * - Multi-joint respiratory breathing (chest expansion and shoulder rise)
+ * - Multi-joint respiratory breathing (chest expansion, shoulder rise)
+ * - Natural standing posture with subtle weight shifting between feet
+ * - Procedural stochastic eyelid blinking (120ms dip every 3.2s - 5.5s)
+ * - Dialogue-triggered lip synchronization (mouth aperture & jaw articulation)
+ * - Conversational gesturing (expressive right arm, open-palm hand tilt, emphatic head nods)
  * - Articulated head & eye gaze tracking toward approaching player
- * - Conversational gesturing: when an NPC is engaged in dialogue (inDialogue: true),
- *   forearm and hand joints articulate natural speech gestures and emphasis pulses
- * - Periodic weight shifting and posture damping (natural living human presence)
- * - Smooth interpolation back to authored resting poses
+ * - Smooth return to authored neutral poses upon departure
  *
- * Frame-rate friendly: zero allocation in update(), deterministic performance.
+ * Performance: Zero allocation in update(delta), deterministic performance.
  */
 
 import {
@@ -24,9 +25,29 @@ interface ArticulatedNpcNodes {
   chest?: Object3D;
   neck?: Object3D;
   head?: Object3D;
+  rightArm?: Object3D;
   rightForearm?: Object3D;
+  rightHand?: Object3D;
   leftArm?: Object3D;
+  eyelidL?: Object3D;
+  eyelidR?: Object3D;
+  eyeL?: Object3D;
+  eyeR?: Object3D;
+  jaw?: Object3D;
+  upperLip?: Object3D;
+  lowerLip?: Object3D;
   baseChestY: number;
+  baseLowerLipY: number;
+  blinkTimer: number;
+  isBlinking: boolean;
+  blinkProgress: number;
+}
+
+interface BaseTransform {
+  x: number;
+  y: number;
+  z: number;
+  baseRotY: number;
 }
 
 export class NpcAnimationSystem extends createSystem({
@@ -35,7 +56,7 @@ export class NpcAnimationSystem extends createSystem({
   private elapsed = 0;
   private playerPos = new Vector3();
   private npcPos = new Vector3();
-  private basePositions = new Map<number, { y: number; baseRotY: number }>();
+  private basePositions = new Map<number, BaseTransform>();
   private articulatedNodes = new Map<number, ArticulatedNpcNodes>();
 
   init(): void {
@@ -43,11 +64,13 @@ export class NpcAnimationSystem extends createSystem({
       this.cacheNpcTransforms(entity);
     }
 
-    this.cleanupFuncs.push(
-      this.queries.npcs.subscribe('qualify', (entity) => {
-        this.cacheNpcTransforms(entity);
-      }),
-    );
+    if (typeof this.queries?.npcs?.subscribe === 'function') {
+      this.cleanupFuncs.push(
+        this.queries.npcs.subscribe('qualify', (entity) => {
+          this.cacheNpcTransforms(entity);
+        }),
+      );
+    }
   }
 
   private cacheNpcTransforms(entity: any): void {
@@ -55,24 +78,65 @@ export class NpcAnimationSystem extends createSystem({
     const obj = entity.object3D;
 
     this.basePositions.set(entity.index, {
+      x: obj.position.x,
       y: obj.position.y,
+      z: obj.position.z,
       baseRotY: obj.rotation.y,
     });
 
     // Discover articulated named joints in 3D hierarchy
-    let chest = obj.getObjectByName('Tobi_Chest');
-    let neck = obj.getObjectByName('Tobi_Neck');
-    let head = obj.getObjectByName('Tobi_Head');
-    let rightForearm = obj.getObjectByName('Tobi_RightForearm');
-    let leftArm = obj.getObjectByName('Tobi_LeftArm');
+    let chest =
+      obj.getObjectByName('Iya_Chest') ||
+      obj.getObjectByName('Baba_Chest') ||
+      obj.getObjectByName('Tobi_Chest');
+    let neck =
+      obj.getObjectByName('Iya_Neck') ||
+      obj.getObjectByName('Baba_Neck') ||
+      obj.getObjectByName('Tobi_Neck');
+    let head =
+      obj.getObjectByName('Iya_Head') ||
+      obj.getObjectByName('Baba_Head') ||
+      obj.getObjectByName('Tobi_Head');
+    let rightArm =
+      obj.getObjectByName('Iya_RightArm') ||
+      obj.getObjectByName('Baba_RightArm') ||
+      obj.getObjectByName('Tobi_RightArm');
+    let rightForearm =
+      obj.getObjectByName('Iya_RightForearm') ||
+      obj.getObjectByName('Baba_RightForearm') ||
+      obj.getObjectByName('Tobi_RightForearm');
+    let rightHand =
+      obj.getObjectByName('Iya_RightHand') ||
+      obj.getObjectByName('RightHand') ||
+      obj.getObjectByName('Hand_R');
+    let leftArm =
+      obj.getObjectByName('Iya_LeftArm') ||
+      obj.getObjectByName('Baba_LeftArm') ||
+      obj.getObjectByName('Tobi_LeftArm');
+
+    // Facial features
+    let eyelidL = obj.getObjectByName('EyeLid_L');
+    let eyelidR = obj.getObjectByName('EyeLid_R');
+    let eyeL = obj.getObjectByName('EyeIris_L') || obj.getObjectByName('EyeSclera_L');
+    let eyeR = obj.getObjectByName('EyeIris_R') || obj.getObjectByName('EyeSclera_R');
+    let jaw = obj.getObjectByName('Jaw_Joint') || obj.getObjectByName('Jaw');
+    let upperLip = obj.getObjectByName('UpperLip');
+    let lowerLip = obj.getObjectByName('LowerLip');
 
     if (!chest) {
       // Search general hierarchy
       obj.traverse((child: Object3D) => {
-        if (!chest && child.name.includes('Chest')) chest = child;
-        if (!neck && child.name.includes('Neck')) neck = child;
-        if (!head && child.name.includes('Head')) head = child;
-        if (!rightForearm && child.name.includes('Forearm')) rightForearm = child;
+        const n = child.name;
+        if (!chest && n.includes('Chest')) chest = child;
+        if (!neck && n.includes('Neck')) neck = child;
+        if (!head && n.includes('Head')) head = child;
+        if (!rightArm && (n.includes('RightArm') || n.includes('Arm_R'))) rightArm = child;
+        if (!rightForearm && (n.includes('Forearm') || n.includes('ForeArm_R'))) rightForearm = child;
+        if (!rightHand && (n.includes('Hand') || n.includes('Palm'))) rightHand = child;
+        if (!eyelidL && n.includes('EyeLid_L')) eyelidL = child;
+        if (!eyelidR && n.includes('EyeLid_R')) eyelidR = child;
+        if (!jaw && n.includes('Jaw')) jaw = child;
+        if (!lowerLip && n.includes('LowerLip')) lowerLip = child;
       });
     }
 
@@ -80,9 +144,22 @@ export class NpcAnimationSystem extends createSystem({
       chest,
       neck,
       head,
+      rightArm,
       rightForearm,
+      rightHand,
       leftArm,
+      eyelidL,
+      eyelidR,
+      eyeL,
+      eyeR,
+      jaw,
+      upperLip,
+      lowerLip,
       baseChestY: chest ? chest.position.y : 1.02,
+      baseLowerLipY: lowerLip ? lowerLip.position.y : -0.013,
+      blinkTimer: 2.0 + (entity.index * 1.3) % 3.0,
+      isBlinking: false,
+      blinkProgress: 0,
     });
   }
 
@@ -102,23 +179,27 @@ export class NpcAnimationSystem extends createSystem({
 
       let base = this.basePositions.get(entity.index);
       if (!base) {
-        base = { y: obj.position.y, baseRotY: obj.rotation.y };
+        base = { x: obj.position.x, y: obj.position.y, z: obj.position.z, baseRotY: obj.rotation.y };
         this.basePositions.set(entity.index, base);
       }
 
       const nodes = this.articulatedNodes.get(entity.index);
       const inDialogue = Boolean(entity.getValue(NPCCharacter, 'inDialogue'));
 
-      // 1. Multi-Joint Procedural Respiratory Breathing
+      // 1. Multi-Joint Procedural Respiratory Breathing & Weight Shifting
       const breathPhase = this.elapsed * 2.2 + entity.index * 0.8;
       const breathOffset = Math.sin(breathPhase) * 0.005;
+
+      // Subtle standing posture weight shift (0.4Hz slow drift)
+      const weightShift = Math.sin(this.elapsed * 0.45 + entity.index * 1.7) * 0.004;
+      obj.position.x = base.x + weightShift;
 
       if (nodes?.chest) {
         // Anatomical chest inhalation expansion
         nodes.chest.position.y = nodes.baseChestY + breathOffset;
         nodes.chest.scale.z = 1.0 + Math.sin(breathPhase) * 0.025;
+        nodes.chest.rotation.z = Math.sin(this.elapsed * 0.45 + entity.index) * 0.01;
       } else {
-        // Fallback root bob
         obj.position.y = base.y + breathOffset;
       }
 
@@ -158,7 +239,54 @@ export class NpcAnimationSystem extends createSystem({
         }
       }
 
-      // 3. Conversational Hand & Forearm Gestures
+      // 3. Procedural Stochastic Blinking
+      if (nodes && (nodes.eyelidL || nodes.eyelidR)) {
+        nodes.blinkTimer -= delta;
+        if (nodes.blinkTimer <= 0 && !nodes.isBlinking) {
+          nodes.isBlinking = true;
+          nodes.blinkProgress = 0;
+          nodes.blinkTimer = 3.2 + Math.random() * 2.4; // Next blink in 3.2s - 5.6s
+        }
+
+        if (nodes.isBlinking) {
+          nodes.blinkProgress += delta / 0.12; // 120ms total blink duration
+          const blinkScale = 1.0 - Math.sin(Math.min(nodes.blinkProgress, 1.0) * Math.PI) * 0.85;
+          if (nodes.eyelidL) nodes.eyelidL.scale.y = blinkScale;
+          if (nodes.eyelidR) nodes.eyelidR.scale.y = blinkScale;
+
+          if (nodes.blinkProgress >= 1.0) {
+            nodes.isBlinking = false;
+            if (nodes.eyelidL) nodes.eyelidL.scale.y = 1.0;
+            if (nodes.eyelidR) nodes.eyelidR.scale.y = 1.0;
+          }
+        }
+      }
+
+      // 4. Dialogue-Triggered Speech Lip Synchronization
+      if (nodes && (nodes.lowerLip || nodes.jaw)) {
+        if (inDialogue) {
+          // Dynamic phonetic speech cadence (active vocal aperture with syllabic modulation)
+          const speechPhase = this.elapsed * 12.0 + entity.index * 1.5;
+          const mouthAperture = Math.abs(Math.sin(speechPhase)) * 0.008 + 0.002;
+
+          if (nodes.lowerLip) {
+            nodes.lowerLip.position.y = nodes.baseLowerLipY - mouthAperture;
+          }
+          if (nodes.jaw) {
+            nodes.jaw.rotation.x = mouthAperture * 2.0;
+          }
+        } else {
+          // Return to neutral mouth closure
+          if (nodes.lowerLip) {
+            nodes.lowerLip.position.y += (nodes.baseLowerLipY - nodes.lowerLip.position.y) * Math.min(delta * 8.0, 1.0);
+          }
+          if (nodes.jaw) {
+            nodes.jaw.rotation.x *= Math.max(0, 1.0 - delta * 6.0);
+          }
+        }
+      }
+
+      // 5. Conversational Hand & Forearm Gestures
       if (inDialogue && nodes?.rightForearm) {
         const gesturePhase = this.elapsed * 3.6;
         const gestureSwing = Math.sin(gesturePhase) * 0.22;
@@ -167,14 +295,21 @@ export class NpcAnimationSystem extends createSystem({
         nodes.rightForearm.rotation.x = -0.25 + gestureSwing;
         nodes.rightForearm.rotation.z = gesturePulse;
 
+        if (nodes.rightHand) {
+          nodes.rightHand.rotation.z = Math.sin(gesturePhase * 0.9) * 0.15;
+        }
+
         if (nodes.head) {
           // Subtle emphatic head nod cadence while speaking
           nodes.head.rotation.y = Math.sin(gesturePhase * 0.5) * 0.08;
         }
       } else if (nodes?.rightForearm) {
-        // Return forearm to resting neutral pose
+        // Return forearm and hand to resting neutral pose
         nodes.rightForearm.rotation.x *= Math.max(0, 1 - delta * 3.0);
         nodes.rightForearm.rotation.z *= Math.max(0, 1 - delta * 3.0);
+        if (nodes.rightHand) {
+          nodes.rightHand.rotation.z *= Math.max(0, 1 - delta * 3.0);
+        }
       }
     }
   }

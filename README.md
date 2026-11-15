@@ -12,6 +12,16 @@ In this competition release, players begin in the **Yoruba Culture of West Afric
 
 - **Seated Comfort**: The entire experience is ergonomically calibrated for comfortable seated play. An interactive wooden display table rests at natural arm reach directly in front of the player.
 - **Hands-First Interaction**: Fully operable end-to-end using hand tracking (pinch and ray interactions) without requiring physical controllers, while remaining fully compatible with Quest controllers.
+- **Cultural Exploration Across 4 Environments**:
+  1. **Ìsàlẹ̀ Èkó Artisan Market**: Historic Lagos textile trading courtyard with market stalls, dye vats, brass scales, and artisan NPCs.
+  2. **Yaba Creative & Transit Corridor**: Urban tech corridor featuring Studio Kán, Danfo transit, and community tech hub.
+  3. **Iga Idunganran Royal Palace**: Historic palace courtyard with carved wooden pillars, bronze ornaments, and throne dais.
+  4. **Tarkwa Bay Beach**: Coastal maritime island with coconut palms, fishing canoe, and ocean shoreline.
+- **Living Articulated Characters**:
+  - **Iyá Aláso** (Master Textile Weaver), **Baba Adéwálé** (Elder Historian), and **Tobi Adeleke** (Junior Architect).
+  - Procedural multi-joint respiration, stochastic blinking, speech-synchronized lip aperture, and conversational gestures.
+- **Immersive Spatial Audio**: Positional soundscapes for all 4 environments with Web Audio synthesis and WebXR listener binding.
+- **Accessible Spatial UI**: Wearable/summonable VR Navigation Tablet and Horizon UIKitML fact cards.
 - **Cultural Artefacts**:
   1. **Adire Cloth**: Ancient Yoruba resist-dyed indigo textile with symbolic geometric patterns.
   2. **Gangan (Talking Drum)**: Hourglass-shaped drum that mimics the tonal cadence of human speech.
@@ -54,6 +64,9 @@ npm install
 ```bash
 # Verify TypeScript types
 npm run typecheck
+
+# Run full automated test suite (197 tests)
+npm test
 
 # Build optimized production bundle
 npm run build

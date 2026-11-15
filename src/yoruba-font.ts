@@ -11,17 +11,22 @@ let yorubaFontFamilies: Promise<Record<string, Record<string, unknown>>> | null 
 
 /** Generate the UI text atlas with Yoruba letters and tone marks included. */
 export function loadYorubaFontFamilies(): Promise<Record<string, Record<string, unknown>>> {
-  yorubaFontFamilies ??= (async () => {
-    const url = new URL('/fonts/NotoSans-Yoruba.ttf', window.location.href).href;
-    const generated = await new TTFLoader().loadAsync([{
-      url,
-      charset: yorubaCharset,
-      textureSize: [1024, 1024],
-    }]);
-    const family = Object.values(generated)[0] as Record<string, unknown> | undefined;
-    const font = family ? Object.values(family)[0] : undefined;
-    if (!font) throw new Error('Noto Sans Yoruba atlas generation returned no font data.');
-    return { 'Noto Sans Yoruba': { 400: font, 700: font } };
-  })();
+  if (!yorubaFontFamilies) {
+    yorubaFontFamilies = (async (): Promise<Record<string, Record<string, unknown>>> => {
+      if (typeof window === 'undefined') {
+        return {};
+      }
+      const url = new URL('/fonts/NotoSans-Yoruba.ttf', window.location.href).href;
+      const generated = await new TTFLoader().loadAsync([{
+        url,
+        charset: yorubaCharset,
+        textureSize: [1024, 1024],
+      }]);
+      const family = Object.values(generated)[0] as Record<string, unknown> | undefined;
+      const font = (family ? Object.values(family)[0] : undefined) as Record<string, unknown>;
+      if (!font) throw new Error('Noto Sans Yoruba atlas generation returned no font data.');
+      return { 'Noto Sans Yoruba': { 400: font, 700: font } };
+    })();
+  }
   return yorubaFontFamilies;
 }

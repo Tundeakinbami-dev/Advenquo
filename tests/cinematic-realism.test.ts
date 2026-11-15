@@ -94,14 +94,21 @@ describe('Phase 14: Cinematic Realism & Premium Visual Transformation Acceptance
     assert.ok(ids.includes('lagos-street-infrastructure'), 'Street infrastructure & utility grid must be present');
     assert.ok(ids.includes('npc-kunle'), 'Kunle Badmus must be placed in urban scene');
 
-    // Tobi anchors the Missing Shipment story at the market; keep the urban
-    // construction set and contractor there without requiring Tobi to be duplicated.
+    // Tobi is assigned to his primary workplace at Studio Kán in Yaba (not colocated in the market)
+    assert.ok(
+      urbanNodes.some((n: any) => n.id === 'npc-tobi'),
+      'Tobi Adeleke must be assigned to Yaba at Studio Kán',
+    );
+    const tobiNode = urbanNodes.find((n: any) => n.id === 'npc-tobi');
+    assert.deepStrictEqual(tobiNode.transform.position, [-3.5, 0, 1.0]);
+    assert.strictEqual(tobiNode.components.LocationAnchor.isActive, false);
+
     const marketNodes = nodes.filter(
       (n: any) => n.components?.LocationAnchor?.locationId === 'nigerian_market',
     );
     assert.ok(
-      marketNodes.some((n: any) => n.id === 'npc-tobi'),
-      'Tobi Adeleke must be present in the active market for the story opening',
+      !marketNodes.some((n: any) => n.id === 'npc-tobi'),
+      'Tobi Adeleke must not be incorrectly colocated in the market',
     );
   });
 

@@ -15,6 +15,7 @@
  */
 
 import {
+  Object3D,
   createSystem,
   LocomotionSystem,
   TurningMethod,
@@ -31,9 +32,16 @@ import { PlayerControllerSystem } from './player-controller-system.js';
 import { loadYorubaFontFamilies } from './yoruba-font.js';
 
 export class VRTabletSystem extends createSystem({}) {
+  private static instance: VRTabletSystem | null = null;
   private tablet: UIKitMLAsset | null = null;
+  private tabletAnchor: Object3D | null = null;
+  private isTabletDismissed = false;
   private activeTab: 'missions' | 'travel' | 'worldnow' | 'journal' | 'settings' = 'missions';
   private currentStoryIndex = 0;
+
+  public static getInstance(): VRTabletSystem | null {
+    return VRTabletSystem.instance;
+  }
 
   // Cached views
   private viewMissions: any = null;
@@ -91,11 +99,18 @@ export class VRTabletSystem extends createSystem({}) {
   private isVignetteActive = true;
 
   init(): void {
+    VRTabletSystem.instance = this;
+    if (typeof window !== 'undefined') {
+      (window as any).__vrTabletSystem = this;
+    }
+
     this.tablet = this.world.getSceneObject<UIKitMLAsset>('vr-nav-tablet') ?? null;
     if (!this.tablet) return;
     void loadYorubaFontFamilies().then((fontFamilies) => {
       this.tablet?.document.rootElement.setProperties({ fontFamilies } as never);
     }).catch((error: unknown) => console.error('Yoruba font atlas failed to load:', error));
+
+    this._setupPlayerAnchor();
 
     // Cache views
     this.viewMissions = this.tablet.getElementById('view-missions');
@@ -205,6 +220,18 @@ export class VRTabletSystem extends createSystem({}) {
     this.tabBtnJournal?.addEventListener('click', onJournalTab);
     this.tabBtnSettings?.addEventListener('click', onSettingsTab);
 
+    // Wire Recenter & Dismiss buttons
+    const btnRecenter = this.tablet.getElementById('tab-btn-recenter');
+    const btnDismiss = this.tablet.getElementById('tab-btn-dismiss');
+    const btnRecenterSetting = this.tablet.getElementById('btn-recenter-setting');
+
+    const onRecenterClick = (): void => this.repositionInFrontOfPlayer();
+    const onDismissClick = (): void => this.dismissTablet();
+
+    btnRecenter?.addEventListener('click', onRecenterClick);
+    btnDismiss?.addEventListener('click', onDismissClick);
+    btnRecenterSetting?.addEventListener('click', onRecenterClick);
+
     // Wire Settings actions
     const onToggleTurn = (): void => this._toggleTurningMethod();
     const onToggleVignette = (): void => this._toggleComfortVignette();
@@ -214,12 +241,38 @@ export class VRTabletSystem extends createSystem({}) {
     this.btnToggleVignette?.addEventListener('click', onToggleVignette);
     this.btnResetPos?.addEventListener('click', onResetPos);
 
+    // Global keyboard and custom event hooks for summoning/repositioning
+    const onKeyDown = (e: KeyboardEvent): void => {
+      if ((e.target as HTMLElement)?.tagName === 'INPUT' || (e.target as HTMLElement)?.tagName === 'TEXTAREA') return;
+      if (e.code === 'KeyT') {
+        this.toggleTablet();
+      } else if (e.code === 'KeyR' && (e.ctrlKey || e.altKey)) {
+        this.repositionInFrontOfPlayer();
+      }
+    };
+
+    const onSummon = (): void => this.summonTablet();
+    const onDismissEvent = (): void => this.dismissTablet();
+    const onToggle = (): void => this.toggleTablet();
+    const onRecenterEvent = (): void => this.repositionInFrontOfPlayer();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('advenquo:summon-tablet', onSummon);
+      window.addEventListener('advenquo:dismiss-tablet', onDismissEvent);
+      window.addEventListener('advenquo:toggle-tablet', onToggle);
+      window.addEventListener('advenquo:recenter-tablet', onRecenterEvent);
+    }
+
     this.cleanupFuncs.push(
       () => this.tabBtnMissions?.removeEventListener('click', onMissionsTab),
       () => this.tabBtnTravel?.removeEventListener('click', onTravelTab),
       () => this.tabBtnWorldNow?.removeEventListener('click', onWorldNowTab),
       () => this.tabBtnJournal?.removeEventListener('click', onJournalTab),
       () => this.tabBtnSettings?.removeEventListener('click', onSettingsTab),
+      () => btnRecenter?.removeEventListener('click', onRecenterClick),
+      () => btnDismiss?.removeEventListener('click', onDismissClick),
+      () => btnRecenterSetting?.removeEventListener('click', onRecenterClick),
       () => this.btnTravelMarket?.removeEventListener('click', onTravelMarket),
       () => this.btnTravelUrban?.removeEventListener('click', onTravelUrban),
       () => this.btnTravelPalace?.removeEventListener('click', onTravelPalace),
@@ -229,6 +282,18 @@ export class VRTabletSystem extends createSystem({}) {
       () => this.btnResetPos?.removeEventListener('click', onResetPos),
       () => this.btnNewsPrev?.removeEventListener('click', onNewsPrev),
       () => this.btnNewsNext?.removeEventListener('click', onNewsNext),
+      () => {
+        if (typeof window !== 'undefined') {
+          window.removeEventListener('keydown', onKeyDown);
+          window.removeEventListener('advenquo:summon-tablet', onSummon);
+          window.removeEventListener('advenquo:dismiss-tablet', onDismissEvent);
+          window.removeEventListener('advenquo:toggle-tablet', onToggle);
+          window.removeEventListener('advenquo:recenter-tablet', onRecenterEvent);
+        }
+      },
+      () => {
+        VRTabletSystem.instance = null;
+      },
     );
 
     // Initial update
@@ -236,7 +301,13 @@ export class VRTabletSystem extends createSystem({}) {
   }
 
   update(delta: number): void {
-    // Keep data fresh periodically
+    // Ensure anchor remains mounted to player if player became available after init
+    const player = this.player ?? (this.world as any)?.player;
+    if (this.tablet && player && typeof player.add === 'function') {
+      if (!this.tabletAnchor || this.tabletAnchor.parent !== player) {
+        this._setupPlayerAnchor();
+      }
+    }
   }
 
   private _switchTab(tab: 'missions' | 'travel' | 'worldnow' | 'journal' | 'settings'): void {
@@ -372,5 +443,119 @@ export class VRTabletSystem extends createSystem({}) {
     if (pc) {
       pc.teleportTo(spawnX, spawnZ, 0);
     }
+  }
+
+  /**
+   * Sets up the dedicated player-relative anchor and parents the tablet under it.
+   */
+  private _setupPlayerAnchor(): void {
+    if (!this.tablet) return;
+
+    if (!this.tabletAnchor) {
+      this.tabletAnchor = new Object3D();
+      this.tabletAnchor.name = 'VRTabletPlayerAnchor';
+    }
+
+    const player = this.player ?? (this.world as any)?.player;
+    if (player && typeof player.add === 'function') {
+      if (this.tabletAnchor.parent !== player) {
+        player.add(this.tabletAnchor);
+      }
+      if (this.tablet.parent !== this.tabletAnchor) {
+        this.tabletAnchor.add(this.tablet);
+      }
+    }
+
+    this.repositionInFrontOfPlayer();
+  }
+
+  /**
+   * Positions the tablet at a comfortable distance (0.7m-1.0m) and height (~1.25m)
+   * directly in front of the player, facing the player's viewpoint.
+   */
+  public repositionInFrontOfPlayer(distance = 0.85): void {
+    if (!this.tablet) return;
+
+    const targetHeight = 1.25;
+    let localYaw = 0;
+
+    // Detect player's horizontal look direction
+    if (this.player?.head) {
+      localYaw = this.player.head.rotation.y;
+    } else if (this.world?.camera) {
+      localYaw = this.world.camera.rotation.y;
+    }
+
+    const sinYaw = Math.sin(localYaw);
+    const cosYaw = Math.cos(localYaw);
+
+    // Forward vector in player-local space is (-sinYaw, 0, -cosYaw)
+    const rawOffsetX = -sinYaw * distance;
+    const rawOffsetZ = -cosYaw * distance;
+    const offsetX = Math.abs(rawOffsetX) < 1e-5 ? 0 : rawOffsetX;
+    const offsetZ = Math.abs(rawOffsetZ) < 1e-5 ? 0 : rawOffsetZ;
+
+    if (this.tabletAnchor) {
+      this.tabletAnchor.position.set(offsetX, targetHeight, offsetZ);
+      // Tilt slightly upward (-10° on X) and orient to face the player
+      this.tabletAnchor.rotation.set(-0.15, localYaw, 0, 'YXZ');
+      this.tablet.position.set(0, 0, 0);
+      this.tablet.rotation.set(0, 0, 0);
+    } else {
+      // Fallback if player rig anchor is not attached
+      const playerPos = this.player?.position ?? new Vector3(0, 0, 0);
+      this.tablet.position.set(
+        playerPos.x + offsetX,
+        playerPos.y + targetHeight,
+        playerPos.z + offsetZ,
+      );
+      this.tablet.rotation.set(-0.15, localYaw, 0, 'YXZ');
+    }
+  }
+
+  /**
+   * Summons the tablet in front of the player and makes it visible.
+   */
+  public summonTablet(): void {
+    if (!this.tablet) return;
+    this.isTabletDismissed = false;
+    this.repositionInFrontOfPlayer();
+    this.tablet.visible = true;
+    if (this.tabletAnchor) this.tabletAnchor.visible = true;
+  }
+
+  /**
+   * Dismisses the tablet to clear the player's field of view.
+   */
+  public dismissTablet(): void {
+    if (!this.tablet) return;
+    this.isTabletDismissed = true;
+    this.tablet.visible = false;
+    if (this.tabletAnchor) this.tabletAnchor.visible = false;
+  }
+
+  /**
+   * Toggles the visibility and summoning of the tablet.
+   */
+  public toggleTablet(): void {
+    if (this.isTabletVisible()) {
+      this.dismissTablet();
+    } else {
+      this.summonTablet();
+    }
+  }
+
+  /**
+   * Returns whether the tablet is currently visible.
+   */
+  public isTabletVisible(): boolean {
+    return Boolean(this.tablet?.visible && (!this.tabletAnchor || this.tabletAnchor.visible));
+  }
+
+  /**
+   * Returns the dedicated player-relative anchor Object3D.
+   */
+  public getTabletAnchor(): Object3D | null {
+    return this.tabletAnchor;
   }
 }

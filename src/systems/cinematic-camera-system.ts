@@ -17,6 +17,7 @@ import {
   createSystem,
   PerspectiveCamera,
   Vector3,
+  VisibilityState,
 } from '@iwsdk/core';
 
 export type CameraMode = 'exploration' | 'conversation' | 'establishing_shot';
@@ -73,8 +74,13 @@ export class CinematicCameraSystem extends createSystem({}) {
     if (camera instanceof PerspectiveCamera) {
       // Camera transforms are local to the persistent player rig. Save that
       // local pose so closing dialogue can return to first-person correctly.
-      this.savedExplorationCameraPosition.copy(camera.position);
-      this.hasSavedExplorationPose = true;
+      if (
+        !this.world?.visibilityState ||
+        this.world.visibilityState.value === VisibilityState.NonImmersive
+      ) {
+        this.savedExplorationCameraPosition.copy(camera.position);
+        this.hasSavedExplorationPose = true;
+      }
       camera.updateWorldMatrix(true, false);
       camera.getWorldPosition(this.currentCamPos);
       camera.getWorldDirection(this.scratchVec);
@@ -131,6 +137,15 @@ export class CinematicCameraSystem extends createSystem({}) {
   update(delta: number): void {
     const camera = this.world.camera;
     if (!(camera instanceof PerspectiveCamera)) return;
+
+    // In immersive VR (Meta Quest 3), physical 6-DoF headset tracking owns the camera.
+    // Involuntary camera translation, lerping, lookAt, and head-bob must never run during XR sessions.
+    if (
+      this.world?.visibilityState?.value !== undefined &&
+      this.world.visibilityState.value !== VisibilityState.NonImmersive
+    ) {
+      return;
+    }
 
     if (this.mode === 'conversation' || this.mode === 'establishing_shot') {
       // Smooth cinematic interpolation (damped slerp-like transition)

@@ -30,6 +30,13 @@
       "components": {
         "LocomotionEnvironment": {
           "type": "static"
+        },
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
         }
       }
     },
@@ -42,6 +49,15 @@
       },
       "transform": {
         "position": [0, 0, -3.8]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
+        }
       }
     },
     {
@@ -62,7 +78,19 @@
           "interactionRadius": 3.8,
           "inDialogue": false
         },
-        "RayInteractable": {}
+        "CharacterAnimation": {
+          "characterId": "baba-adewale",
+          "state": "idle",
+          "rigType": "auto"
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
+        }
       }
     },
     {
@@ -75,6 +103,15 @@
       "transform": {
         "position": [2.8, 0, -1.8],
         "rotationDeg": [0, -35, 0]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
+        }
       }
     },
     {
@@ -96,7 +133,19 @@
           "interactionRadius": 3.5,
           "inDialogue": false
         },
-        "RayInteractable": {}
+        "CharacterAnimation": {
+          "characterId": "iya-alaso",
+          "state": "idle",
+          "rigType": "auto"
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
+        }
       }
     },
     {
@@ -108,6 +157,15 @@
       },
       "transform": {
         "position": [1.4, 0, -2.6]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
+        }
       }
     },
     {
@@ -120,6 +178,16 @@
       "transform": {
         "position": [-3.2, 0, 1.2],
         "rotationDeg": [0, 30, 0]
+      },
+      "components": {
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
+        }
       }
     },
     {
@@ -132,6 +200,15 @@
       "transform": {
         "position": [-2.0, 0.72, -1.5],
         "rotationDeg": [0, 15, 0]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
+        }
       }
     },
     {
@@ -158,6 +235,13 @@
           "src": "./audio/chime.mp3",
           "maxInstances": 2,
           "playbackMode": "fade-restart"
+        },
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
         }
       }
     },
@@ -185,6 +269,13 @@
           "src": "./audio/chime.mp3",
           "maxInstances": 2,
           "playbackMode": "fade-restart"
+        },
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
         }
       }
     },
@@ -212,6 +303,13 @@
           "src": "./audio/chime.mp3",
           "maxInstances": 2,
           "playbackMode": "fade-restart"
+        },
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
         }
       }
     },
@@ -239,6 +337,13 @@
           "src": "./audio/chime.mp3",
           "maxInstances": 2,
           "playbackMode": "fade-restart"
+        },
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
         }
       }
     },
@@ -255,7 +360,14 @@
         "scale": [1.35, 1.35, 1.35]
       },
       "components": {
-        "OneHandGrabbable": {}
+        "OneHandGrabbable": {},
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
+        }
       }
     },
     {
@@ -276,7 +388,14 @@
           "collected": false,
           "isObjectiveTarget": true
         },
-        "RayInteractable": {}
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
+        }
       }
     },
     {
@@ -300,6 +419,13 @@
         "RayInteractable": {},
         "DistanceGrabbable": {
           "movementMode": "MoveFromTarget"
+        },
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
         }
       }
     },
@@ -341,8 +467,8 @@
         "asset": "vr-nav-tablet"
       },
       "transform": {
-        "position": [0.85, 1.25, -1.1],
-        "rotationDeg": [0, -25, 0]
+        "position": [0, 1.25, -0.85],
+        "rotationDeg": [-10, 0, 0]
       },
       "components": {
         "RayInteractable": {}
@@ -360,7 +486,14 @@
         "rotationDeg": [0, 15, 0]
       },
       "components": {
-        "RayInteractable": {}
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
+        }
       }
     },
     {
@@ -375,7 +508,14 @@
         "rotationDeg": [0, 15, 0]
       },
       "components": {
-        "RayInteractable": {}
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
+        }
       }
     },
     {
@@ -390,7 +530,14 @@
         "rotationDeg": [0, 15, 0]
       },
       "components": {
-        "RayInteractable": {}
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
+        }
       }
     },
     {
@@ -405,7 +552,14 @@
         "rotationDeg": [0, 15, 0]
       },
       "components": {
-        "RayInteractable": {}
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "nigerian_market",
+          "name": "Ìsàlẹ̀ Èkó Artisan Market",
+          "environmentCategory": "market",
+          "isActive": true,
+          "isDiscovered": true
+        }
       }
     },
     {
@@ -499,7 +653,7 @@
         "asset": "npc-tobi"
       },
       "transform": {
-        "position": [-4.8, 0, 0.5],
+        "position": [-3.5, 0, 1.0],
         "rotationDeg": [0, 30, 0]
       },
       "components": {
@@ -517,10 +671,10 @@
         },
         "RayInteractable": {},
         "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
+          "locationId": "lagos_urban",
+          "name": "Yaba Tech & Transit Corridor",
+          "environmentCategory": "urban",
+          "isActive": false,
           "isDiscovered": false
         }
       }
@@ -642,6 +796,607 @@
           "locationId": "lagos_urban",
           "name": "Yaba Tech & Transit Corridor",
           "environmentCategory": "urban",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "urban-danfo-bus",
+      "name": "Iconic Lagos Danfo Minibus",
+      "content": {
+        "type": "asset",
+        "asset": "urban-danfo-bus"
+      },
+      "transform": {
+        "position": [2.5, 0, 0],
+        "rotationDeg": [0, -15, 0]
+      },
+      "components": {
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "lagos_urban",
+          "name": "Yaba Tech & Transit Corridor",
+          "environmentCategory": "urban",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "danfo-fare-box",
+      "name": "Danfo Conductor Coin Box",
+      "content": {
+        "type": "asset",
+        "asset": "danfo-fare-box"
+      },
+      "transform": {
+        "position": [2.2, 0.75, 0.2]
+      },
+      "components": {
+        "CulturalObject": {
+          "factId": "danfo-fare-box",
+          "discovered": false
+        },
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget"
+        },
+        "AudioSource": {
+          "src": "./audio/chime.mp3",
+          "maxInstances": 2,
+          "playbackMode": "fade-restart"
+        },
+        "LocationAnchor": {
+          "locationId": "lagos_urban",
+          "name": "Yaba Tech & Transit Corridor",
+          "environmentCategory": "urban",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "smart-iot-beacon",
+      "name": "Yaba IoT Solar Environmental Sensor",
+      "content": {
+        "type": "asset",
+        "asset": "smart-iot-beacon"
+      },
+      "transform": {
+        "position": [-2.0, 0.9, -3.8]
+      },
+      "components": {
+        "CulturalObject": {
+          "factId": "smart-iot-beacon",
+          "discovered": false
+        },
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget"
+        },
+        "AudioSource": {
+          "src": "./audio/chime.mp3",
+          "maxInstances": 2,
+          "playbackMode": "fade-restart"
+        },
+        "LocationAnchor": {
+          "locationId": "lagos_urban",
+          "name": "Yaba Tech & Transit Corridor",
+          "environmentCategory": "urban",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "palace-ground",
+      "name": "Iga Idunganran Royal Flagstone Courtyard",
+      "content": {
+        "type": "asset",
+        "asset": "palace-ground"
+      },
+      "transform": {
+        "position": [0, 0, 0]
+      },
+      "components": {
+        "LocomotionEnvironment": {
+          "type": "static"
+        },
+        "LocationAnchor": {
+          "locationId": "heritage_iga",
+          "name": "Iga Idunganran Royal Palace",
+          "environmentCategory": "heritage",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "palace-chamber-interior",
+      "name": "Royal Council Chamber Interior",
+      "content": {
+        "type": "asset",
+        "asset": "palace-chamber-interior"
+      },
+      "transform": {
+        "position": [0, 0, -3.8]
+      },
+      "components": {
+        "LocomotionEnvironment": {
+          "type": "static"
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "heritage_iga",
+          "name": "Iga Idunganran Royal Palace",
+          "environmentCategory": "heritage",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "palace-throne-dais",
+      "name": "The Oba's Throne Dais & Bronze Leopards",
+      "content": {
+        "type": "asset",
+        "asset": "palace-throne-dais"
+      },
+      "transform": {
+        "position": [0, 0, -3.8]
+      },
+      "components": {
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "heritage_iga",
+          "name": "Iga Idunganran Royal Palace",
+          "environmentCategory": "heritage",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "palace-pillars",
+      "name": "Carved Iroko Ancestral Pillars",
+      "content": {
+        "type": "asset",
+        "asset": "palace-pillars"
+      },
+      "transform": {
+        "position": [0, 0, -1.8]
+      },
+      "components": {
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "heritage_iga",
+          "name": "Iga Idunganran Royal Palace",
+          "environmentCategory": "heritage",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "npc-palace-chief",
+      "name": "Chief Ẹletu Odibo (Prime Minister & Kingmaker)",
+      "content": {
+        "type": "asset",
+        "asset": "npc-palace-chief"
+      },
+      "transform": {
+        "position": [-1.8, 0, -1.8],
+        "rotationDeg": [0, 30, 0]
+      },
+      "components": {
+        "NPCCharacter": {
+          "characterId": "chief-eletu",
+          "name": "Chief Ẹletu Odibo",
+          "role": "Prime Minister & Traditional Kingmaker of Lagos",
+          "interactionRadius": 3.5,
+          "inDialogue": false
+        },
+        "CharacterAnimation": {
+          "characterId": "chief-eletu",
+          "state": "idle",
+          "rigType": "auto"
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "heritage_iga",
+          "name": "Iga Idunganran Royal Palace",
+          "environmentCategory": "heritage",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "npc-olori-morenike",
+      "name": "Olori Morénikẹ́ (Palace Cultural Historian)",
+      "content": {
+        "type": "asset",
+        "asset": "npc-olori-morenike"
+      },
+      "transform": {
+        "position": [1.6, 0, -1.5],
+        "rotationDeg": [0, -40, 0]
+      },
+      "components": {
+        "NPCCharacter": {
+          "characterId": "olori-morenike",
+          "name": "Olori Morénikẹ́",
+          "role": "Palace Cultural Historian",
+          "interactionRadius": 3.5,
+          "inDialogue": false
+        },
+        "CharacterAnimation": {
+          "characterId": "olori-morenike",
+          "state": "idle",
+          "rigType": "auto"
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "heritage_iga",
+          "name": "Iga Idunganran Royal Palace",
+          "environmentCategory": "heritage",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "oba-staff",
+      "name": "Ọpá Àṣẹ: Ceremonial Staff of Office",
+      "content": {
+        "type": "asset",
+        "asset": "oba-staff"
+      },
+      "transform": {
+        "position": [-0.6, 0.8, -3.2]
+      },
+      "components": {
+        "CulturalObject": {
+          "factId": "oba-staff-of-office",
+          "discovered": false
+        },
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget"
+        },
+        "AudioSource": {
+          "src": "./audio/chime.mp3",
+          "maxInstances": 2,
+          "playbackMode": "fade-restart"
+        },
+        "LocationAnchor": {
+          "locationId": "heritage_iga",
+          "name": "Iga Idunganran Royal Palace",
+          "environmentCategory": "heritage",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "royal-coral-necklace",
+      "name": "Imperial Coral Bead Collar (Ìyùn)",
+      "content": {
+        "type": "asset",
+        "asset": "royal-coral-necklace"
+      },
+      "transform": {
+        "position": [0.6, 0.8, -3.2]
+      },
+      "components": {
+        "CulturalObject": {
+          "factId": "royal-coral-necklace",
+          "discovered": false
+        },
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget"
+        },
+        "AudioSource": {
+          "src": "./audio/chime.mp3",
+          "maxInstances": 2,
+          "playbackMode": "fade-restart"
+        },
+        "LocationAnchor": {
+          "locationId": "heritage_iga",
+          "name": "Iga Idunganran Royal Palace",
+          "environmentCategory": "heritage",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "coastal-ground",
+      "name": "Tarkwa Bay Shoreline & Golden Beach Sand",
+      "content": {
+        "type": "asset",
+        "asset": "coastal-ground"
+      },
+      "transform": {
+        "position": [0, 0, 0]
+      },
+      "components": {
+        "LocomotionEnvironment": {
+          "type": "static"
+        },
+        "LocationAnchor": {
+          "locationId": "beach_waterfront",
+          "name": "Tarkwa Bay Coastal Haven",
+          "environmentCategory": "natural",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "beach-cabana",
+      "name": "Artisan Bamboo Thatched Beach Cabana",
+      "content": {
+        "type": "asset",
+        "asset": "beach-cabana"
+      },
+      "transform": {
+        "position": [-3.2, 0, 2.0]
+      },
+      "components": {
+        "LocomotionEnvironment": {
+          "type": "static"
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "beach_waterfront",
+          "name": "Tarkwa Bay Coastal Haven",
+          "environmentCategory": "natural",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "coastal-hut",
+      "name": "Marine Station & Fisherman Thatched Hut",
+      "content": {
+        "type": "asset",
+        "asset": "coastal-hut"
+      },
+      "transform": {
+        "position": [3.6, 0, 2.2]
+      },
+      "components": {
+        "LocomotionEnvironment": {
+          "type": "static"
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "beach_waterfront",
+          "name": "Tarkwa Bay Coastal Haven",
+          "environmentCategory": "natural",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "fishing-canoe",
+      "name": "Artisanal Wooden Fishing Canoe (Ọkọ̀ Ojú-Omi)",
+      "content": {
+        "type": "asset",
+        "asset": "fishing-canoe"
+      },
+      "transform": {
+        "position": [2.8, 0, 0.5],
+        "rotationDeg": [0, -25, 0]
+      },
+      "components": {
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "beach_waterfront",
+          "name": "Tarkwa Bay Coastal Haven",
+          "environmentCategory": "natural",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "coconut-palm-beach-west",
+      "name": "Coastal Coconut Palm West",
+      "content": {
+        "type": "asset",
+        "asset": "coconut-palm"
+      },
+      "transform": {
+        "position": [-3.5, 0, -1.8],
+        "rotationDeg": [0, 30, 0]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "beach_waterfront",
+          "name": "Tarkwa Bay Coastal Haven",
+          "environmentCategory": "natural",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "coconut-palm-beach-east",
+      "name": "Coastal Coconut Palm East",
+      "content": {
+        "type": "asset",
+        "asset": "coconut-palm"
+      },
+      "transform": {
+        "position": [4.2, 0, -1.2],
+        "rotationDeg": [0, -45, 0]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "beach_waterfront",
+          "name": "Tarkwa Bay Coastal Haven",
+          "environmentCategory": "natural",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "coconut-palm-beach-south",
+      "name": "Coastal Coconut Palm South",
+      "content": {
+        "type": "asset",
+        "asset": "coconut-palm"
+      },
+      "transform": {
+        "position": [-4.5, 0, 4.0],
+        "rotationDeg": [0, 60, 0]
+      },
+      "components": {
+        "LocationAnchor": {
+          "locationId": "beach_waterfront",
+          "name": "Tarkwa Bay Coastal Haven",
+          "environmentCategory": "natural",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "npc-fisherman",
+      "name": "Captain Femi (Pa Daniel, Coastal Fisherman)",
+      "content": {
+        "type": "asset",
+        "asset": "npc-fisherman"
+      },
+      "transform": {
+        "position": [1.8, 0, 0.2],
+        "rotationDeg": [0, -100, 0]
+      },
+      "components": {
+        "NPCCharacter": {
+          "characterId": "captain-femi",
+          "name": "Captain Femi",
+          "role": "Artisanal Coastal Fisherman & Ferryman",
+          "interactionRadius": 3.5,
+          "inDialogue": false
+        },
+        "CharacterAnimation": {
+          "characterId": "captain-femi",
+          "state": "idle",
+          "rigType": "auto"
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "beach_waterfront",
+          "name": "Tarkwa Bay Coastal Haven",
+          "environmentCategory": "natural",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "npc-amara-marine",
+      "name": "Amara Eze (Marine Conservationist)",
+      "content": {
+        "type": "asset",
+        "asset": "npc-amara-marine"
+      },
+      "transform": {
+        "position": [-2.2, 0, -0.8],
+        "rotationDeg": [0, 40, 0]
+      },
+      "components": {
+        "NPCCharacter": {
+          "characterId": "amara-marine",
+          "name": "Amara Eze",
+          "role": "Marine Ecologist & Coastal Conservationist",
+          "interactionRadius": 3.5,
+          "inDialogue": false
+        },
+        "CharacterAnimation": {
+          "characterId": "amara-marine",
+          "state": "idle",
+          "rigType": "auto"
+        },
+        "RayInteractable": {},
+        "LocationAnchor": {
+          "locationId": "beach_waterfront",
+          "name": "Tarkwa Bay Coastal Haven",
+          "environmentCategory": "natural",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "sea-shell",
+      "name": "Atlantic Giant Tun Marine Shell",
+      "content": {
+        "type": "asset",
+        "asset": "sea-shell"
+      },
+      "transform": {
+        "position": [-1.2, 0.2, -1.5]
+      },
+      "components": {
+        "CulturalObject": {
+          "factId": "lagoon-sea-shell",
+          "discovered": false
+        },
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget"
+        },
+        "AudioSource": {
+          "src": "./audio/chime.mp3",
+          "maxInstances": 2,
+          "playbackMode": "fade-restart"
+        },
+        "LocationAnchor": {
+          "locationId": "beach_waterfront",
+          "name": "Tarkwa Bay Coastal Haven",
+          "environmentCategory": "natural",
+          "isActive": false,
+          "isDiscovered": false
+        }
+      }
+    },
+    {
+      "id": "fresh-coconut",
+      "name": "Chilled Coconut with Drinking Palm Straw",
+      "content": {
+        "type": "asset",
+        "asset": "fresh-coconut"
+      },
+      "transform": {
+        "position": [-2.8, 0.72, 2.0]
+      },
+      "components": {
+        "CulturalObject": {
+          "factId": "fresh-coconut-vessel",
+          "discovered": false
+        },
+        "RayInteractable": {},
+        "DistanceGrabbable": {
+          "movementMode": "MoveFromTarget"
+        },
+        "AudioSource": {
+          "src": "./audio/chime.mp3",
+          "maxInstances": 2,
+          "playbackMode": "fade-restart"
+        },
+        "LocationAnchor": {
+          "locationId": "beach_waterfront",
+          "name": "Tarkwa Bay Coastal Haven",
+          "environmentCategory": "natural",
           "isActive": false,
           "isDiscovered": false
         }

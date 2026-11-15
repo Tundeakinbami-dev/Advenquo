@@ -333,6 +333,12 @@
       <div id="tab-btn-settings" class="tab-btn">
         <div id="tab-lbl-settings" class="tab-label">Comfort</div>
       </div>
+      <div id="tab-btn-recenter" class="tab-btn" style="background-color: rgba(74, 144, 217, 0.35);">
+        <div id="tab-lbl-recenter" class="tab-label" style="font-size: 1.1;">Recenter</div>
+      </div>
+      <div id="tab-btn-dismiss" class="tab-btn" style="background-color: rgba(239, 68, 68, 0.35);">
+        <div id="tab-lbl-dismiss" class="tab-label" style="font-size: 1.1;">✕</div>
+      </div>
     </div>
   </div>
 
@@ -445,6 +451,12 @@
         <div class="setting-label">Comfort Vignette</div>
         <div id="btn-toggle-vignette" class="toggle-btn">
           <div id="lbl-toggle-vignette" class="toggle-btn-label">Active (Low Motion)</div>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">Tablet Position</div>
+        <div id="btn-recenter-setting" class="toggle-btn">
+          <div class="toggle-btn-label">Recenter Tablet</div>
         </div>
       </div>
       <div class="setting-row">

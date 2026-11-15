@@ -17,6 +17,7 @@ import {
 } from '@iwsdk/core';
 import {
   FBXAnimationLoaderService,
+  IYA_ALASO_BONE_MAP,
   PEDESTRIAN_BONE_MAP,
   TOBI_BONE_MAP,
   type AnimationAuditReport,
@@ -48,6 +49,7 @@ export class AnimationManager {
 
   private nativeClips: PreparedAnimationClips | null = null;
   private tobiClips: PreparedAnimationClips | null = null;
+  private iyaClips: PreparedAnimationClips | null = null;
   private pedestrianClips: PreparedAnimationClips | null = null;
 
   // Active controllers registry
@@ -170,6 +172,27 @@ export class AnimationManager {
       idle: pedIdle,
     };
 
+    // 5. Prepare Iyá Aláso Retargeted clips
+    const iyaJump = this.loaderService.retargetClipToProcedural(
+      this.rawJumpClip,
+      IYA_ALASO_BONE_MAP,
+      'IyaAlaso',
+      { includeVerticalDisplacement: true, scale: 0.01 },
+    );
+    const iyaPain = this.loaderService.retargetClipToProcedural(
+      this.rawPainClip,
+      IYA_ALASO_BONE_MAP,
+      'IyaAlaso',
+      { includeVerticalDisplacement: false },
+    );
+    const iyaIdle = this.loaderService.createSyntheticIdleClip('Iya_Chest', 3.0);
+
+    this.iyaClips = {
+      standingJump: iyaJump,
+      painGesture: iyaPain,
+      idle: iyaIdle,
+    };
+
     this.isLoaded = true;
   }
 
@@ -189,16 +212,23 @@ export class AnimationManager {
 
     // Determine target rig type
     const isTobi = root.name.includes('Tobi') || root.getObjectByName('Tobi_Chest') !== undefined;
+    const isIya =
+      root.name.includes('IyaAlaso') || root.getObjectByName('Iya_Chest') !== undefined;
     const isPedestrian =
       root.name.includes('Pedestrian') || root.getObjectByName('WalkLeftLeg') !== undefined;
     const isNative =
       forcedRigType === 'native' ||
-      (!isTobi && !isPedestrian && root.getObjectByName('mixamorigHips') !== undefined);
+      (!isTobi && !isIya && !isPedestrian && root.getObjectByName('mixamorigHips') !== undefined);
 
     if (isTobi && this.tobiClips) {
       controller.registerClip('jumping', this.tobiClips.standingJump);
       controller.registerClip('pain', this.tobiClips.painGesture);
       if (this.tobiClips.idle) controller.registerClip('idle', this.tobiClips.idle);
+      controller.transitionTo('idle');
+    } else if (isIya && this.iyaClips) {
+      controller.registerClip('jumping', this.iyaClips.standingJump);
+      controller.registerClip('pain', this.iyaClips.painGesture);
+      if (this.iyaClips.idle) controller.registerClip('idle', this.iyaClips.idle);
       controller.transitionTo('idle');
     } else if (isPedestrian && this.pedestrianClips) {
       controller.registerClip('jumping', this.pedestrianClips.standingJump);

@@ -15,7 +15,20 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: process.env.NODE_ENV !== 'production',
     target: 'esnext',
-    rollupOptions: { input: './index.html' },
+    rollupOptions: {
+      input: './index.html',
+      output: {
+        manualChunks(id) {
+          if (
+            id.includes('@pmndrs') ||
+            id.includes('lucide') ||
+            id.includes('@drawcall/uikitml')
+          ) {
+            return 'vendor-uikit';
+          }
+        },
+      },
+    },
   },
   esbuild: { target: 'esnext' },
   // @drawcall/uikitml otherwise pulls a second three/@pmndrs/uikit graph

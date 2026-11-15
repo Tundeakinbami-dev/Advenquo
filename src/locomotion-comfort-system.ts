@@ -20,13 +20,20 @@ import {
 } from '@iwsdk/core';
 
 export class LocomotionComfortSystem extends createSystem({}) {
+  private static instance: LocomotionComfortSystem | null = null;
   private headPos = new Vector3();
   private safeOrigin = new Vector3(0, 0, 0);
   private boundaryHalfWidth = 7.5; // Courtyard is 16m × 16m (half-width 8m minus 0.5m curb cushion)
   private minZ = -7.0; // In front of back compound wall
   private maxZ = 7.0;
+  private hasInitialSpawnOccurred = false;
+
+  public static getInstance(): LocomotionComfortSystem | null {
+    return LocomotionComfortSystem.instance;
+  }
 
   init(): void {
+    LocomotionComfortSystem.instance = this;
     const locomotion = this.world.getSystem(LocomotionSystem);
     if (locomotion) {
       // Default to Quest comfort best practices: Snap Turn, Vignette, moderate sliding speed
@@ -41,13 +48,40 @@ export class LocomotionComfortSystem extends createSystem({}) {
     this.cleanupFuncs.push(
       this.world.visibilityState.subscribe((state) => {
         if (state === VisibilityState.Visible) {
-          // In immersive XR, ensure player is grounded safely
-          if (locomotion) {
-            locomotion.setPlayerPosition(this.safeOrigin);
+          // Only ground player on first launch into immersive XR if initial spawn has not yet occurred.
+          // On focus resume (e.g. returning from Meta system menu), PRESERVE player's current world position.
+          if (!this.hasInitialSpawnOccurred) {
+            this.hasInitialSpawnOccurred = true;
+            if (
+              locomotion &&
+              (!this.player || (this.player.position.x === 0 && this.player.position.z === 0))
+            ) {
+              locomotion.setPlayerPosition(this.safeOrigin);
+            }
           }
+        } else if (state === VisibilityState.VisibleBlurred) {
+          // When Meta system menu is opened or focus is lost, do not reset position.
+          // Locomotion remains safely paused while system overlay is active.
         }
       }),
+      () => {
+        LocomotionComfortSystem.instance = null;
+      },
     );
+  }
+
+  public setBoundaryLimits(minX: number, maxX: number, minZ: number, maxZ: number): void {
+    this.boundaryHalfWidth = Math.max(Math.abs(minX), Math.abs(maxX));
+    this.minZ = minZ;
+    this.maxZ = maxZ;
+  }
+
+  public resetSpawnFlag(): void {
+    this.hasInitialSpawnOccurred = false;
+  }
+
+  public hasSpawned(): boolean {
+    return this.hasInitialSpawnOccurred;
   }
 
   update(delta: number): void {
