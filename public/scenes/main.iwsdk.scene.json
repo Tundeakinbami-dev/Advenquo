@@ -4,25 +4,25 @@
   "components": {
     "com.iwsdk.components.DomeGradient": {
       "sky": [0.35, 0.58, 0.92, 1],
-      "equator": [0.92, 0.78, 0.62, 1],
-      "ground": [0.45, 0.32, 0.22, 1],
+      "equator": [0.88, 0.82, 0.72, 1],
+      "ground": [0.38, 0.38, 0.40, 1],
       "intensity": 1.2
     },
     "com.iwsdk.components.IBLGradient": {
       "sky": [0.55, 0.68, 0.88, 1],
-      "equator": [0.92, 0.78, 0.62, 1],
-      "ground": [0.45, 0.32, 0.22, 1],
+      "equator": [0.88, 0.82, 0.72, 1],
+      "ground": [0.38, 0.38, 0.40, 1],
       "intensity": 1.1
     }
   },
   "resources": {},
   "nodes": [
     {
-      "id": "market-ground",
-      "name": "Market Ground & Courtyard Walkway",
+      "id": "construction-workshop",
+      "name": "Construction Workshop & Building Pad",
       "content": {
         "type": "asset",
-        "asset": "market-ground"
+        "asset": "construction-workshop"
       },
       "transform": {
         "position": [0, 0, 0]
@@ -31,429 +31,260 @@
         "LocomotionEnvironment": {
           "type": "static"
         },
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
+        "ConstructionWorkshopState": {
+          "activeChallengeId": "small_house_challenge",
+          "completionPercentage": 0,
+          "validationPassed": false,
+          "isCompleted": false
         }
       }
     },
     {
-      "id": "courtyard-veranda",
-      "name": "Courtyard Veranda & Compound Wall",
+      "id": "starter-clay-brick-1",
+      "name": "Starter Clay Brick 1",
       "content": {
         "type": "asset",
-        "asset": "courtyard-veranda"
+        "asset": "construction-clay-brick"
       },
       "transform": {
-        "position": [0, 0, -3.8]
+        "position": [-0.6, 0.85, -0.6]
       },
       "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "baba-adewale",
-      "name": "Baba Adéwálé (Courtyard Elder)",
-      "content": {
-        "type": "asset",
-        "asset": "npc-baba-adewale"
-      },
-      "transform": {
-        "position": [0, 0, -3.8]
-      },
-      "components": {
-        "NPCCharacter": {
-          "characterId": "baba-adewale",
-          "name": "Baba Adéwálé",
-          "role": "Elder of the Courtyard",
-          "interactionRadius": 3.8,
-          "inDialogue": false
+        "ConstructionBlock": {
+          "instanceId": "starter_brick_1",
+          "componentType": "clay_brick",
+          "structuralRole": "compressive_masonry",
+          "isPlaced": false,
+          "isHeld": false,
+          "isStaticOptimized": false
         },
-        "CharacterAnimation": {
-          "characterId": "baba-adewale",
-          "state": "idle",
-          "rigType": "auto"
-        },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "market-stall",
-      "name": "Artisan Textile Stall",
-      "content": {
-        "type": "asset",
-        "asset": "market-stall"
-      },
-      "transform": {
-        "position": [2.8, 0, -1.8],
-        "rotationDeg": [0, -35, 0]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "iya-alaso",
-      "name": "Iyá Aláso (Master Adire Artisan)",
-      "content": {
-        "type": "asset",
-        "asset": "npc-iya-alaso"
-      },
-      "transform": {
-        "position": [2.65, 0, -1.4],
-        "rotationDeg": [0, -35, 0]
-      },
-      "components": {
-        "NPCCharacter": {
-          "characterId": "iya-alaso",
-          "name": "Iyá Aláso",
-          "role": "Master Adire Artisan",
-          "interactionRadius": 3.5,
-          "inDialogue": false
-        },
-        "CharacterAnimation": {
-          "characterId": "iya-alaso",
-          "state": "idle",
-          "rigType": "auto"
-        },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "market-props",
-      "name": "Market Produce & Trade Props",
-      "content": {
-        "type": "asset",
-        "asset": "market-props"
-      },
-      "transform": {
-        "position": [1.4, 0, -2.6]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "district-sign",
-      "name": "Ìsàlẹ̀ Èkó District Signpost",
-      "content": {
-        "type": "asset",
-        "asset": "district-sign"
-      },
-      "transform": {
-        "position": [-3.2, 0, 1.2],
-        "rotationDeg": [0, 30, 0]
-      },
-      "components": {
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "display-table",
-      "name": "Display Table",
-      "content": {
-        "type": "asset",
-        "asset": "display-table"
-      },
-      "transform": {
-        "position": [-2.0, 0.72, -1.5],
-        "rotationDeg": [0, 15, 0]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "adire-cloth",
-      "name": "Adire Cloth",
-      "content": {
-        "type": "asset",
-        "asset": "adire-cloth"
-      },
-      "transform": {
-        "position": [-2.32, 0.76, -1.45],
-        "rotationDeg": [0, 15, 0]
-      },
-      "components": {
-        "CulturalObject": {
-          "factId": "adire-cloth",
-          "discovered": false
-        },
-        "RayInteractable": {},
-        "DistanceGrabbable": {
-          "movementMode": "MoveFromTarget"
-        },
-        "AudioSource": {
-          "src": "./audio/chime.mp3",
-          "maxInstances": 2,
-          "playbackMode": "fade-restart"
-        },
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "talking-drum",
-      "name": "Talking Drum",
-      "content": {
-        "type": "asset",
-        "asset": "talking-drum"
-      },
-      "transform": {
-        "position": [-2.11, 0.76, -1.45],
-        "rotationDeg": [0, 15, 0]
-      },
-      "components": {
-        "CulturalObject": {
-          "factId": "talking-drum",
-          "discovered": false
-        },
-        "RayInteractable": {},
-        "DistanceGrabbable": {
-          "movementMode": "MoveFromTarget"
-        },
-        "AudioSource": {
-          "src": "./audio/chime.mp3",
-          "maxInstances": 2,
-          "playbackMode": "fade-restart"
-        },
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "calabash",
-      "name": "Calabash Bowl",
-      "content": {
-        "type": "asset",
-        "asset": "calabash"
-      },
-      "transform": {
-        "position": [-1.89, 0.76, -1.45],
-        "rotationDeg": [0, 15, 0]
-      },
-      "components": {
-        "CulturalObject": {
-          "factId": "calabash",
-          "discovered": false
-        },
-        "RayInteractable": {},
-        "DistanceGrabbable": {
-          "movementMode": "MoveFromTarget"
-        },
-        "AudioSource": {
-          "src": "./audio/chime.mp3",
-          "maxInstances": 2,
-          "playbackMode": "fade-restart"
-        },
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "kola-nut",
-      "name": "Kola Nut",
-      "content": {
-        "type": "asset",
-        "asset": "kola-nut"
-      },
-      "transform": {
-        "position": [-1.68, 0.76, -1.45],
-        "rotationDeg": [0, 15, 0]
-      },
-      "components": {
-        "CulturalObject": {
-          "factId": "kola-nut",
-          "discovered": false
-        },
-        "RayInteractable": {},
-        "DistanceGrabbable": {
-          "movementMode": "MoveFromTarget"
-        },
-        "AudioSource": {
-          "src": "./audio/chime.mp3",
-          "maxInstances": 2,
-          "playbackMode": "fade-restart"
-        },
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "handheld-adire-sample",
-      "name": "Adire Cloth Sample — Hand Practice",
-      "content": {
-        "type": "asset",
-        "asset": "adire-cloth"
-      },
-      "transform": {
-        "position": [-0.35, 1.1, -0.7],
-        "rotationDeg": [0, 10, 0],
-        "scale": [1.35, 1.35, 1.35]
-      },
-      "components": {
         "OneHandGrabbable": {},
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
+        "RayInteractable": {}
       }
     },
     {
-      "id": "delivery-clue-scroll",
-      "name": "Dropped Delivery Receipt Scroll",
+      "id": "starter-clay-brick-2",
+      "name": "Starter Clay Brick 2",
       "content": {
         "type": "asset",
-        "asset": "delivery-clue-scroll"
+        "asset": "construction-clay-brick"
       },
       "transform": {
-        "position": [-1.48, 0.74, -1.35],
-        "rotationDeg": [0, -20, 0]
+        "position": [-0.3, 0.85, -0.6]
       },
       "components": {
-        "AdventureItem": {
-          "itemId": "delivery_manifest",
-          "title": "Carriers Guild Receipt #104",
-          "collected": false,
-          "isObjectiveTarget": true
+        "ConstructionBlock": {
+          "instanceId": "starter_brick_2",
+          "componentType": "clay_brick",
+          "structuralRole": "compressive_masonry",
+          "isPlaced": false,
+          "isHeld": false,
+          "isStaticOptimized": false
         },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
+        "OneHandGrabbable": {},
+        "RayInteractable": {}
       }
     },
     {
-      "id": "missing-goods-crate",
-      "name": "Missing Abeokuta Indigo Dye Crate",
+      "id": "starter-concrete-block-1",
+      "name": "Starter Concrete Block 1",
       "content": {
         "type": "asset",
-        "asset": "missing-goods-crate"
+        "asset": "construction-concrete-block"
       },
       "transform": {
-        "position": [-3.5, 0.0, 1.8],
-        "rotationDeg": [0, 45, 0]
+        "position": [0.3, 0.85, -0.6]
       },
       "components": {
-        "AdventureItem": {
-          "itemId": "missing_goods_crate",
-          "title": "Abeokuta Indigo Dye Crate",
-          "collected": false,
-          "isObjectiveTarget": true
+        "ConstructionBlock": {
+          "instanceId": "starter_block_1",
+          "componentType": "concrete_block",
+          "structuralRole": "compressive_masonry",
+          "isPlaced": false,
+          "isHeld": false,
+          "isStaticOptimized": false
         },
-        "RayInteractable": {},
-        "DistanceGrabbable": {
-          "movementMode": "MoveFromTarget"
+        "OneHandGrabbable": {},
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "starter-concrete-block-2",
+      "name": "Starter Concrete Block 2",
+      "content": {
+        "type": "asset",
+        "asset": "construction-concrete-block"
+      },
+      "transform": {
+        "position": [0.6, 0.85, -0.6]
+      },
+      "components": {
+        "ConstructionBlock": {
+          "instanceId": "starter_block_2",
+          "componentType": "concrete_block",
+          "structuralRole": "compressive_masonry",
+          "isPlaced": false,
+          "isHeld": false,
+          "isStaticOptimized": false
         },
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
+        "OneHandGrabbable": {},
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "starter-column-1",
+      "name": "Starter Column 1",
+      "content": {
+        "type": "asset",
+        "asset": "construction-reinforced-column"
+      },
+      "transform": {
+        "position": [-1.4, 0.85, -1.0]
+      },
+      "components": {
+        "ConstructionBlock": {
+          "instanceId": "starter_column_1",
+          "componentType": "reinforced_column",
+          "structuralRole": "load_bearing_column",
+          "isPlaced": false,
+          "isHeld": false,
+          "isStaticOptimized": false
+        },
+        "TwoHandsGrabbable": {},
+        "OneHandGrabbable": {},
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "starter-column-2",
+      "name": "Starter Column 2",
+      "content": {
+        "type": "asset",
+        "asset": "construction-reinforced-column"
+      },
+      "transform": {
+        "position": [1.4, 0.85, -1.0]
+      },
+      "components": {
+        "ConstructionBlock": {
+          "instanceId": "starter_column_2",
+          "componentType": "reinforced_column",
+          "structuralRole": "load_bearing_column",
+          "isPlaced": false,
+          "isHeld": false,
+          "isStaticOptimized": false
+        },
+        "TwoHandsGrabbable": {},
+        "OneHandGrabbable": {},
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "starter-beam-1",
+      "name": "Starter Horizontal Beam 1",
+      "content": {
+        "type": "asset",
+        "asset": "construction-horizontal-beam"
+      },
+      "transform": {
+        "position": [0, 0.85, -1.2]
+      },
+      "components": {
+        "ConstructionBlock": {
+          "instanceId": "starter_beam_1",
+          "componentType": "horizontal_beam",
+          "structuralRole": "load_transfer_beam",
+          "isPlaced": false,
+          "isHeld": false,
+          "isStaticOptimized": false
+        },
+        "TwoHandsGrabbable": {},
+        "OneHandGrabbable": {},
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "starter-wall-panel-1",
+      "name": "Starter Wall Panel 1",
+      "content": {
+        "type": "asset",
+        "asset": "construction-wall-panel"
+      },
+      "transform": {
+        "position": [-1.2, 0.85, -1.6]
+      },
+      "components": {
+        "ConstructionBlock": {
+          "instanceId": "starter_wall_1",
+          "componentType": "wall_panel",
+          "structuralRole": "wall_partition",
+          "isPlaced": false,
+          "isHeld": false,
+          "isStaticOptimized": false
+        },
+        "TwoHandsGrabbable": {},
+        "OneHandGrabbable": {},
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "starter-floor-slab-1",
+      "name": "Starter Floor Slab 1",
+      "content": {
+        "type": "asset",
+        "asset": "construction-floor-component"
+      },
+      "transform": {
+        "position": [0, 0.85, -1.8]
+      },
+      "components": {
+        "ConstructionBlock": {
+          "instanceId": "starter_floor_1",
+          "componentType": "floor_component",
+          "structuralRole": "horizontal_deck",
+          "isPlaced": false,
+          "isHeld": false,
+          "isStaticOptimized": false
+        },
+        "TwoHandsGrabbable": {},
+        "OneHandGrabbable": {},
+        "RayInteractable": {}
+      }
+    },
+    {
+      "id": "starter-roof-panel-1",
+      "name": "Starter Roof Panel 1",
+      "content": {
+        "type": "asset",
+        "asset": "construction-roof-panel"
+      },
+      "transform": {
+        "position": [1.2, 0.85, -1.6]
+      },
+      "components": {
+        "ConstructionBlock": {
+          "instanceId": "starter_roof_1",
+          "componentType": "roof_panel",
+          "structuralRole": "weather_enclosure",
+          "isPlaced": false,
+          "isHeld": false,
+          "isStaticOptimized": false
+        },
+        "TwoHandsGrabbable": {},
+        "OneHandGrabbable": {},
+        "RayInteractable": {}
       }
     },
     {
       "id": "intro-panel",
-
-      "name": "Intro Panel",
+      "name": "Construction Intro & Seated Station Panel",
       "content": {
         "type": "asset",
         "asset": "intro-panel"
       },
       "transform": {
-        "position": [-0.85, 1.35, -1.2],
-        "rotationDeg": [0, 25, 0]
-      },
-      "components": {
-        "RayInteractable": {}
-      }
-    },
-    {
-      "id": "npc-dialogue-panel",
-      "name": "NPC Dialogue Panel",
-      "content": {
-        "type": "asset",
-        "asset": "npc-dialogue-panel"
-      },
-      "transform": {
-        "position": [0.65, 1.35, -3.2]
+        "position": [-0.75, 1.25, -1.1],
+        "rotationDeg": [0, 20, 0]
       },
       "components": {
         "RayInteractable": {}
@@ -461,7 +292,7 @@
     },
     {
       "id": "vr-nav-tablet",
-      "name": "VR Navigation Tablet",
+      "name": "Builder Tablet HUD",
       "content": {
         "type": "asset",
         "asset": "vr-nav-tablet"
@@ -475,179 +306,8 @@
       }
     },
     {
-      "id": "fact-panel-adire",
-      "name": "Fact Panel: Adire",
-      "content": {
-        "type": "asset",
-        "asset": "fact-panel-adire"
-      },
-      "transform": {
-        "position": [-2.32, 1.25, -1.45],
-        "rotationDeg": [0, 15, 0]
-      },
-      "components": {
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "fact-panel-drum",
-      "name": "Fact Panel: Drum",
-      "content": {
-        "type": "asset",
-        "asset": "fact-panel-drum"
-      },
-      "transform": {
-        "position": [-2.11, 1.25, -1.45],
-        "rotationDeg": [0, 15, 0]
-      },
-      "components": {
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "fact-panel-calabash",
-      "name": "Fact Panel: Calabash",
-      "content": {
-        "type": "asset",
-        "asset": "fact-panel-calabash"
-      },
-      "transform": {
-        "position": [-1.89, 1.25, -1.45],
-        "rotationDeg": [0, 15, 0]
-      },
-      "components": {
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "fact-panel-kola",
-      "name": "Fact Panel: Kola",
-      "content": {
-        "type": "asset",
-        "asset": "fact-panel-kola"
-      },
-      "transform": {
-        "position": [-1.68, 1.25, -1.45],
-        "rotationDeg": [0, 15, 0]
-      },
-      "components": {
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Artisan Market",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": true
-        }
-      }
-    },
-    {
-      "id": "completion-panel",
-      "name": "Completion Celebration Panel",
-      "content": {
-        "type": "asset",
-        "asset": "completion-panel"
-      },
-      "transform": {
-        "position": [0, 1.5, -2.5]
-      },
-      "components": {
-        "RayInteractable": {}
-      }
-    },
-    {
-      "id": "architect-studio",
-      "name": "Studio Kán Architectes (Tobi's Studio)",
-      "content": {
-        "type": "asset",
-        "asset": "architect-studio"
-      },
-      "transform": {
-        "position": [-3.8, 0, 1.2]
-      },
-      "components": {
-        "LocomotionEnvironment": {
-          "type": "static"
-        },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "lagos_urban",
-          "name": "Yaba Tech & Transit Corridor",
-          "environmentCategory": "urban",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "construction-site",
-      "name": "Eco-Terrace Active Construction Site",
-      "content": {
-        "type": "asset",
-        "asset": "construction-site"
-      },
-      "transform": {
-        "position": [4.2, 0, 2.5]
-      },
-      "components": {
-        "LocomotionEnvironment": {
-          "type": "static"
-        },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "lagos_urban",
-          "name": "Yaba Tech & Transit Corridor",
-          "environmentCategory": "urban",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "buka-restaurant",
-      "name": "Mama Nkechi's Buka Canteen",
-      "content": {
-        "type": "asset",
-        "asset": "buka-restaurant"
-      },
-      "transform": {
-        "position": [3.8, 0, -2.2]
-      },
-      "components": {
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "lagos_urban",
-          "name": "Yaba Tech & Transit Corridor",
-          "environmentCategory": "urban",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
       "id": "npc-tobi",
-      "name": "Tobi Adeleke (Junior Architect)",
+      "name": "Tobi Adeleke (Lead Architect)",
       "content": {
         "type": "asset",
         "asset": "npc-tobi"
@@ -657,112 +317,17 @@
         "rotationDeg": [0, 30, 0]
       },
       "components": {
-        "NPCCharacter": {
-          "characterId": "npc_tobi",
-          "name": "Tobi Adeleke",
-          "role": "Junior Architect",
-          "interactionRadius": 3.5,
-          "inDialogue": false
-        },
         "CharacterAnimation": {
           "characterId": "npc_tobi",
           "state": "idle",
           "rigType": "auto"
         },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "lagos_urban",
-          "name": "Yaba Tech & Transit Corridor",
-          "environmentCategory": "urban",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "npc-kunle",
-      "name": "Kunle Badmus (Lead Site Contractor)",
-      "content": {
-        "type": "asset",
-        "asset": "npc-kunle-contractor"
-      },
-      "transform": {
-        "position": [4.0, 0, 2.0],
-        "rotationDeg": [0, -45, 0]
-      },
-      "components": {
-        "NPCCharacter": {
-          "characterId": "npc_kunle",
-          "name": "Kunle Badmus",
-          "role": "Lead Site Contractor",
-          "interactionRadius": 3.5,
-          "inDialogue": false
-        },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "lagos_urban",
-          "name": "Yaba Tech & Transit Corridor",
-          "environmentCategory": "urban",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "npc-folake",
-      "name": "Folake Coker (Senior Partner)",
-      "content": {
-        "type": "asset",
-        "asset": "npc-folake-mentor"
-      },
-      "transform": {
-        "position": [-4.2, 0, 1.8],
-        "rotationDeg": [0, 60, 0]
-      },
-      "components": {
-        "NPCCharacter": {
-          "characterId": "npc_folake",
-          "name": "Folake Coker",
-          "role": "Senior Partner",
-          "interactionRadius": 3.5,
-          "inDialogue": false
-        },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "lagos_urban",
-          "name": "Yaba Tech & Transit Corridor",
-          "environmentCategory": "urban",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "lagos-street-infrastructure",
-      "name": "Lagos Street Infrastructure & Utility Grid",
-      "content": {
-        "type": "asset",
-        "asset": "lagos-street-infrastructure"
-      },
-      "transform": {
-        "position": [0, 0, 0]
-      },
-      "components": {
-        "LocomotionEnvironment": {
-          "type": "static"
-        },
-        "LocationAnchor": {
-          "locationId": "lagos_urban",
-          "name": "Yaba Tech & Transit Corridor",
-          "environmentCategory": "urban",
-          "isActive": false,
-          "isDiscovered": false
-        }
+        "RayInteractable": {}
       }
     },
     {
       "id": "moving-pedestrian-urban",
-      "name": "Yaba Commuter",
+      "name": "Site Surveyor",
       "content": {
         "type": "asset",
         "asset": "moving-pedestrian"
@@ -771,1427 +336,26 @@
         "position": [-1.8, 0.08, 0.6]
       },
       "components": {
-        "NPCMovement": {
-          "actorId": "yaba-commuter-01",
-          "role": "commuter",
-          "state": "walking",
-          "activity": "Walking along the Yaba corridor",
-          "enabled": true,
-          "speed": 0.8,
-          "startX": -1.8,
-          "startZ": 0.6,
-          "endX": 1.8,
-          "endZ": 0.6,
-          "progress": 0,
-          "movingForward": true,
-          "destinationX": 1.8,
-          "destinationZ": 0.6
-        },
         "CharacterAnimation": {
           "characterId": "moving-pedestrian-urban",
           "state": "walking",
           "rigType": "auto"
-        },
-        "LocationAnchor": {
-          "locationId": "lagos_urban",
-          "name": "Yaba Tech & Transit Corridor",
-          "environmentCategory": "urban",
-          "isActive": false,
-          "isDiscovered": false
         }
       }
     },
     {
-      "id": "urban-danfo-bus",
-      "name": "Iconic Lagos Danfo Minibus",
+      "id": "completion-panel",
+      "name": "Structure Certification Panel",
       "content": {
         "type": "asset",
-        "asset": "urban-danfo-bus"
+        "asset": "completion-panel"
       },
       "transform": {
-        "position": [2.5, 0, 0],
-        "rotationDeg": [0, -15, 0]
+        "position": [0, 1.6, -1.8],
+        "rotationDeg": [0, 0, 0]
       },
       "components": {
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "lagos_urban",
-          "name": "Yaba Tech & Transit Corridor",
-          "environmentCategory": "urban",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "danfo-fare-box",
-      "name": "Danfo Conductor Coin Box",
-      "content": {
-        "type": "asset",
-        "asset": "danfo-fare-box"
-      },
-      "transform": {
-        "position": [2.2, 0.75, 0.2]
-      },
-      "components": {
-        "CulturalObject": {
-          "factId": "danfo-fare-box",
-          "discovered": false
-        },
-        "RayInteractable": {},
-        "DistanceGrabbable": {
-          "movementMode": "MoveFromTarget"
-        },
-        "AudioSource": {
-          "src": "./audio/chime.mp3",
-          "maxInstances": 2,
-          "playbackMode": "fade-restart"
-        },
-        "LocationAnchor": {
-          "locationId": "lagos_urban",
-          "name": "Yaba Tech & Transit Corridor",
-          "environmentCategory": "urban",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "smart-iot-beacon",
-      "name": "Yaba IoT Solar Environmental Sensor",
-      "content": {
-        "type": "asset",
-        "asset": "smart-iot-beacon"
-      },
-      "transform": {
-        "position": [-2.0, 0.9, -3.8]
-      },
-      "components": {
-        "CulturalObject": {
-          "factId": "smart-iot-beacon",
-          "discovered": false
-        },
-        "RayInteractable": {},
-        "DistanceGrabbable": {
-          "movementMode": "MoveFromTarget"
-        },
-        "AudioSource": {
-          "src": "./audio/chime.mp3",
-          "maxInstances": 2,
-          "playbackMode": "fade-restart"
-        },
-        "LocationAnchor": {
-          "locationId": "lagos_urban",
-          "name": "Yaba Tech & Transit Corridor",
-          "environmentCategory": "urban",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "palace-ground",
-      "name": "Iga Idunganran Royal Flagstone Courtyard",
-      "content": {
-        "type": "asset",
-        "asset": "palace-ground"
-      },
-      "transform": {
-        "position": [0, 0, 0]
-      },
-      "components": {
-        "LocomotionEnvironment": {
-          "type": "static"
-        },
-        "LocationAnchor": {
-          "locationId": "heritage_iga",
-          "name": "Iga Idunganran Royal Palace",
-          "environmentCategory": "heritage",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "palace-chamber-interior",
-      "name": "Royal Council Chamber Interior",
-      "content": {
-        "type": "asset",
-        "asset": "palace-chamber-interior"
-      },
-      "transform": {
-        "position": [0, 0, -3.8]
-      },
-      "components": {
-        "LocomotionEnvironment": {
-          "type": "static"
-        },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "heritage_iga",
-          "name": "Iga Idunganran Royal Palace",
-          "environmentCategory": "heritage",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "palace-throne-dais",
-      "name": "The Oba's Throne Dais & Bronze Leopards",
-      "content": {
-        "type": "asset",
-        "asset": "palace-throne-dais"
-      },
-      "transform": {
-        "position": [0, 0, -3.8]
-      },
-      "components": {
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "heritage_iga",
-          "name": "Iga Idunganran Royal Palace",
-          "environmentCategory": "heritage",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "palace-pillars",
-      "name": "Carved Iroko Ancestral Pillars",
-      "content": {
-        "type": "asset",
-        "asset": "palace-pillars"
-      },
-      "transform": {
-        "position": [0, 0, -1.8]
-      },
-      "components": {
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "heritage_iga",
-          "name": "Iga Idunganran Royal Palace",
-          "environmentCategory": "heritage",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "npc-palace-chief",
-      "name": "Chief Ẹletu Odibo (Prime Minister & Kingmaker)",
-      "content": {
-        "type": "asset",
-        "asset": "npc-palace-chief"
-      },
-      "transform": {
-        "position": [-1.8, 0, -1.8],
-        "rotationDeg": [0, 30, 0]
-      },
-      "components": {
-        "NPCCharacter": {
-          "characterId": "chief-eletu",
-          "name": "Chief Ẹletu Odibo",
-          "role": "Prime Minister & Traditional Kingmaker of Lagos",
-          "interactionRadius": 3.5,
-          "inDialogue": false
-        },
-        "CharacterAnimation": {
-          "characterId": "chief-eletu",
-          "state": "idle",
-          "rigType": "auto"
-        },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "heritage_iga",
-          "name": "Iga Idunganran Royal Palace",
-          "environmentCategory": "heritage",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "npc-olori-morenike",
-      "name": "Olori Morénikẹ́ (Palace Cultural Historian)",
-      "content": {
-        "type": "asset",
-        "asset": "npc-olori-morenike"
-      },
-      "transform": {
-        "position": [1.6, 0, -1.5],
-        "rotationDeg": [0, -40, 0]
-      },
-      "components": {
-        "NPCCharacter": {
-          "characterId": "olori-morenike",
-          "name": "Olori Morénikẹ́",
-          "role": "Palace Cultural Historian",
-          "interactionRadius": 3.5,
-          "inDialogue": false
-        },
-        "CharacterAnimation": {
-          "characterId": "olori-morenike",
-          "state": "idle",
-          "rigType": "auto"
-        },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "heritage_iga",
-          "name": "Iga Idunganran Royal Palace",
-          "environmentCategory": "heritage",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "oba-staff",
-      "name": "Ọpá Àṣẹ: Ceremonial Staff of Office",
-      "content": {
-        "type": "asset",
-        "asset": "oba-staff"
-      },
-      "transform": {
-        "position": [-0.6, 0.8, -3.2]
-      },
-      "components": {
-        "CulturalObject": {
-          "factId": "oba-staff-of-office",
-          "discovered": false
-        },
-        "RayInteractable": {},
-        "DistanceGrabbable": {
-          "movementMode": "MoveFromTarget"
-        },
-        "AudioSource": {
-          "src": "./audio/chime.mp3",
-          "maxInstances": 2,
-          "playbackMode": "fade-restart"
-        },
-        "LocationAnchor": {
-          "locationId": "heritage_iga",
-          "name": "Iga Idunganran Royal Palace",
-          "environmentCategory": "heritage",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "royal-coral-necklace",
-      "name": "Imperial Coral Bead Collar (Ìyùn)",
-      "content": {
-        "type": "asset",
-        "asset": "royal-coral-necklace"
-      },
-      "transform": {
-        "position": [0.6, 0.8, -3.2]
-      },
-      "components": {
-        "CulturalObject": {
-          "factId": "royal-coral-necklace",
-          "discovered": false
-        },
-        "RayInteractable": {},
-        "DistanceGrabbable": {
-          "movementMode": "MoveFromTarget"
-        },
-        "AudioSource": {
-          "src": "./audio/chime.mp3",
-          "maxInstances": 2,
-          "playbackMode": "fade-restart"
-        },
-        "LocationAnchor": {
-          "locationId": "heritage_iga",
-          "name": "Iga Idunganran Royal Palace",
-          "environmentCategory": "heritage",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "coastal-ground",
-      "name": "Tarkwa Bay Shoreline & Golden Beach Sand",
-      "content": {
-        "type": "asset",
-        "asset": "coastal-ground"
-      },
-      "transform": {
-        "position": [0, 0, 0]
-      },
-      "components": {
-        "LocomotionEnvironment": {
-          "type": "static"
-        },
-        "LocationAnchor": {
-          "locationId": "beach_waterfront",
-          "name": "Tarkwa Bay Coastal Haven",
-          "environmentCategory": "natural",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "beach-cabana",
-      "name": "Artisan Bamboo Thatched Beach Cabana",
-      "content": {
-        "type": "asset",
-        "asset": "beach-cabana"
-      },
-      "transform": {
-        "position": [-3.2, 0, 2.0]
-      },
-      "components": {
-        "LocomotionEnvironment": {
-          "type": "static"
-        },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "beach_waterfront",
-          "name": "Tarkwa Bay Coastal Haven",
-          "environmentCategory": "natural",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "coastal-hut",
-      "name": "Marine Station & Fisherman Thatched Hut",
-      "content": {
-        "type": "asset",
-        "asset": "coastal-hut"
-      },
-      "transform": {
-        "position": [3.6, 0, 2.2]
-      },
-      "components": {
-        "LocomotionEnvironment": {
-          "type": "static"
-        },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "beach_waterfront",
-          "name": "Tarkwa Bay Coastal Haven",
-          "environmentCategory": "natural",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "fishing-canoe",
-      "name": "Artisanal Wooden Fishing Canoe (Ọkọ̀ Ojú-Omi)",
-      "content": {
-        "type": "asset",
-        "asset": "fishing-canoe"
-      },
-      "transform": {
-        "position": [2.8, 0, 0.5],
-        "rotationDeg": [0, -25, 0]
-      },
-      "components": {
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "beach_waterfront",
-          "name": "Tarkwa Bay Coastal Haven",
-          "environmentCategory": "natural",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "coconut-palm-beach-west",
-      "name": "Coastal Coconut Palm West",
-      "content": {
-        "type": "asset",
-        "asset": "coconut-palm"
-      },
-      "transform": {
-        "position": [-3.5, 0, -1.8],
-        "rotationDeg": [0, 30, 0]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "beach_waterfront",
-          "name": "Tarkwa Bay Coastal Haven",
-          "environmentCategory": "natural",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "coconut-palm-beach-east",
-      "name": "Coastal Coconut Palm East",
-      "content": {
-        "type": "asset",
-        "asset": "coconut-palm"
-      },
-      "transform": {
-        "position": [4.2, 0, -1.2],
-        "rotationDeg": [0, -45, 0]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "beach_waterfront",
-          "name": "Tarkwa Bay Coastal Haven",
-          "environmentCategory": "natural",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "coconut-palm-beach-south",
-      "name": "Coastal Coconut Palm South",
-      "content": {
-        "type": "asset",
-        "asset": "coconut-palm"
-      },
-      "transform": {
-        "position": [-4.5, 0, 4.0],
-        "rotationDeg": [0, 60, 0]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "beach_waterfront",
-          "name": "Tarkwa Bay Coastal Haven",
-          "environmentCategory": "natural",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "npc-fisherman",
-      "name": "Captain Femi (Pa Daniel, Coastal Fisherman)",
-      "content": {
-        "type": "asset",
-        "asset": "npc-fisherman"
-      },
-      "transform": {
-        "position": [1.8, 0, 0.2],
-        "rotationDeg": [0, -100, 0]
-      },
-      "components": {
-        "NPCCharacter": {
-          "characterId": "captain-femi",
-          "name": "Captain Femi",
-          "role": "Artisanal Coastal Fisherman & Ferryman",
-          "interactionRadius": 3.5,
-          "inDialogue": false
-        },
-        "CharacterAnimation": {
-          "characterId": "captain-femi",
-          "state": "idle",
-          "rigType": "auto"
-        },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "beach_waterfront",
-          "name": "Tarkwa Bay Coastal Haven",
-          "environmentCategory": "natural",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "npc-amara-marine",
-      "name": "Amara Eze (Marine Conservationist)",
-      "content": {
-        "type": "asset",
-        "asset": "npc-amara-marine"
-      },
-      "transform": {
-        "position": [-2.2, 0, -0.8],
-        "rotationDeg": [0, 40, 0]
-      },
-      "components": {
-        "NPCCharacter": {
-          "characterId": "amara-marine",
-          "name": "Amara Eze",
-          "role": "Marine Ecologist & Coastal Conservationist",
-          "interactionRadius": 3.5,
-          "inDialogue": false
-        },
-        "CharacterAnimation": {
-          "characterId": "amara-marine",
-          "state": "idle",
-          "rigType": "auto"
-        },
-        "RayInteractable": {},
-        "LocationAnchor": {
-          "locationId": "beach_waterfront",
-          "name": "Tarkwa Bay Coastal Haven",
-          "environmentCategory": "natural",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "sea-shell",
-      "name": "Atlantic Giant Tun Marine Shell",
-      "content": {
-        "type": "asset",
-        "asset": "sea-shell"
-      },
-      "transform": {
-        "position": [-1.2, 0.2, -1.5]
-      },
-      "components": {
-        "CulturalObject": {
-          "factId": "lagoon-sea-shell",
-          "discovered": false
-        },
-        "RayInteractable": {},
-        "DistanceGrabbable": {
-          "movementMode": "MoveFromTarget"
-        },
-        "AudioSource": {
-          "src": "./audio/chime.mp3",
-          "maxInstances": 2,
-          "playbackMode": "fade-restart"
-        },
-        "LocationAnchor": {
-          "locationId": "beach_waterfront",
-          "name": "Tarkwa Bay Coastal Haven",
-          "environmentCategory": "natural",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "fresh-coconut",
-      "name": "Chilled Coconut with Drinking Palm Straw",
-      "content": {
-        "type": "asset",
-        "asset": "fresh-coconut"
-      },
-      "transform": {
-        "position": [-2.8, 0.72, 2.0]
-      },
-      "components": {
-        "CulturalObject": {
-          "factId": "fresh-coconut-vessel",
-          "discovered": false
-        },
-        "RayInteractable": {},
-        "DistanceGrabbable": {
-          "movementMode": "MoveFromTarget"
-        },
-        "AudioSource": {
-          "src": "./audio/chime.mp3",
-          "maxInstances": 2,
-          "playbackMode": "fade-restart"
-        },
-        "LocationAnchor": {
-          "locationId": "beach_waterfront",
-          "name": "Tarkwa Bay Coastal Haven",
-          "environmentCategory": "natural",
-          "isActive": false,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-palm-west",
-      "name": "Courtyard Palm West",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-palm-tall",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          -5.5,
-          0.14,
-          -4.2
-        ],
-        "rotationDeg": [
-          0,
-          20,
-          0
-        ],
-        "scale": [
-          2.8,
-          2.8,
-          2.8
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-palm-east",
-      "name": "Courtyard Palm East",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-palm-tall",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          5.5,
-          0.15,
-          -3.8
-        ],
-        "rotationDeg": [
-          0,
-          -25,
-          0
-        ],
-        "scale": [
-          3.0,
-          3.0,
-          3.0
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-palm-southwest",
-      "name": "Courtyard Palm Southwest",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-palm-short",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          -5.8,
-          0.135,
-          3.8
-        ],
-        "rotationDeg": [
-          0,
-          50,
-          0
-        ],
-        "scale": [
-          2.7,
-          2.7,
-          2.7
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-palm-southeast",
-      "name": "Courtyard Palm Southeast",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-palm-short",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          5.6,
-          0.125,
-          2.6
-        ],
-        "rotationDeg": [
-          0,
-          -40,
-          0
-        ],
-        "scale": [
-          2.5,
-          2.5,
-          2.5
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-shrub-west",
-      "name": "Courtyard Shrub West",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-bush",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          -5.0,
-          0.08,
-          -4.25
-        ],
-        "rotationDeg": [
-          0,
-          15,
-          0
-        ],
-        "scale": [
-          1.6,
-          1.6,
-          1.6
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-shrub-east",
-      "name": "Courtyard Shrub East",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-bush",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          5.0,
-          0.09,
-          -3.9
-        ],
-        "rotationDeg": [
-          0,
-          70,
-          0
-        ],
-        "scale": [
-          1.8,
-          1.8,
-          1.8
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-shrub-west-gate",
-      "name": "Courtyard Shrub West Gate",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-bush",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          -5.9,
-          0.07,
-          3.1
-        ],
-        "rotationDeg": [
-          0,
-          30,
-          0
-        ],
-        "scale": [
-          1.4,
-          1.4,
-          1.4
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-shrub-east-gate",
-      "name": "Courtyard Shrub East Gate",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-bush",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          5.7,
-          0.08,
-          3.5
-        ],
-        "rotationDeg": [
-          0,
-          55,
-          0
-        ],
-        "scale": [
-          1.6,
-          1.6,
-          1.6
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-rock-west",
-      "name": "Courtyard Rock West",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-rock",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          -5.15,
-          0.1,
-          -3.5
-        ],
-        "rotationDeg": [
-          0,
-          35,
-          0
-        ],
-        "scale": [
-          2.0,
-          2.0,
-          2.0
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-rock-east",
-      "name": "Courtyard Rock East",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-rock",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          5.05,
-          0.08,
-          -3.1
-        ],
-        "rotationDeg": [
-          0,
-          115,
-          0
-        ],
-        "scale": [
-          1.6,
-          1.6,
-          1.6
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-flat-rock-west",
-      "name": "Courtyard Flat Rock West",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-flat-rock",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          -4.7,
-          0.09,
-          -3.8
-        ],
-        "rotationDeg": [
-          0,
-          25,
-          0
-        ],
-        "scale": [
-          1.8,
-          1.8,
-          1.8
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-flat-rock-east",
-      "name": "Courtyard Flat Rock East",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-flat-rock",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          4.65,
-          0.1,
-          -3.5
-        ],
-        "rotationDeg": [
-          0,
-          80,
-          0
-        ],
-        "scale": [
-          2.0,
-          2.0,
-          2.0
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-grass-west-a",
-      "name": "Courtyard Grass West A",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-grass",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          -5.5,
-          0.06,
-          -3.25
-        ],
-        "rotationDeg": [
-          0,
-          20,
-          0
-        ],
-        "scale": [
-          1.2,
-          1.2,
-          1.2
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-grass-west-b",
-      "name": "Courtyard Grass West B",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-grass",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          -4.7,
-          0.05,
-          -4.7
-        ],
-        "rotationDeg": [
-          0,
-          60,
-          0
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1.0
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-grass-east-a",
-      "name": "Courtyard Grass East A",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-grass",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          5.7,
-          0.06,
-          -3.0
-        ],
-        "rotationDeg": [
-          0,
-          90,
-          0
-        ],
-        "scale": [
-          1.2,
-          1.2,
-          1.2
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-grass-east-b",
-      "name": "Courtyard Grass East B",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-grass",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          4.9,
-          0.055,
-          -4.6
-        ],
-        "rotationDeg": [
-          0,
-          35,
-          0
-        ],
-        "scale": [
-          1.1,
-          1.1,
-          1.1
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-grass-gate-west",
-      "name": "Courtyard Grass Gate West",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-grass",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          -5.15,
-          0.06,
-          3.8
-        ],
-        "rotationDeg": [
-          0,
-          45,
-          0
-        ],
-        "scale": [
-          1.2,
-          1.2,
-          1.2
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-grass-gate-east",
-      "name": "Courtyard Grass Gate East",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-grass",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          5.0,
-          0.06,
-          3.2
-        ],
-        "rotationDeg": [
-          0,
-          130,
-          0
-        ],
-        "scale": [
-          1.2,
-          1.2,
-          1.2
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-bench-west",
-      "name": "Courtyard Bench West",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-bench",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          -4.8,
-          0,
-          -2.5
-        ],
-        "rotationDeg": [
-          0,
-          90,
-          0
-        ],
-        "scale": [
-          2,
-          2,
-          2
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-bench-east",
-      "name": "Courtyard Bench East",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-bench",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          4.8,
-          0,
-          0.7
-        ],
-        "rotationDeg": [
-          0,
-          -90,
-          0
-        ],
-        "scale": [
-          2,
-          2,
-          2
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-pot-west",
-      "name": "Courtyard Pot West",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-potted-plant",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          -3.6,
-          0,
-          -4.4
-        ],
-        "rotationDeg": [
-          0,
-          0,
-          0
-        ],
-        "scale": [
-          1.3,
-          1.3,
-          1.3
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
-      }
-    },
-    {
-      "id": "courtyard-pot-east",
-      "name": "Courtyard Pot East",
-      "content": {
-        "type": "asset",
-        "asset": "scenery-potted-plant",
-        "castShadow": false,
-        "receiveShadow": true
-      },
-      "transform": {
-        "position": [
-          3.6,
-          0,
-          -4.4
-        ],
-        "rotationDeg": [
-          0,
-          0,
-          0
-        ],
-        "scale": [
-          1.3,
-          1.3,
-          1.3
-        ]
-      },
-      "components": {
-        "LocationAnchor": {
-          "locationId": "nigerian_market",
-          "name": "Ìsàlẹ̀ Èkó Courtyard Garden",
-          "environmentCategory": "market",
-          "isActive": true,
-          "isDiscovered": false
-        }
+        "RayInteractable": {}
       }
     }
   ]

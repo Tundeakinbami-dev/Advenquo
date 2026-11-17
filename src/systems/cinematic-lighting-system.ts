@@ -24,7 +24,6 @@ import {
   Vector3,
 } from '@iwsdk/core';
 
-import { WorldStreamingSystem } from '../world-streaming-system.js';
 import { qualityProfileSystem } from './quality-profile-system.js';
 
 export interface LocationLightingPreset {
@@ -37,6 +36,14 @@ export interface LocationLightingPreset {
 }
 
 export const LIGHTING_PRESETS: Record<string, LocationLightingPreset> = {
+  construction_workshop: {
+    sunColor: 0xffeedb, // Warm outdoor sunlight
+    sunIntensity: 1.4,
+    sunPosition: [8, 20, 10],
+    targetPosition: [0, 0, -2.5],
+    ambientColor: 0x3a404d, // Clean workshop ambient fill
+    ambientIntensity: 0.55,
+  },
   nigerian_market: {
     sunColor: 0xffeedb, // Warm Lagos morning golden sunlight
     sunIntensity: 1.35,
@@ -82,7 +89,7 @@ export class CinematicLightingSystem extends createSystem({
   private sunLight: DirectionalLight | null = null;
   private ambientLight: AmbientLight | null = null;
   private sunTarget: Object3D | null = null;
-  private currentLocationId = 'nigerian_market';
+  private currentLocationId = 'construction_workshop';
 
   init(): void {
     CinematicLightingSystem.instance = this;
@@ -94,7 +101,7 @@ export class CinematicLightingSystem extends createSystem({
     const isQuest = profile.profileName === 'quest_vr_performance';
 
     // 1. Primary Directional Sunlight
-    const preset = LIGHTING_PRESETS[this.currentLocationId] || LIGHTING_PRESETS.nigerian_market;
+    const preset = LIGHTING_PRESETS[this.currentLocationId] || LIGHTING_PRESETS.construction_workshop;
     this.sunLight = new DirectionalLight(preset.sunColor, preset.sunIntensity);
     this.sunLight.name = 'CinematicSunLight';
     this.sunLight.position.set(preset.sunPosition[0], preset.sunPosition[1], preset.sunPosition[2]);
@@ -126,18 +133,6 @@ export class CinematicLightingSystem extends createSystem({
     this.ambientLight = new AmbientLight(preset.ambientColor, preset.ambientIntensity);
     this.ambientLight.name = 'CinematicAmbientLight';
     scene.add(this.ambientLight);
-
-    // 3. Connect to WorldStreamingSystem destination transitions
-    const streamingSys = WorldStreamingSystem.getInstance();
-    if (streamingSys) {
-      this.currentLocationId = streamingSys.getCurrentLocationId() || 'nigerian_market';
-      this.applyLocationLighting(this.currentLocationId);
-
-      const unsubscribe = streamingSys.onLocationChanged((locDef) => {
-        this.applyLocationLighting(locDef.id);
-      });
-      this.cleanupFuncs.push(unsubscribe);
-    }
 
     this.cleanupFuncs.push(() => {
       if (this.sunLight && scene) scene.remove(this.sunLight);

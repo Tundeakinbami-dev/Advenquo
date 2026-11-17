@@ -1,165 +1,136 @@
 /**
- * Advenquo — Responsive UI System
+ * Advenquo — Responsive UI System for Construction World
  *
- * Provides a responsive, accessible 2D presentation layer for desktop, tablet,
+ * Provides a responsive, accessible presentation layer for desktop, tablet,
  * and mobile browsers, while seamlessly preserving the Meta Quest VR experience.
  *
  * Responsibilities:
- * - Adapts 2D camera FOV and position on window resize so the cultural showcase
+ * - Adapts 2D camera FOV and position on window resize so the construction workshop
  *   is never cropped or off-screen on narrow mobile screens (320px–430px+).
- * - Provides touch-friendly alternatives (artefact tray, cards, and canvas touch)
- *   to discover artefacts and view cultural stories.
+ * - Provides touch & click controls for selecting and placing modular construction blocks.
  * - Detects WebXR & Meta Quest device capabilities, providing device-aware status
  *   and clear fallback messaging.
- * - Manages mobile navigation drawer, interactive modals, and discovery progress.
+ * - Manages mobile navigation drawer, blueprint library modals, and construction stage progress.
  * - Completely hides all 2D web overlays when an immersive VR session begins.
  */
 
 import {
-  AudioUtils,
   createSystem,
   PerspectiveCamera,
+  Vector3,
   VisibilityState,
 } from '@iwsdk/core';
 
-import { CulturalObject } from './cultural-object-component.js';
+import { challengeManager } from './construction/progression/challenge-manager.js';
+import { assemblySystem } from './construction/assembly/assembly-system.js';
+import { desktopConstructionController } from './construction/interaction/desktop-interaction.js';
+import type { ComponentType } from './construction/core/construction-types.js';
 
-interface ArtefactMeta {
-  title: string;
-  culturalWord: string;
-  fact: string;
-  icon: string;
-  subtitle: string;
-}
-
-const ARTEFACT_DATA: Record<string, ArtefactMeta> = {
-  'adire-cloth': {
-    title: 'Adire Cloth',
-    culturalWord: 'Yoruba word: Adire (ah-dee-reh) — to tie and dye',
-    fact: 'Adire is a Yoruba tradition of resist-dyeing cloth in deep indigo blue. Geometric patterns are drawn in cassava paste, then the cloth is submerged in pots of indigo dye. Each pattern carries meaning: family, status, or a prayer.',
-    icon: '🧵',
-    subtitle: 'Indigo Resist-Dye',
-  },
-  'talking-drum': {
-    title: 'Talking Drum',
-    culturalWord: 'Yoruba word: Gangan (gahn-gahn) — the talking drum',
-    fact: 'The Gangan is an hourglass-shaped drum capable of mimicking the tonal inflections of the Yoruba language. Squeezing the leather tension chords changes the pitch as the player strikes the drum head with a curved mallet.',
-    icon: '🥁',
-    subtitle: 'Gangan of Kings',
-  },
-  calabash: {
-    title: 'Calabash Bowl',
-    culturalWord: 'Yoruba word: Igba (eeg-bah) — dried gourd vessel',
-    fact: 'Carved from the dried shell of a gourd, the Igba is a vital domestic and ceremonial vessel in Yoruba culture. Pyrography (hot-metal etching) creates intricate geometric patterns symbolizing prosperity, fertility, and protection.',
-    icon: '🏺',
-    subtitle: 'Carved Igba Gourd',
-  },
-  'kola-nut': {
-    title: 'Kola Nut',
-    culturalWord: 'Yoruba word: Obi (oh-bee) — the sacred kola nut',
-    fact: 'The kola nut is a sacred symbol of hospitality, respect, and prayer across West Africa. In Yoruba tradition, offering Obi to a guest is the highest sign of welcome. As the Yoruba proverb says: "He who brings kola brings life."',
-    icon: '🌱',
-    subtitle: 'Sacred Obi Blessing',
-  },
-};
-
-export class ResponsiveUISystem extends createSystem({
-  cultural: { required: [CulturalObject] },
-}) {
-  private prevDiscoveredCount = -1;
+export class ResponsiveUISystem extends createSystem({}) {
   private celebrateShown = false;
   private isVRMode = false;
   private isQuestDevice = false;
   private webXRSupported = false;
   private overlay: HTMLElement | null = null;
+  private lastStageIndex = -1;
 
   init(): void {
     this.overlay = document.getElementById('web-overlay');
     this._detectDeviceAndWebXR();
     this._wireNavigationAndModals();
-    this._wireArtefactCards();
+    this._wireConstructionPalette();
     this._wireCameraResize();
     this._wireVisibilityState();
-
-    // Attach click listeners to 3D cultural object entities for 2D interaction
-    this.cleanupFuncs.push(
-      this.queries.cultural.subscribe('qualify', (entity) => {
-        const obj = entity.object3D;
-        if (!obj) return;
-        const onClick = (): void => {
-          if (!this.isVRMode) {
-            this.discoverArtefact(entity);
-          }
-        };
-        obj.addEventListener('click', onClick);
-      }),
-    );
   }
 
   update(): void {
     if (this.isVRMode) return;
 
-    let discoveredCount = 0;
-    const total = this.queries.cultural.entities.size;
+    // Track active construction challenge stage
+    const stage = challengeManager.getCurrentStageInfo();
+    if (stage && stage.stageIndex !== this.lastStageIndex) {
+      this.lastStageIndex = stage.stageIndex;
+      this._updateConstructionHUD(stage.stageIndex, stage.title);
+    }
 
-    for (const entity of this.queries.cultural.entities) {
-      const isFound = entity.getValue(CulturalObject, 'discovered');
-      const factId = entity.getValue(CulturalObject, 'factId');
+    // Check challenge completion
+    if (challengeManager.isChallengeCompleted() && !this.celebrateShown) {
+      this.celebrateShown = true;
+      this._openModal('completion-modal-backdrop');
+    }
+  }
 
-      if (isFound) {
-        discoveredCount++;
-        if (factId) {
-          this._updateArtefactCardFound(factId);
+  private _updateConstructionHUD(stageIndex: number, stageTitle: string): void {
+    const counterEl = document.getElementById('web-counter');
+    if (counterEl) {
+      counterEl.textContent = `Stage ${stageIndex} / 6: ${stageTitle}`;
+    }
+
+    for (let i = 1; i <= 6; i++) {
+      const dot = document.getElementById(`dot-stage-${i}`);
+      if (!dot) continue;
+      dot.classList.remove('active', 'completed');
+      if (i === stageIndex) {
+        dot.classList.add('active');
+      } else if (i < stageIndex) {
+        dot.classList.add('completed');
+      }
+    }
+  }
+
+  private _wireConstructionPalette(): void {
+    const cards = document.querySelectorAll<HTMLElement>('.construction-card');
+    cards.forEach((card) => {
+      const compType = card.dataset.componentType as ComponentType;
+      if (!compType) return;
+
+      const onSelect = (e: Event): void => {
+        e.preventDefault();
+        desktopConstructionController.selectComponent(
+          `spawned_${compType}_${Date.now().toString(36)}`,
+          compType,
+          new Vector3(0, 1.2, -1.8),
+        );
+        this._showToast(`Selected ${card.querySelector('.card-name')?.textContent || compType}. Move mouse & click to place.`);
+      };
+
+      card.addEventListener('click', onSelect);
+      card.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onSelect(e);
         }
-      }
-    }
+      });
+    });
 
-    if (discoveredCount !== this.prevDiscoveredCount) {
-      this.prevDiscoveredCount = discoveredCount;
-      this._updateProgressHUD(discoveredCount, total);
-
-      // Trigger celebration when all artefacts are discovered
-      if (total > 0 && discoveredCount === total && !this.celebrateShown) {
-        this.celebrateShown = true;
+    // Wire dock controls
+    document.getElementById('btn-dock-validate')?.addEventListener('click', () => {
+      const graph = assemblySystem.getGraph();
+      const result = challengeManager.evaluateProgress(graph);
+      if (result.passed) {
         this._openModal('completion-modal-backdrop');
+      } else {
+        const err = result.placementErrors[0] || result.stabilityErrors[0] || result.feedbackNotes[0] || 'Validation incomplete';
+        this._showToast(`Validation: ${err}`);
       }
-    }
-  }
+    });
 
-  /**
-   * Discovers an artefact from 2D web interaction (card tap or canvas click).
-   * Sets ECS state, plays audio chime, and opens cultural fact modal.
-   */
-  public discoverArtefact(entity: (typeof this.queries.cultural.entities extends Set<infer E> ? E : never)): void {
-    const isFound = entity.getValue(CulturalObject, 'discovered');
-    const factId = entity.getValue(CulturalObject, 'factId');
+    document.getElementById('btn-dock-undo')?.addEventListener('click', () => {
+      const undone = desktopConstructionController.undoLastPlacement();
+      if (undone) {
+        this._showToast(`Undid placement of ${undone}`);
+      } else {
+        this._showToast('Nothing to undo.');
+      }
+    });
 
-    if (!isFound) {
-      entity.setValue(CulturalObject, 'discovered', true);
-      AudioUtils.play(entity);
-    }
-
-    if (factId) {
-      this.openFactModal(factId);
-    }
-  }
-
-  /**
-   * Opens the cultural fact modal for a specific artefact ID.
-   */
-  public openFactModal(factId: string): void {
-    const meta = ARTEFACT_DATA[factId];
-    if (!meta) return;
-
-    const titleEl = document.getElementById('fact-modal-title');
-    const wordEl = document.getElementById('fact-modal-word');
-    const bodyEl = document.getElementById('fact-modal-body');
-
-    if (titleEl) titleEl.textContent = meta.title;
-    if (wordEl) wordEl.textContent = meta.culturalWord;
-    if (bodyEl) bodyEl.textContent = meta.fact;
-
-    this._openModal('fact-modal-backdrop');
+    document.getElementById('btn-dock-reset')?.addEventListener('click', () => {
+      assemblySystem.reset();
+      challengeManager.reset();
+      desktopConstructionController.reset();
+      this.celebrateShown = false;
+      this._updateConstructionHUD(1, 'Foundation Inspection');
+      this._showToast('Construction project reset.');
+    });
   }
 
   // ── Private Setup Methods ────────────────────────────────────────────────
@@ -278,34 +249,6 @@ export class ResponsiveUISystem extends createSystem({
     });
   }
 
-  private _wireArtefactCards(): void {
-    const cards = document.querySelectorAll<HTMLElement>('.artefact-card');
-    for (const card of cards) {
-      const factId = card.dataset.factId;
-      if (!factId) continue;
-
-      const onSelect = (e: Event): void => {
-        e.preventDefault();
-        // Find matching entity
-        for (const entity of this.queries.cultural.entities) {
-          if (entity.getValue(CulturalObject, 'factId') === factId) {
-            this.discoverArtefact(entity);
-            return;
-          }
-        }
-        // Fallback: show modal even if entity not yet loaded
-        this.openFactModal(factId);
-      };
-
-      card.addEventListener('click', onSelect);
-      card.addEventListener('keydown', (e: KeyboardEvent) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          onSelect(e);
-        }
-      });
-    }
-  }
-
   private _launchVRSession(): void {
     if (this.world.xrEnabled) {
       try {
@@ -366,7 +309,11 @@ export class ResponsiveUISystem extends createSystem({
       this._closeMobileDrawer();
       this._openModal('about-modal-backdrop');
     };
-    const scrollToArtefacts = (): void => {
+    const openProjects = (): void => {
+      this._closeMobileDrawer();
+      this._openModal('projects-modal-backdrop');
+    };
+    const scrollToMaterials = (): void => {
       this._closeMobileDrawer();
       const dock = document.getElementById('artefact-dock');
       dock?.scrollIntoView({ behavior: 'smooth' });
@@ -376,12 +323,37 @@ export class ResponsiveUISystem extends createSystem({
     document.getElementById('drawer-link-help')?.addEventListener('click', openHelp);
     document.getElementById('nav-about')?.addEventListener('click', openAbout);
     document.getElementById('drawer-link-about')?.addEventListener('click', openAbout);
-    document.getElementById('nav-artefacts')?.addEventListener('click', scrollToArtefacts);
-    document.getElementById('drawer-link-artefacts')?.addEventListener('click', scrollToArtefacts);
+    document.getElementById('nav-projects')?.addEventListener('click', openProjects);
+    document.getElementById('drawer-link-projects')?.addEventListener('click', openProjects);
+    document.getElementById('nav-materials')?.addEventListener('click', scrollToMaterials);
+    document.getElementById('drawer-link-materials')?.addEventListener('click', scrollToMaterials);
+    document.getElementById('nav-workshop')?.addEventListener('click', () => {
+      this._closeAllModals();
+      this._closeMobileDrawer();
+    });
+    document.getElementById('drawer-link-workshop')?.addEventListener('click', () => {
+      this._closeAllModals();
+      this._closeMobileDrawer();
+    });
     document.getElementById('brand-home-btn')?.addEventListener('click', openAbout);
 
+    // Project selection cards
+    const projectCards = document.querySelectorAll<HTMLElement>('.project-card');
+    projectCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        projectCards.forEach((c) => c.classList.remove('active'));
+        card.classList.add('active');
+        const projId = card.dataset.projectId;
+        if (projId) {
+          const bp = challengeManager.selectBlueprint(projId);
+          this._updateConstructionHUD(1, bp.stages[0]?.title || 'Stage 1');
+          this._showToast(`Loaded blueprint: ${bp.title}`);
+        }
+      });
+    });
+
     // Modal Close Buttons
-    this._wireModalClose('fact-modal-backdrop', ['fact-modal-close', 'fact-modal-ok']);
+    this._wireModalClose('projects-modal-backdrop', ['projects-modal-close', 'projects-modal-select-btn']);
     this._wireModalClose('help-modal-backdrop', ['help-modal-close', 'help-modal-ok']);
     this._wireModalClose('about-modal-backdrop', ['about-modal-close', 'about-modal-ok']);
     this._wireModalClose('completion-modal-backdrop', ['celebrate-close-btn']);
@@ -400,40 +372,7 @@ export class ResponsiveUISystem extends createSystem({
     });
   }
 
-  private _updateProgressHUD(count: number, total: number): void {
-    const counterEl = document.getElementById('web-counter');
-    if (counterEl) {
-      counterEl.textContent = `${count} / ${total || 4} Discovered`;
-    }
-    void import('./game/game-shell.js').then(({ gameShell }) => gameShell.updateSpatialDiscovery(count));
-  }
 
-  private _updateArtefactCardFound(factId: string): void {
-    // Map factId to DOM elements
-    const idMap: Record<string, { card: string; badge: string; dot: string }> = {
-      'adire-cloth': { card: 'card-adire', badge: 'badge-adire', dot: 'dot-adire' },
-      'talking-drum': { card: 'card-drum', badge: 'badge-drum', dot: 'dot-drum' },
-      calabash: { card: 'card-calabash', badge: 'badge-calabash', dot: 'dot-calabash' },
-      'kola-nut': { card: 'card-kola', badge: 'badge-kola', dot: 'dot-kola' },
-    };
-
-    const mapping = idMap[factId];
-    if (!mapping) return;
-
-    const card = document.getElementById(mapping.card);
-    const badge = document.getElementById(mapping.badge);
-    const dot = document.getElementById(mapping.dot);
-
-    if (card && !card.classList.contains('discovered')) {
-      card.classList.add('discovered');
-    }
-    if (badge && badge.textContent !== 'Found ✓') {
-      badge.textContent = 'Found ✓';
-    }
-    if (dot && !dot.classList.contains('active')) {
-      dot.classList.add('active');
-    }
-  }
 
   private _openMobileDrawer(): void {
     const backdrop = document.getElementById('mobile-nav-backdrop');

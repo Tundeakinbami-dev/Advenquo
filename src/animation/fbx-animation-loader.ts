@@ -70,17 +70,6 @@ export const TOBI_BONE_MAP: Record<string, string> = {
   'mixamorigLeftArm': 'Tobi_LeftArm',
 };
 
-export const IYA_ALASO_BONE_MAP: Record<string, string> = {
-  'mixamorigSpine': 'Iya_Chest',
-  'mixamorigSpine1': 'Iya_Chest',
-  'mixamorigSpine2': 'Iya_Chest',
-  'mixamorigNeck': 'Iya_Neck',
-  'mixamorigHead': 'Iya_Head',
-  'mixamorigRightArm': 'Iya_RightArm',
-  'mixamorigRightForeArm': 'Iya_RightForearm',
-  'mixamorigLeftArm': 'Iya_LeftArm',
-};
-
 export const PEDESTRIAN_BONE_MAP: Record<string, string> = {
   'mixamorigSpine': 'Torso',
   'mixamorigRightArm': 'WalkRightArm',

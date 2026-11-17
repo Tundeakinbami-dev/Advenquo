@@ -18,7 +18,6 @@ import {
   spatialAudioManager,
   SpatialAudioManager,
 } from '../audio/spatial-audio-manager.js';
-import { WorldStreamingSystem } from '../world-streaming-system.js';
 import type { EnvironmentLocationId } from '../audio/types.js';
 
 export class SpatialAudioSystem extends createSystem({
@@ -57,22 +56,8 @@ export class SpatialAudioSystem extends createSystem({
       });
     }
 
-    // Connect with WorldStreamingSystem for continuous location transitions
-    const streamingSys = WorldStreamingSystem.getInstance();
-    if (streamingSys) {
-      const initialLoc = streamingSys.getCurrentLocationId() as EnvironmentLocationId;
-      if (initialLoc) {
-        this.audioManager.switchSoundscape(initialLoc, 0.8);
-      }
-
-      const unsubscribe = streamingSys.onLocationChanged((locDef) => {
-        this.audioManager.switchSoundscape(locDef.id as EnvironmentLocationId, 1.2);
-      });
-      this.cleanupFuncs.push(unsubscribe);
-    } else {
-      // Default to market courtyard if streaming system not yet bound
-      this.audioManager.switchSoundscape('nigerian_market', 0.8);
-    }
+    // Default to dedicated construction workshop soundscape
+    this.audioManager.switchSoundscape('construction_workshop', 0.8);
 
     this.cleanupFuncs.push(() => {
       this.audioManager.dispose();

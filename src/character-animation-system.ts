@@ -17,8 +17,6 @@ import {
 } from '@iwsdk/core';
 
 import { CharacterAnimation } from './character-animation-component.js';
-import { NPCCharacter } from './npc-component.js';
-import { NPCMovement } from './npc-movement-component.js';
 import { animationManager, AnimationManager } from './animation/animation-manager.js';
 import type { CharacterAnimationState } from './animation/character-animation-controller.js';
 
@@ -92,6 +90,13 @@ export class CharacterAnimationSystem extends createSystem({
     }
 
     // Configure completion callback to sync ECS state
+    controller.onActionComplete = () => {
+      if (entity.hasComponent(CharacterAnimation)) {
+        entity.setValue(CharacterAnimation, 'isOneShotPlaying', false);
+        entity.setValue(CharacterAnimation, 'state', controller.getCurrentState());
+      }
+    };
+
     controller.transitionTo('idle');
   }
 
@@ -138,9 +143,38 @@ export class CharacterAnimationSystem extends createSystem({
   }
 
   /**
+   * Find nearest character entity within interaction distance.
+   */
+  private getNearestCharacter(): any | null {
+    if (this.player?.head) {
+      this.player.head.getWorldPosition(this.playerPos);
+    } else if (this.world.camera) {
+      this.playerPos.copy(this.world.camera.position);
+    }
+    let nearest: any = null;
+    let minDist = Infinity;
+    for (const entity of this.queries.characters.entities) {
+      const root = entity.object3D as Object3D | undefined;
+      if (!root || !root.visible) continue;
+      root.getWorldPosition(this.tempVec);
+      const dist = this.tempVec.distanceTo(this.playerPos);
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = entity;
+      }
+    }
+    return minDist < 12 ? nearest : null;
+  }
+
+  /**
    * Find primary character (e.g. Tobi) or nearest NPC to player and trigger Jump.
    */
   private triggerPrimaryJump(): void {
+    const nearest = this.getNearestCharacter();
+    if (nearest) {
+      nearest.setValue(CharacterAnimation, 'trigger', 'jump');
+      return;
+    }
     if (this.triggerJump('npc_tobi')) return;
     for (const entity of this.queries.characters.entities) {
       entity.setValue(CharacterAnimation, 'trigger', 'jump');
@@ -152,6 +186,11 @@ export class CharacterAnimationSystem extends createSystem({
    * Find primary character (e.g. Tobi) or nearest NPC to player and trigger Pain Gesture.
    */
   private triggerPrimaryPain(): void {
+    const nearest = this.getNearestCharacter();
+    if (nearest) {
+      nearest.setValue(CharacterAnimation, 'trigger', 'pain');
+      return;
+    }
     if (this.triggerPain('npc_tobi')) return;
     for (const entity of this.queries.characters.entities) {
       entity.setValue(CharacterAnimation, 'trigger', 'pain');
@@ -184,26 +223,10 @@ export class CharacterAnimationSystem extends createSystem({
         entity.setValue(CharacterAnimation, 'state', 'pain');
         entity.setValue(CharacterAnimation, 'lastAction', 'pain');
       } else if (!isOneShot) {
-        // Synchronize with movement or dialogue systems when no one-shot is active
-        const hasMovement = entity.hasComponent(NPCMovement);
-        const hasNPC = entity.hasComponent(NPCCharacter);
-
-        if (hasMovement) {
-          const moveState = entity.getValue(NPCMovement, 'state') as string;
-          const targetState: CharacterAnimationState = moveState === 'walking' ? 'walking' : 'idle';
-          if (controller.getCurrentState() !== targetState) {
-            controller.transitionTo(targetState);
-            entity.setValue(CharacterAnimation, 'state', targetState);
-          }
-        } else if (hasNPC) {
-          const inDialogue = Boolean(entity.getValue(NPCCharacter, 'inDialogue'));
-          const targetState: CharacterAnimationState = inDialogue ? 'talking' : 'idle';
-          if (controller.getCurrentState() !== targetState) {
-            controller.transitionTo(targetState);
-            entity.setValue(CharacterAnimation, 'state', targetState);
-          }
+        const animState = (entity.getValue(CharacterAnimation, 'state') as CharacterAnimationState) || 'idle';
+        if (controller.getCurrentState() !== animState) {
+          controller.transitionTo(animState);
         }
-
         entity.setValue(CharacterAnimation, 'isOneShotPlaying', false);
       }
     }

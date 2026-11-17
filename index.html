@@ -6,20 +6,20 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#0b0f19" />
+    <meta name="theme-color" content="#0b1329" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="icon" href="data:," />
-    <title>Advenquo: The World Begins at Home</title>
+    <title>Advenquo: VR Construction & Building Game</title>
     <meta
       name="description"
-      content="Advenquo: Hands-first, seated-friendly VR cultural exploration game for Meta Quest and WebXR, with responsive desktop and mobile presentation."
+      content="Advenquo: Immersive, seated, two-handed VR construction and building game for Meta Quest and WebXR. Use your hands to assemble modular bricks, columns, beams and roofs with realistic physics."
     />
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700&family=Nunito:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -31,14 +31,16 @@
     <div id="web-overlay">
       <!-- App Header / Navigation -->
       <header class="app-header">
-        <div class="brand-group" id="brand-home-btn" role="button" tabindex="0" aria-label="Advenquo Home">
-          <div class="brand-title">Advenquo</div>
-          <div class="brand-subtitle">Yoruba Cultural Journey</div>
+        <div class="brand-group" id="brand-home-btn" role="button" tabindex="0" aria-label="Advenquo Construction Home">
+          <div class="brand-title">🔨 ADVENQUO</div>
+          <div class="brand-subtitle">VR Construction & Building World</div>
         </div>
 
         <nav class="desktop-nav" aria-label="Main Navigation">
-          <button type="button" class="nav-btn" id="nav-artefacts">Artefacts</button>
-          <button type="button" class="nav-btn" id="nav-how-to-play">How to Play</button>
+          <button type="button" class="nav-btn active" id="nav-workshop">Workshop</button>
+          <button type="button" class="nav-btn" id="nav-projects">Projects</button>
+          <button type="button" class="nav-btn" id="nav-materials">Materials</button>
+          <button type="button" class="nav-btn" id="nav-how-to-play">How to Build</button>
           <button type="button" class="nav-btn" id="nav-about">About</button>
         </nav>
 
@@ -48,11 +50,11 @@
             <span id="device-status-text">Detecting device…</span>
           </div>
 
-          <button type="button" class="btn-enter-vr" id="web-enter-vr-btn" aria-label="Enter Virtual Reality">
+          <button type="button" class="btn-enter-vr" id="web-enter-vr-btn" aria-label="Enter Virtual Reality Construction Workshop">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20.5 6h-17A2.5 2.5 0 0 0 1 8.5v7A2.5 2.5 0 0 0 3.5 18h4.7a2 2 0 0 0 1.6-.8L11 15.5a1.4 1.4 0 0 1 2 0l1.2 1.7a2 2 0 0 0 1.6.8h4.7a2.5 2.5 0 0 0 2.5-2.5v-7A2.5 2.5 0 0 0 20.5 6zM7 13.5A2.5 2.5 0 1 1 9.5 11 2.5 2.5 0 0 1 7 13.5zm10 0A2.5 2.5 0 1 1 19.5 11 2.5 2.5 0 0 1 17 13.5z"/>
             </svg>
-            <span>Enter VR</span>
+            <span>Enter VR Workshop</span>
           </button>
 
           <button type="button" class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Open Navigation Menu" aria-expanded="false">
@@ -65,61 +67,86 @@
         </div>
       </header>
 
-      <!-- Discovery Progress HUD -->
+      <!-- Active Construction Project & Stage HUD -->
       <div class="progress-hud" id="progress-hud">
-        <span class="progress-text" id="web-counter">0 / 4 Discovered</span>
+        <span class="progress-text" id="web-counter">Stage 1 / 6: Foundation Inspection</span>
         <div class="progress-dots" aria-hidden="true">
-          <div class="progress-dot" id="dot-adire" title="Adire Cloth"></div>
-          <div class="progress-dot" id="dot-drum" title="Talking Drum"></div>
-          <div class="progress-dot" id="dot-calabash" title="Calabash Bowl"></div>
-          <div class="progress-dot" id="dot-kola" title="Kola Nut"></div>
+          <div class="progress-dot active" id="dot-stage-1" title="Stage 1: Foundation"></div>
+          <div class="progress-dot" id="dot-stage-2" title="Stage 2: First Course"></div>
+          <div class="progress-dot" id="dot-stage-3" title="Stage 3: Walls"></div>
+          <div class="progress-dot" id="dot-stage-4" title="Stage 4: Openings"></div>
+          <div class="progress-dot" id="dot-stage-5" title="Stage 5: Support Lintel"></div>
+          <div class="progress-dot" id="dot-stage-6" title="Stage 6: Roof Panels"></div>
         </div>
       </div>
 
-      <!-- Bottom Responsive Artefact Tray / Dock -->
-      <section class="artefact-dock" id="artefact-dock" aria-label="Cultural Artefacts Exploration">
+      <!-- Bottom Construction Materials Supply Palette -->
+      <section class="artefact-dock construction-dock" id="artefact-dock" aria-label="Modular Construction Materials Bay">
         <div class="dock-header">
           <div class="dock-title-group">
-            <span class="dock-title">Sacred Artefacts</span>
-            <span class="dock-hint">— Tap or click to explore</span>
+            <span class="dock-title">📦 Materials Supply Bay</span>
+            <span class="dock-hint">— Click to select & place in 3D workspace</span>
+          </div>
+          <div class="dock-controls">
+            <button type="button" class="dock-action-btn" id="btn-dock-validate" title="Validate Engineering Stability">🔍 Validate</button>
+            <button type="button" class="dock-action-btn" id="btn-dock-undo" title="Undo Last Placement">↩️ Undo</button>
+            <button type="button" class="dock-action-btn" id="btn-dock-reset" title="Restart Project">🔄 Reset</button>
           </div>
         </div>
 
         <div class="artefact-cards-container" role="list">
-          <article class="artefact-card" id="card-adire" data-fact-id="adire-cloth" role="listitem" tabindex="0">
+          <article class="artefact-card construction-card" id="card-brick" data-component-type="clay_brick" role="listitem" tabindex="0">
             <div class="card-top">
-              <span class="card-icon" aria-hidden="true">🧵</span>
-              <span class="card-status-badge" id="badge-adire">Explore</span>
+              <span class="card-icon" aria-hidden="true">🧱</span>
+              <span class="card-status-badge">Masonry</span>
             </div>
-            <div class="card-name">Adire Cloth</div>
-            <div class="card-cultural">Indigo Resist-Dye</div>
+            <div class="card-name">Clay Brick</div>
+            <div class="card-cultural">0.24m × 0.08m · 4.4kg</div>
           </article>
 
-          <article class="artefact-card" id="card-drum" data-fact-id="talking-drum" role="listitem" tabindex="0">
+          <article class="artefact-card construction-card" id="card-block" data-component-type="concrete_block" role="listitem" tabindex="0">
             <div class="card-top">
-              <span class="card-icon" aria-hidden="true">🥁</span>
-              <span class="card-status-badge" id="badge-drum">Explore</span>
+              <span class="card-icon" aria-hidden="true">🔲</span>
+              <span class="card-status-badge">Base Block</span>
             </div>
-            <div class="card-name">Talking Drum</div>
-            <div class="card-cultural">Gangan of Kings</div>
+            <div class="card-name">Concrete Block</div>
+            <div class="card-cultural">0.40m × 0.20m · 16kg</div>
           </article>
 
-          <article class="artefact-card" id="card-calabash" data-fact-id="calabash" role="listitem" tabindex="0">
+          <article class="artefact-card construction-card" id="card-column" data-component-type="reinforced_column" role="listitem" tabindex="0">
             <div class="card-top">
-              <span class="card-icon" aria-hidden="true">🏺</span>
-              <span class="card-status-badge" id="badge-calabash">Explore</span>
+              <span class="card-icon" aria-hidden="true">🏛️</span>
+              <span class="card-status-badge">Two-Hand</span>
             </div>
-            <div class="card-name">Calabash Bowl</div>
-            <div class="card-cultural">Carved Igba Gourd</div>
+            <div class="card-name">Rebar Column</div>
+            <div class="card-cultural">0.30m × 2.40m · 529kg</div>
           </article>
 
-          <article class="artefact-card" id="card-kola" data-fact-id="kola-nut" role="listitem" tabindex="0">
+          <article class="artefact-card construction-card" id="card-beam" data-component-type="horizontal_beam" role="listitem" tabindex="0">
             <div class="card-top">
-              <span class="card-icon" aria-hidden="true">🌱</span>
-              <span class="card-status-badge" id="badge-kola">Explore</span>
+              <span class="card-icon" aria-hidden="true">➖</span>
+              <span class="card-status-badge">Two-Hand</span>
             </div>
-            <div class="card-name">Kola Nut</div>
-            <div class="card-cultural">Sacred Obi Blessing</div>
+            <div class="card-name">Lintel Beam</div>
+            <div class="card-cultural">2.40m × 0.30m · 440kg</div>
+          </article>
+
+          <article class="artefact-card construction-card" id="card-wall" data-component-type="wall_panel" role="listitem" tabindex="0">
+            <div class="card-top">
+              <span class="card-icon" aria-hidden="true">🚪</span>
+              <span class="card-status-badge">Two-Hand</span>
+            </div>
+            <div class="card-name">Wall Panel</div>
+            <div class="card-cultural">1.20m × 2.40m · 350kg</div>
+          </article>
+
+          <article class="artefact-card construction-card" id="card-roof" data-component-type="roof_panel" role="listitem" tabindex="0">
+            <div class="card-top">
+              <span class="card-icon" aria-hidden="true">🏠</span>
+              <span class="card-status-badge">Roofing</span>
+            </div>
+            <div class="card-name">Roof Panel</div>
+            <div class="card-cultural">1.40m × 1.20m · 45kg</div>
           </article>
         </div>
       </section>
@@ -129,8 +156,8 @@
         <div class="mobile-nav-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
           <div class="drawer-header">
             <div class="brand-group">
-              <div class="brand-title">Advenquo</div>
-              <div class="brand-subtitle">Yoruba Journey</div>
+              <div class="brand-title">🔨 ADVENQUO</div>
+              <div class="brand-subtitle">VR Construction World</div>
             </div>
             <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close Menu">
               ✕
@@ -138,16 +165,24 @@
           </div>
 
           <div class="drawer-links">
-            <button type="button" class="drawer-link" id="drawer-link-artefacts">
-              <span aria-hidden="true">🏺</span>
-              <span>Yoruba Artefacts</span>
+            <button type="button" class="drawer-link" id="drawer-link-workshop">
+              <span aria-hidden="true">🔨</span>
+              <span>Construction Workshop</span>
+            </button>
+            <button type="button" class="drawer-link" id="drawer-link-projects">
+              <span aria-hidden="true">📐</span>
+              <span>Project Blueprints</span>
+            </button>
+            <button type="button" class="drawer-link" id="drawer-link-materials">
+              <span aria-hidden="true">📦</span>
+              <span>Materials Palette</span>
             </button>
             <button type="button" class="drawer-link" id="drawer-link-help">
               <span aria-hidden="true">🎮</span>
-              <span>How to Play</span>
+              <span>How to Build</span>
             </button>
             <button type="button" class="drawer-link" id="drawer-link-about">
-              <span aria-hidden="true">🌍</span>
+              <span aria-hidden="true">ℹ️</span>
               <span>About Advenquo</span>
             </button>
           </div>
@@ -155,7 +190,7 @@
           <div class="drawer-section">
             <div class="device-badge" id="drawer-device-badge">
               <span class="status-dot"></span>
-              <span id="drawer-device-text">3D Web Showcase</span>
+              <span id="drawer-device-text">3D Web Workshop</span>
             </div>
             <button type="button" class="btn-enter-vr drawer-vr-btn" id="drawer-enter-vr-btn">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -167,70 +202,130 @@
         </div>
       </div>
 
-      <!-- Fact Detail Modal -->
-      <div class="modal-backdrop" id="fact-modal-backdrop" aria-hidden="true">
-        <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="fact-modal-title">
+      <!-- Construction Projects / Level Selection Modal -->
+      <div class="modal-backdrop" id="projects-modal-backdrop" aria-hidden="true">
+        <div class="modal-panel projects-panel" role="dialog" aria-modal="true" aria-labelledby="projects-modal-title">
           <div class="modal-header">
-            <span class="modal-badge">DISCOVERY • YORUBA CULTURE</span>
-            <button type="button" class="modal-close-btn" id="fact-modal-close" aria-label="Close fact card">✕</button>
+            <span class="modal-badge">BLUEPRINT LIBRARY</span>
+            <button type="button" class="modal-close-btn" id="projects-modal-close" aria-label="Close projects modal">✕</button>
           </div>
-          <h2 class="modal-title" id="fact-modal-title">Artefact Title</h2>
-          <div class="modal-cultural-word" id="fact-modal-word">Yoruba Word</div>
-          <p class="modal-body" id="fact-modal-body">Cultural description and history.</p>
+          <h2 class="modal-title" id="projects-modal-title">Select Construction Project</h2>
+          <div class="modal-body">
+            <div class="projects-grid">
+              <div class="project-card active" data-project-id="small_house_challenge">
+                <div class="project-header">
+                  <span class="project-badge">Tier 1 · Starter</span>
+                  <span class="project-time">15 min</span>
+                </div>
+                <h3 class="project-name">🏡 Eco-Pavilion Small House</h3>
+                <p class="project-desc">Learn modular construction fundamentals: foundation courses, doorway openings, reinforced lintel load transfer, and weathered zinc thermal roofing.</p>
+                <div class="project-reqs">Requires: 4x Blocks, 4x Bricks, 2x Columns, 1x Lintel, 2x Wall, 2x Roof</div>
+              </div>
+
+              <div class="project-card" data-project-id="duplex_villa">
+                <div class="project-header">
+                  <span class="project-badge">Tier 2 · Intermediate</span>
+                  <span class="project-time">25 min</span>
+                </div>
+                <h3 class="project-name">🏢 Two-Story Duplex Villa</h3>
+                <p class="project-desc">Construct a multi-story residence with ground-floor living, precast intermediate deck slabs, second-level balconies, and dual roof trusses.</p>
+                <div class="project-reqs">Requires: 8x Blocks, 8x Bricks, 4x Columns, 3x Beams, 4x Floor Slabs, 4x Roof</div>
+              </div>
+
+              <div class="project-card" data-project-id="arched_bridge">
+                <div class="project-header">
+                  <span class="project-badge">Tier 3 · Advanced</span>
+                  <span class="project-time">30 min</span>
+                </div>
+                <h3 class="project-name">🌉 Engineered Viaduct Bridge</h3>
+                <p class="project-desc">Civil engineering challenge: erect heavy pier abutments, install longitudinal beam spans across water trenches, and lay road decks.</p>
+                <div class="project-reqs">Requires: 6x Piers, 4x Horizontal Beams, 6x Road Decks, Guard Rails</div>
+              </div>
+
+              <div class="project-card" data-project-id="castle_manor">
+                <div class="project-header">
+                  <span class="project-badge">Tier 4 · Master Builder</span>
+                  <span class="project-time">45 min</span>
+                </div>
+                <h3 class="project-name">🏰 Fortified Stone Manor & Towers</h3>
+                <p class="project-desc">Epic stone masonry: interlocking corner bastions, defensible archway entrances, central courtyard colonnade, and high battlement parapets.</p>
+                <div class="project-reqs">Requires: 16x Blocks, 12x Bricks, 8x Columns, 4x Beams, 6x Panels</div>
+              </div>
+
+              <div class="project-card" data-project-id="creative_sandbox">
+                <div class="project-header">
+                  <span class="project-badge">Free Play</span>
+                  <span class="project-time">Infinite</span>
+                </div>
+                <h3 class="project-name">✨ Creative Construction Sandbox</h3>
+                <p class="project-desc">No constraints, no blueprint limits. Unlimited supply of all 7 modular building materials with live physics and structural statics simulation.</p>
+                <div class="project-reqs">Full unrestricted palette</div>
+              </div>
+            </div>
+          </div>
           <div class="modal-actions">
-            <button type="button" class="nav-btn interactive" id="fact-modal-ok">Continue Journey</button>
+            <button type="button" class="nav-btn interactive" id="projects-modal-select-btn">Load Selected Project</button>
           </div>
         </div>
       </div>
 
-      <!-- Completion Celebration Modal -->
+      <!-- Structural Validation & Celebration Modal -->
       <div class="modal-backdrop" id="completion-modal-backdrop" aria-hidden="true">
         <div class="modal-panel celebrate-card" role="dialog" aria-modal="true" aria-labelledby="celebrate-title">
-          <div class="celebrate-tag">EXPLORATION COMPLETE</div>
-          <h2 class="celebrate-headline" id="celebrate-title">E ku oriire!</h2>
-          <p class="modal-body">
-            You have explored the foundational treasures of Yoruba heritage: the Adire cloth, the Gangan talking drum, the carved Igba calabash, and the blessed Obi kola nut.
+          <div class="celebrate-tag">ENGINEERING ASSESSMENT REPORT</div>
+          <h2 class="celebrate-headline" id="celebrate-title">Structural Validation Passed!</h2>
+          <p class="modal-body" id="celebrate-body">
+            Your structure meets all blueprint alignment tolerances and establishes continuous load-path transfer down to the foundation footing.
           </p>
           <div class="unlocked-banner">
-            <div class="unlocked-title">NEXT DESTINATION UNLOCKED</div>
-            <div class="unlocked-dest">Nile Valley: Ancient Nubian Architecture</div>
+            <div class="unlocked-title">MASTER BUILDER CERTIFICATION</div>
+            <div class="unlocked-dest">+250 XP Awarded · Next Challenge Unlocked</div>
           </div>
-          <p style="font-size: 0.9rem; color: var(--color-accent-sky); font-style: italic;">
-            "Discover your world. Unlock the next."
+          <p style="font-size: 0.85rem; color: #94a3b8; font-style: italic;">
+            Educational engineering simulation only. Uses simplified rigid-body approximations.
           </p>
           <div class="modal-actions" style="justify-content: center; margin-top: 12px;">
-            <button type="button" class="btn-enter-vr" id="celebrate-close-btn">Keep Exploring</button>
+            <button type="button" class="btn-enter-vr" id="celebrate-close-btn">Continue Building</button>
           </div>
         </div>
       </div>
 
-      <!-- How to Play Modal -->
+      <!-- How to Build / Instructions Modal -->
       <div class="modal-backdrop" id="help-modal-backdrop" aria-hidden="true">
         <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="help-title">
           <div class="modal-header">
-            <span class="modal-badge">GUIDE</span>
+            <span class="modal-badge">BUILDING MANUAL</span>
             <button type="button" class="modal-close-btn" id="help-modal-close" aria-label="Close guide">✕</button>
           </div>
-          <h2 class="modal-title" id="help-title">How to Play Advenquo</h2>
+          <h2 class="modal-title" id="help-title">How to Build in Advenquo</h2>
           <div class="modal-body">
-            <h3 style="color: var(--color-accent-gold); margin-top: 6px; font-size: 1.05rem;">📱 Mobile & Tablet</h3>
+            <h3 style="color: #38bdf8; margin-top: 6px; font-size: 1.05rem;">🥽 Meta Quest (Seated Two-Handed VR)</h3>
             <p style="margin-bottom: 12px;">
-              • Tap any artefact on the wooden table or tap the cards in the bottom tray to inspect its story and hear its chime.<br />
-              • Fully responsive layout designed for touch-first exploration.
+              • Sit comfortably in your play space facing the construction pad.<br />
+              • Reach with your hands and <strong>pinch your thumb and index finger</strong> to grab any block or component.<br />
+              • Rotate your wrist to align the component in 3D space.<br />
+              • For larger pieces (columns, beams, roof panels), use <strong>both hands</strong> for stable two-handed manipulation.<br />
+              • Bring the component near a compatible snap socket to see the <strong>emerald green snap preview</strong>.<br />
+              • Release your pinch to snap the component firmly into place!
             </p>
-            <h3 style="color: var(--color-accent-gold); margin-top: 6px; font-size: 1.05rem;">💻 Desktop</h3>
+            <h3 style="color: #38bdf8; margin-top: 6px; font-size: 1.05rem;">💻 Desktop Keyboard & Mouse Fallback</h3>
             <p style="margin-bottom: 12px;">
-              • Click on artefacts on the table or use the bottom navigation cards to discover all 4 cultural relics.
+              • <strong>Click</strong> any component in the materials palette or in the 3D scene to pick it up.<br />
+              • Move your mouse to position the component.<br />
+              • Press <strong>Q / E</strong> to rotate yaw (wrist rotation equivalent).<br />
+              • Press <strong>R</strong> to rotate pitch.<br />
+              • <strong>Click</strong> to release and snap into the assembly.<br />
+              • Press <strong>U</strong> to undo the last placement.
             </p>
-            <h3 style="color: var(--color-accent-gold); margin-top: 6px; font-size: 1.05rem;">🥽 Meta Quest (WebXR VR)</h3>
+            <h3 style="color: #38bdf8; margin-top: 6px; font-size: 1.05rem;">🏗️ Structural Engineering Rules</h3>
             <p>
-              • Put on your Meta Quest 2, 3, 3S, or Pro.<br />
-              • Tap <strong>"Enter VR"</strong> to enter the seated-friendly immersive world.<br />
-              • Point your hand and <strong>pinch</strong> (or pull the controller trigger) to discover artefacts and reveal 3D floating fact panels.
+              • Every upper component must trace a continuous load path down to the foundation.<br />
+              • Openings (doors and windows) require a horizontal lintel beam before supporting upper wall or roof loads.<br />
+              • Roof panels must rest on beam seats or wall plates.
             </p>
           </div>
           <div class="modal-actions">
-            <button type="button" class="nav-btn interactive" id="help-modal-ok">Got it</button>
+            <button type="button" class="nav-btn interactive" id="help-modal-ok">Start Building</button>
           </div>
         </div>
       </div>
@@ -242,16 +337,16 @@
             <span class="modal-badge">ABOUT ADVENQUO</span>
             <button type="button" class="modal-close-btn" id="about-modal-close" aria-label="Close about modal">✕</button>
           </div>
-          <h2 class="modal-title" id="about-title">The World Begins at Home</h2>
+          <h2 class="modal-title" id="about-title">Immersive VR Construction</h2>
           <div class="modal-body">
             <p style="margin-bottom: 12px;">
-              <strong>Advenquo</strong> is an original hands-first, seated-friendly VR cultural exploration game created for the <strong>Meta VR Start Developer Competition 2026</strong>. Built with Meta Immersive Web SDK (IWSDK), Three.js, and WebXR.
+              <strong>Advenquo</strong> is an immersive, seated, two-handed VR construction and architectural engineering game. Built with Meta Immersive Web SDK (IWSDK), Three.js, and WebXR.
             </p>
             <p style="margin-bottom: 12px;">
-              In this opening journey, explore the Yoruba culture of West Africa through 4 authentic artefacts resting on an arm-reach display table: Adire resist-dyed cloth, the Gangan talking drum, the carved Igba calabash bowl, and the sacred Obi kola nut.
+              Experience the tactile joy of modular LEGO-like interlocking mechanics paired with high-fidelity architectural materials: kiln-fired terracotta clay bricks, cured aggregate concrete blocks, reinforced rebar columns, prestressed lintel beams, precast floor decks, and weathered corrugated zinc roofing.
             </p>
             <p>
-              Discover all four items to unlock the Nile Valley: Ancient Nubian Architecture.
+              Master real engineering principles: load-bearing continuity, cantilever thresholds, and structural statics across houses, duplexes, bridges, and castles.
             </p>
           </div>
           <div class="modal-actions">
@@ -260,11 +355,11 @@
         </div>
       </div>
 
-      <!-- WebXR Fallback Toast -->
+      <!-- WebXR Notification Toast -->
       <aside class="fallback-toast" id="vr-notice-toast" role="status" aria-live="polite">
-        <span aria-hidden="true">ℹ️</span>
+        <span aria-hidden="true">🔨</span>
         <span class="toast-text" id="toast-text">
-          WebXR immersive mode is best experienced on Meta Quest. Exploring in 3D Web Showcase.
+          Meta Quest 3 hand tracking active. Sit comfortably and use two hands to build.
         </span>
         <button type="button" class="toast-close" id="toast-close" aria-label="Dismiss notification">✕</button>
       </aside>

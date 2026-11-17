@@ -1,11 +1,13 @@
 /**
- * Advenquo: The World Begins at Home
+ * Advenquo: VR Construction & Building Game
  *
  * Application entry point. Creates the IWSDK World from the virtual project
- * options (declared in iwsdk.config.json) and registers all game systems.
+ * options (declared in iwsdk.config.json) and registers all construction and VR systems.
  *
- * System order:
- * LocomotionComfortSystem → DiscoverySystem → SceneUISystem → ResponsiveUISystem → NpcDialogueSystem → VRTabletSystem
+ * System registration order:
+ * LocomotionComfortSystem → CinematicCameraSystem → PlayerControllerSystem →
+ * SpatialAudioSystem → CinematicLightingSystem → SceneUISystem →
+ * ResponsiveUISystem → VRTabletSystem → ConstructionInteractionSystem
  */
 
 import './styles/responsive.css';
@@ -16,20 +18,12 @@ import projectOptions from 'virtual:iwsdk-project';
 import { LocomotionComfortSystem } from './locomotion-comfort-system.js';
 import { CinematicCameraSystem } from './systems/cinematic-camera-system.js';
 import { PlayerControllerSystem } from './player-controller-system.js';
-import { WorldStreamingSystem } from './world-streaming-system.js';
 import { SpatialAudioSystem } from './systems/spatial-audio-system.js';
 import { CinematicLightingSystem } from './systems/cinematic-lighting-system.js';
-import { NpcAnimationSystem } from './npc-animation-system.js';
-import { CharacterAnimationSystem } from './character-animation-system.js';
-import { EnvironmentalAnimationSystem } from './environmental-animation-system.js';
-import { NPCMovementSystem } from './npc-movement-system.js';
-import { DiscoverySystem } from './discovery-system.js';
-import { AdventureMissionSystem } from './adventure-mission-system.js';
 import { ResponsiveUISystem } from './responsive-ui-system.js';
 import { SceneUISystem } from './scene-ui-system.js';
-import { NpcDialogueSystem } from './npc-dialogue-system.js';
 import { VRTabletSystem } from './vr-tablet-system.js';
-import { worldManager } from './systems/world-manager.js';
+import { ConstructionInteractionSystem } from './construction/interaction/construction-interaction-system.js';
 
 World.create(
   document.getElementById('scene-container') as HTMLDivElement,
@@ -38,23 +32,10 @@ World.create(
   world.registerSystem(LocomotionComfortSystem);
   world.registerSystem(CinematicCameraSystem);
   world.registerSystem(PlayerControllerSystem);
-  world.registerSystem(WorldStreamingSystem);
   world.registerSystem(SpatialAudioSystem);
   world.registerSystem(CinematicLightingSystem);
-  world.registerSystem(NPCMovementSystem);
-  world.registerSystem(NpcAnimationSystem);
-  world.registerSystem(CharacterAnimationSystem);
-  world.registerSystem(EnvironmentalAnimationSystem);
-  world.registerSystem(DiscoverySystem);
-  world.registerSystem(AdventureMissionSystem);
   world.registerSystem(SceneUISystem);
   world.registerSystem(ResponsiveUISystem);
-  world.registerSystem(NpcDialogueSystem);
   world.registerSystem(VRTabletSystem);
-  // Keep the non-immersive map, news and passport shell out of the initial
-  // Quest startup chunk. The spatial experience is available before this UI
-  // module and its supporting data are requested.
-  void import('./game/game-shell.js').then(({ gameShell }) => gameShell.init());
-  (window as any).__worldManager = worldManager;
+  world.registerSystem(ConstructionInteractionSystem);
 });
-

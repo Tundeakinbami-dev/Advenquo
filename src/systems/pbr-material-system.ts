@@ -291,8 +291,8 @@ export class PBRMaterialSystem {
       case 'steel_scaffold':
         mat = new MeshStandardMaterial({
           color: new Color(0xf59e0b), // Industrial safety yellow steel
-          metalness: 0.7,
-          roughness: 0.35,
+          metalness: 0.85,
+          roughness: 0.3,
           normalMap,
           normalScale: new Vector2(0.3, 0.3),
         });

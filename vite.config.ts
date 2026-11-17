@@ -26,6 +26,15 @@ export default defineConfig({
           ) {
             return 'vendor-uikit';
           }
+          if (
+            id.includes('node_modules/three') ||
+            id.includes('node_modules/super-three')
+          ) {
+            return 'vendor-three';
+          }
+          if (id.includes('/construction/')) {
+            return 'construction-engine';
+          }
         },
       },
     },

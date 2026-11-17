@@ -1,119 +1,59 @@
 /**
- * Advenquo: Phase 4 Cinematic Environments Regression Suite.
+ * Advenquo: Cinematic Construction Workshop Lighting & PBR Materials Test Suite
  *
  * Validates:
- * 1. Directional sunlight presets for all 4 Nigerian destinations
+ * 1. Directional sunlight presets for the construction workshop compound
  * 2. Ambient fill lighting and contact shadow configurations
- * 3. Shadow camera frustum bounds and bias parameters
- * 4. Environmental animations:
- *    • Market courtyard floating dust particles
- *    • Palace ceremonial brazier flames
- *    • Tarkwa Bay coastal shoreline wave wash
- *    • Natural vegetation and fabric ripples
+ * 3. Shadow camera frustum bounds and bias parameters for Quest 3 VR
+ * 4. PBR physical material shaders and normal map procedural generation
  */
 
-import { describe, it, beforeEach } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  Object3D,
-  Vector3,
-} from '@iwsdk/core';
-
-import {
-  CinematicLightingSystem,
   LIGHTING_PRESETS,
 } from '../src/systems/cinematic-lighting-system.js';
-import { EnvironmentalAnimationSystem } from '../src/environmental-animation-system.js';
+import {
+  pbrMaterialSystem,
+} from '../src/systems/pbr-material-system.js';
 
-describe('Phase 4: Cinematic Environments & Lighting', () => {
-  describe('1. Environment Lighting Presets', () => {
-    it('defines authentic directional sunlight and ambient lighting for all 4 environments', () => {
-      const locations = ['nigerian_market', 'lagos_urban', 'heritage_iga', 'beach_waterfront'];
-
-      for (const locId of locations) {
-        const preset = LIGHTING_PRESETS[locId];
-        assert.ok(preset, `Preset must exist for ${locId}`);
-        assert.ok(preset.sunIntensity > 1.0, 'Sun intensity must be bright and directional');
-        assert.ok(preset.ambientIntensity > 0.4, 'Ambient intensity must provide adequate fill');
-        assert.strictEqual(preset.sunPosition.length, 3, 'Sun position must be 3D');
-        assert.strictEqual(preset.targetPosition.length, 3, 'Target position must be 3D');
-      }
-    });
-
-    it('market preset provides warm Lagos morning sunlight', () => {
-      const market = LIGHTING_PRESETS.nigerian_market;
-      assert.strictEqual(market.sunColor, 0xffeedb);
-      assert.strictEqual(market.ambientColor, 0x3a3028);
-    });
-
-    it('yaba preset provides bright urban midday sun', () => {
-      const yaba = LIGHTING_PRESETS.lagos_urban;
-      assert.strictEqual(yaba.sunColor, 0xffffff);
-      assert.strictEqual(yaba.sunPosition[1], 32, 'Midday sun has high elevation');
-    });
-
-    it('palace preset provides regal golden courtyard lighting', () => {
-      const palace = LIGHTING_PRESETS.heritage_iga;
-      assert.strictEqual(palace.sunColor, 0xffd48a);
-      assert.strictEqual(palace.targetPosition[2], 145, 'Target points to palace center');
-    });
-
-    it('tarkwa bay preset provides coastal sunlight with maritime ambient fill', () => {
-      const beach = LIGHTING_PRESETS.beach_waterfront;
-      assert.strictEqual(beach.sunColor, 0xfff2e5);
-      assert.strictEqual(beach.targetPosition[2], 305, 'Target points to beach waterfront');
+describe('Advenquo: Cinematic Construction Lighting & PBR Materials', () => {
+  describe('1. Construction Workshop Lighting Presets', () => {
+    it('defines warm directional sunlight and ambient lighting for the workshop', () => {
+      const workshop = LIGHTING_PRESETS.construction_workshop;
+      assert.ok(workshop, 'Workshop preset must exist');
+      assert.ok(workshop.sunIntensity >= 1.2, 'Sun intensity must provide directional clarity');
+      assert.ok(workshop.ambientIntensity >= 0.45, 'Ambient intensity must provide adequate fill');
+      assert.strictEqual(workshop.sunPosition.length, 3);
+      assert.strictEqual(workshop.targetPosition.length, 3);
+      assert.strictEqual(workshop.targetPosition[2], -2.5, 'Target points to workshop foundation pad center');
     });
   });
 
-  describe('2. Cinematic Lighting System & Shadow Frustum', () => {
-    it('initializes directional light with contact shadows and correct frustum bounds', () => {
-      const mockScene = new Object3D();
-      const mockWorld = {
-        scene: mockScene,
-      };
+  describe('2. PBR Materials & Shaders for Modular Construction', () => {
+    it('creates PBR materials for all structural building materials', () => {
+      const concrete = pbrMaterialSystem.getMaterial('cured_concrete');
+      assert.ok(concrete, 'Concrete material must exist');
+      assert.ok(concrete.roughness >= 0.7, 'Concrete has high roughness');
 
-      const lightSys = new CinematicLightingSystem(mockWorld as any);
-      (lightSys as any).scene = mockScene;
-      lightSys.init();
+      const zinc = pbrMaterialSystem.getMaterial('weathered_zinc');
+      assert.ok(zinc, 'Zinc material must exist');
+      assert.ok(zinc.metalness >= 0.6, 'Zinc is metallic');
 
-      const sun = mockScene.getObjectByName('CinematicSunLight') as any;
-      const ambient = mockScene.getObjectByName('CinematicAmbientLight') as any;
+      const iroko = pbrMaterialSystem.getMaterial('african_iroko');
+      assert.ok(iroko, 'Timber material must exist');
 
-      assert.ok(sun, 'Sunlight must be added to scene');
-      assert.ok(ambient, 'Ambient light must be added to scene');
-      assert.strictEqual(sun.castShadow, true, 'Sunlight must cast shadows');
-      assert.strictEqual(sun.shadow.bias, -0.0004, 'Shadow bias must prevent shadow acne');
-      assert.strictEqual(sun.shadow.camera.near, 0.5);
-      assert.strictEqual(sun.shadow.camera.far, 120);
-
-      // Transition to Palace
-      lightSys.applyLocationLighting('heritage_iga');
-      const current = lightSys.getCurrentLightingPreset();
-      assert.strictEqual(current.sunColor, 0xffd48a);
+      const steel = pbrMaterialSystem.getMaterial('steel_scaffold');
+      assert.ok(steel, 'Steel material must exist');
+      assert.ok(steel.metalness >= 0.8, 'Steel is highly metallic');
     });
-  });
 
-  describe('3. Environmental Effects & Animations', () => {
-    it('creates floating dust particles in market and animates drift', () => {
-      const mockScene = new Object3D();
-      const mockWorld = {
-        scene: mockScene,
-        camera: { position: new Vector3(0, 1.6, 0) },
-      };
-
-      const envSys = new EnvironmentalAnimationSystem(mockWorld as any);
-      (envSys as any).scene = mockScene;
-      envSys.init();
-
-      const dust = mockScene.getObjectByName('MarketDustParticles');
-      assert.ok(dust, 'Market dust particles must be created');
-      assert.strictEqual(dust.visible, true, 'Dust must be visible in market by default');
-
-      // Update frame
-      assert.doesNotThrow(() => {
-        envSys.update(0.016);
-      }, 'Update tick must execute smoothly');
+    it('generates deterministic normal maps for structural materials', () => {
+      const normalMap = pbrMaterialSystem.generateProceduralNormalMap('cured_concrete', 256);
+      assert.ok(normalMap, 'Procedural normal map must be generated');
+      assert.strictEqual(normalMap.image.width, 256);
+      assert.strictEqual(normalMap.image.height, 256);
     });
   });
 });

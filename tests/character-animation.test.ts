@@ -267,4 +267,56 @@ describe('Advenquo FBX Animation System & Asset Integration', () => {
     assert.ok(ped.getObjectByName('WalkLeftLeg'), 'WalkLeftLeg must be preserved');
     assert.ok(ped.getObjectByName('WalkRightLeg'), 'WalkRightLeg must be preserved');
   });
+
+  it('Criterion 11: Non-zero world transform coordinates (e.g. [-4.8, 0, 0.5]) are preserved during jump without teleportation', () => {
+    const tobiMesh = buildNpcTobi();
+    // Simulate scene transform at market location [-4.8, 0.15, 0.5]
+    tobiMesh.position.set(-4.8, 0.15, 0.5);
+
+    const manager = AnimationManager.getInstance();
+    const jumpBuf = fs.readFileSync(jumpOrganizedPath);
+    const painBuf = fs.readFileSync(painOrganizedPath);
+    manager.processAnimationBuffers(
+      jumpBuf.buffer.slice(jumpBuf.byteOffset, jumpBuf.byteOffset + jumpBuf.byteLength),
+      painBuf.buffer.slice(painBuf.byteOffset, painBuf.byteOffset + painBuf.byteLength),
+    );
+
+    const controller = manager.setupController('test_tobi_teleport_prevention', tobiMesh, 'retargeted');
+    assert.equal(tobiMesh.position.x, -4.8);
+    assert.equal(tobiMesh.position.z, 0.5);
+
+    controller.triggerJump();
+    assert.equal(controller.getCurrentState(), 'jumping');
+
+    // Step to apex (1.2s)
+    controller.update(1.2);
+    // Horizontal positions MUST remain exactly -4.8 and 0.5, while Y elevates above baseline 0.15
+    assert.equal(tobiMesh.position.x, -4.8, 'Tobi must not teleport to origin in X');
+    assert.equal(tobiMesh.position.z, 0.5, 'Tobi must not teleport to origin in Z');
+    assert.ok(tobiMesh.position.y > 0.4, `Tobi Y should elevate during jump, got ${tobiMesh.position.y}`);
+
+    // Step past landing (total 2.43s)
+    controller.update(1.5);
+    assert.equal(controller.isPlayingOneShot(), false);
+    assert.equal(controller.getCurrentState(), 'idle');
+    assert.equal(tobiMesh.position.x, -4.8, 'Tobi X must stay at -4.8 after landing');
+    assert.equal(tobiMesh.position.z, 0.5, 'Tobi Z must stay at 0.5 after landing');
+    assert.equal(Math.abs(tobiMesh.position.y - 0.15) < 0.001, true, 'Tobi Y must return to ground baseline 0.15');
+
+    manager.removeController('test_tobi_teleport_prevention');
+  });
+
+  it('Criterion 12: Controller aliasing prevents duplicate mixers and duplicate updates for the same root', () => {
+    const tobiMesh = buildNpcTobi();
+    const manager = AnimationManager.getInstance();
+
+    const ctrl1 = manager.setupController(999, tobiMesh, 'retargeted');
+    const ctrl2 = manager.setupController('npc_tobi_alias', tobiMesh, 'retargeted');
+
+    assert.equal(ctrl1, ctrl2, 'Aliased registration for the same root must return the identical controller instance');
+
+    manager.removeController(999);
+    assert.equal(manager.getController(999), undefined);
+    assert.equal(manager.getController('npc_tobi_alias'), undefined);
+  });
 });

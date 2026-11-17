@@ -36,6 +36,43 @@ import type {
 import { proceduralAudioEngine, ProceduralAudioEngine } from './procedural-audio-engine.js';
 
 export const ENVIRONMENT_SOUNDSCAPES: Record<EnvironmentLocationId, EnvironmentSoundscapeDef> = {
+  construction_workshop: {
+    locationId: 'construction_workshop',
+    name: 'Construction Workshop & Building Pad',
+    description: 'Ambient outdoor workshop breeze, distant scaffolding clinks, and modular masonry assembly.',
+    baseAmbience: {
+      soundType: 'coastal_wind',
+      volume: 0.25,
+    },
+    positionalEmitters: [
+      {
+        id: 'workshop-tool-rack',
+        name: 'Tool Rack & Equipment',
+        category: 'construction',
+        position: [-2.6, 0.85, -2.2],
+        refDistance: 2.0,
+        maxDistance: 20.0,
+        rolloffFactor: 1.0,
+        distanceModel: 'inverse',
+        volume: 0.4,
+        loop: true,
+        soundType: 'construction',
+      },
+      {
+        id: 'workshop-materials-bay',
+        name: 'Materials Supply Bay',
+        category: 'construction',
+        position: [2.6, 0.85, -2.2],
+        refDistance: 2.0,
+        maxDistance: 20.0,
+        rolloffFactor: 1.0,
+        distanceModel: 'inverse',
+        volume: 0.35,
+        loop: true,
+        soundType: 'construction',
+      },
+    ],
+  },
   nigerian_market: {
     locationId: 'nigerian_market',
     name: 'Ìsàlẹ̀ Èkó Artisan Market',
@@ -308,6 +345,9 @@ export class SpatialAudioManager {
       } catch (err) {
         console.warn('[SpatialAudio] Web Audio initialization deferred:', err);
       }
+    } else {
+      // Headless / SSR / Node.js test environment: fallback Object3D mock listener
+      this.listener = new Object3D() as any;
     }
 
     // Set up gain bus graph
@@ -719,7 +759,9 @@ export class SpatialAudioManager {
       unlockedByUser: this.unlockedByUser,
       isXR: this.isXR,
       activeLocationId: this.activeLocationId,
+      activeSoundscape: this.activeLocationId,
       activeEmittersCount: this.currentSoundscape?.emitters.size || 0,
+      activeEmitterCount: this.currentSoundscape?.emitters.size || 0,
       masterVolume: this.masterVolume,
       ambientVolume: this.ambientVolume,
       sfxVolume: this.sfxVolume,

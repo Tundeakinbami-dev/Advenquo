@@ -1,24 +1,23 @@
 <!--
-  Advenquo — Intro / Welcome panel.
-  Shown persistently at the left side of the scene.
+  Advenquo — VR Construction Intro & Control Panel.
+  Shown in the spatial construction workshop.
   In XR, the Enter/Exit buttons swap based on immersive state.
-  The discovery-count text is updated by SceneUISystem at runtime.
+  The build progress text is updated by ConstructionInteractionSystem.
 
-  UIKit units are centimetres. This panel is 30 cm wide × 36 cm tall.
-  It faces +Z in the scene; rotate the scene node to face the player.
+  UIKit units are centimetres. This panel is 32 cm wide × 38 cm tall.
 -->
 <style>
   .root {
     flex-direction: column;
-    width: 30;
-    background-color: rgba(10, 10, 30, 0.92);
+    width: 32;
+    background-color: rgba(11, 19, 41, 0.94);
     border-radius: 1.2;
     border-width: 0.15;
-    border-color: #4a90d9;
+    border-color: #0284c7;
   }
 
   .header {
-    background-color: #1a237e;
+    background-color: #0369a1;
     padding-top: 2;
     padding-bottom: 1.5;
     padding-left: 2;
@@ -28,18 +27,18 @@
   }
 
   .title {
-    font-size: 2.4;
+    font-size: 2.2;
     font-weight: 700;
-    color: #f5d370;
+    color: #f8fafc;
     text-align: center;
     letter-spacing: -0.05;
   }
 
   .subtitle {
-    font-size: 1.4;
-    color: #90caf9;
+    font-size: 1.3;
+    color: #bae6fd;
     text-align: center;
-    margin-top: 0.5;
+    margin-top: 0.4;
   }
 
   .body {
@@ -52,15 +51,15 @@
   }
 
   .instruction {
-    font-size: 1.5;
-    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.4;
+    color: rgba(255, 255, 255, 0.9);
     line-height: 1.4;
   }
 
   .counter {
-    font-size: 1.6;
+    font-size: 1.5;
     font-weight: 600;
-    color: #f5d370;
+    color: #38bdf8;
     margin-top: 0.5;
   }
 
@@ -73,7 +72,7 @@
   }
 
   .xr-btn {
-    background-color: #f5d370;
+    background-color: #0284c7;
     border-radius: 0.8;
     padding-top: 1.2;
     padding-bottom: 1.2;
@@ -83,9 +82,9 @@
   }
 
   .xr-btn-label {
-    font-size: 1.6;
+    font-size: 1.5;
     font-weight: 700;
-    color: #1a237e;
+    color: #ffffff;
   }
 
   .exit-btn {
@@ -101,27 +100,27 @@
   }
 
   .exit-btn-label {
-    font-size: 1.4;
+    font-size: 1.3;
     color: rgba(255, 255, 255, 0.7);
   }
 </style>
 
 <Panel class="root">
   <div class="header">
-    <div class="title">Advenquo</div>
-    <div class="subtitle">Yoruba Cultural Journey</div>
+    <div class="title">ADVENQUO</div>
+    <div class="subtitle">VR Construction World</div>
   </div>
 
   <div class="body">
     <div class="instruction">
-      Point at each object on the table and pinch or press to discover its story.
+      Sit comfortably and use both hands to grab blocks, rotate with your wrists, and snap modular materials onto the foundation.
     </div>
-    <div id="discovery-count" class="counter">0 / 4 discovered</div>
+    <div id="discovery-count" class="counter">Project: Eco-Pavilion House</div>
   </div>
 
   <div class="btn-row">
     <div id="xr-enter-btn" class="xr-btn">
-      <div class="xr-btn-label">Enter VR</div>
+      <div class="xr-btn-label">Enter VR Workshop</div>
     </div>
     <div id="xr-exit-btn" class="exit-btn" style="display: none">
       <div class="exit-btn-label">Exit to Browser</div>

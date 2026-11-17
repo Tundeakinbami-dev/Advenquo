@@ -9,6 +9,7 @@
  */
 
 export type EnvironmentLocationId =
+  | 'construction_workshop'
   | 'nigerian_market'
   | 'lagos_urban'
   | 'heritage_iga'
@@ -77,7 +78,9 @@ export interface SpatialAudioSystemStatus {
   unlockedByUser: boolean;
   isXR: boolean;
   activeLocationId: EnvironmentLocationId | null;
+  activeSoundscape?: EnvironmentLocationId | null;
   activeEmittersCount: number;
+  activeEmitterCount?: number;
   masterVolume: number;
   ambientVolume: number;
   sfxVolume: number;

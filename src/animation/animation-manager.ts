@@ -17,7 +17,6 @@ import {
 } from '@iwsdk/core';
 import {
   FBXAnimationLoaderService,
-  IYA_ALASO_BONE_MAP,
   PEDESTRIAN_BONE_MAP,
   TOBI_BONE_MAP,
   type AnimationAuditReport,
@@ -49,11 +48,11 @@ export class AnimationManager {
 
   private nativeClips: PreparedAnimationClips | null = null;
   private tobiClips: PreparedAnimationClips | null = null;
-  private iyaClips: PreparedAnimationClips | null = null;
   private pedestrianClips: PreparedAnimationClips | null = null;
 
-  // Active controllers registry
+  // Active controllers registry and unique instances set to prevent duplicate mixer updates
   private activeControllers = new Map<number | string, CharacterAnimationController>();
+  private uniqueControllers = new Set<CharacterAnimationController>();
   private isLoaded = false;
   private loadPromise: Promise<boolean> | null = null;
 
@@ -172,27 +171,6 @@ export class AnimationManager {
       idle: pedIdle,
     };
 
-    // 5. Prepare Iyá Aláso Retargeted clips
-    const iyaJump = this.loaderService.retargetClipToProcedural(
-      this.rawJumpClip,
-      IYA_ALASO_BONE_MAP,
-      'IyaAlaso',
-      { includeVerticalDisplacement: true, scale: 0.01 },
-    );
-    const iyaPain = this.loaderService.retargetClipToProcedural(
-      this.rawPainClip,
-      IYA_ALASO_BONE_MAP,
-      'IyaAlaso',
-      { includeVerticalDisplacement: false },
-    );
-    const iyaIdle = this.loaderService.createSyntheticIdleClip('Iya_Chest', 3.0);
-
-    this.iyaClips = {
-      standingJump: iyaJump,
-      painGesture: iyaPain,
-      idle: iyaIdle,
-    };
-
     this.isLoaded = true;
   }
 
@@ -204,31 +182,32 @@ export class AnimationManager {
     root: Object3D,
     forcedRigType: 'auto' | 'native' | 'retargeted' = 'auto',
   ): CharacterAnimationController {
-    // Check if controller already cached
+    // Check if controller already cached for this identifier
     const existing = this.activeControllers.get(identifier);
     if (existing) return existing;
+
+    // Check if a controller is already managing this exact root Object3D (alias registration)
+    for (const ctrl of this.uniqueControllers) {
+      if (ctrl.root === root) {
+        this.activeControllers.set(identifier, ctrl);
+        return ctrl;
+      }
+    }
 
     const controller = new CharacterAnimationController(root);
 
     // Determine target rig type
     const isTobi = root.name.includes('Tobi') || root.getObjectByName('Tobi_Chest') !== undefined;
-    const isIya =
-      root.name.includes('IyaAlaso') || root.getObjectByName('Iya_Chest') !== undefined;
     const isPedestrian =
       root.name.includes('Pedestrian') || root.getObjectByName('WalkLeftLeg') !== undefined;
     const isNative =
       forcedRigType === 'native' ||
-      (!isTobi && !isIya && !isPedestrian && root.getObjectByName('mixamorigHips') !== undefined);
+      (!isTobi && !isPedestrian && root.getObjectByName('mixamorigHips') !== undefined);
 
     if (isTobi && this.tobiClips) {
       controller.registerClip('jumping', this.tobiClips.standingJump);
       controller.registerClip('pain', this.tobiClips.painGesture);
       if (this.tobiClips.idle) controller.registerClip('idle', this.tobiClips.idle);
-      controller.transitionTo('idle');
-    } else if (isIya && this.iyaClips) {
-      controller.registerClip('jumping', this.iyaClips.standingJump);
-      controller.registerClip('pain', this.iyaClips.painGesture);
-      if (this.iyaClips.idle) controller.registerClip('idle', this.iyaClips.idle);
       controller.transitionTo('idle');
     } else if (isPedestrian && this.pedestrianClips) {
       controller.registerClip('jumping', this.pedestrianClips.standingJump);
@@ -243,6 +222,7 @@ export class AnimationManager {
     }
 
     this.activeControllers.set(identifier, controller);
+    this.uniqueControllers.add(controller);
     return controller;
   }
 
@@ -278,10 +258,11 @@ export class AnimationManager {
   }
 
   /**
-   * Update all registered controllers. Zero allocation per frame.
+   * Update all registered controllers. Exactly one mixer update per unique rig.
+   * Frame-budget friendly: zero heap allocation during update.
    */
   public update(delta: number): void {
-    for (const ctrl of this.activeControllers.values()) {
+    for (const ctrl of this.uniqueControllers) {
       ctrl.update(delta);
     }
   }
@@ -292,8 +273,13 @@ export class AnimationManager {
   public removeController(identifier: number | string): void {
     const ctrl = this.activeControllers.get(identifier);
     if (ctrl) {
+      this.uniqueControllers.delete(ctrl);
+      for (const [key, val] of this.activeControllers.entries()) {
+        if (val === ctrl) {
+          this.activeControllers.delete(key);
+        }
+      }
       ctrl.dispose();
-      this.activeControllers.delete(identifier);
     }
   }
 
@@ -301,10 +287,11 @@ export class AnimationManager {
    * Clear all controllers.
    */
   public disposeAll(): void {
-    for (const ctrl of this.activeControllers.values()) {
+    for (const ctrl of this.uniqueControllers) {
       ctrl.dispose();
     }
     this.activeControllers.clear();
+    this.uniqueControllers.clear();
   }
 }
 

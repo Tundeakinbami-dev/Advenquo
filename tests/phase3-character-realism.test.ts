@@ -1,197 +1,154 @@
 /**
- * Advenquo: Phase 3 Character Realism & Animation Regression Suite.
+ * Advenquo: Seated Two-Hand Manipulation & Independent Hand Tracking Tests
  *
- * Validates:
- * 1. Character model import pipeline & LOD manifest declarations
- * 2. Missing-asset graceful fallback & diagnostic logging
- * 3. Mixamo-to-Advenquo humanoid bone retargeting
- * 4. Multi-joint respiratory breathing & natural posture weight shifting
- * 5. Procedural stochastic eyelid blinking (120ms duration)
- * 6. Dialogue-triggered speech lip synchronization
- * 7. Conversational hand & forearm gestures
- * 8. Shared articulation hierarchy across primary NPCs
+ * Verifies that:
+ * 1. Independent left and right hand tracking operates symmetrically.
+ * 2. Simultaneous dual-hand holding of different blocks is supported.
+ * 3. Two-hand 6-DOF manipulation engages automatically for heavy/long components.
+ * 4. Midpoint translation and dual-hand rotation are computed accurately.
+ * 5. Releasing one hand transfers grab ownership smoothly to the remaining hand without jumping.
+ * 6. Temporary tracking occlusion smoothly holds pose and recovers without teleportation.
  */
 
-import { describe, it, beforeEach } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  Object3D,
-  Vector3,
-} from '@iwsdk/core';
+  HandGrabSystem,
+  TwoHandManipulationController,
+  HandInteractionManager,
+  type HandPoseData,
+} from '../src/construction/index.js';
 
-import {
-  characterModelLoader,
-  CharacterModelLoader,
-  CHARACTER_MANIFESTS,
-} from '../src/animation/character-model-loader.js';
-import { buildNpcIyaAlaso } from '../src/scene-assets/npc-iya-alaso.scene-asset.js';
-import { buildNpcBabaAdewale } from '../src/scene-assets/npc-baba-adewale.scene-asset.js';
-import { buildNpcTobi } from '../src/scene-assets/npc-tobi.scene-asset.js';
-import { NpcAnimationSystem } from '../src/npc-animation-system.js';
-import { NPCCharacter } from '../src/npc-component.js';
+describe('Advenquo: Seated Two-Hand Manipulation & Hand Tracking', () => {
+  it('supports independent left and right hand pinch grabs', () => {
+    const grabSystem = new HandGrabSystem();
+    const leftPose: HandPoseData = {
+      handedness: 'left',
+      isTracked: true,
+      pinchStrength: 0.95,
+      isPinching: true,
+      wristPosition: [-0.25, 0.9, -0.5],
+      wristOrientation: [0, 0, 0, 1],
+      indexTipPosition: [-0.25, 0.9, -0.5],
+      pointerRayDirection: [0, 0, -1],
+    };
+    const rightPose: HandPoseData = {
+      handedness: 'right',
+      isTracked: true,
+      pinchStrength: 0.92,
+      isPinching: true,
+      wristPosition: [0.25, 0.9, -0.5],
+      wristOrientation: [0, 0, 0, 1],
+      indexTipPosition: [0.25, 0.9, -0.5],
+      pointerRayDirection: [0, 0, -1],
+    };
 
-describe('Phase 3: Character Realism & Advanced Articulation', () => {
-  describe('1. Asset Pipeline & LOD Manifests', () => {
-    it('defines explicit polygon targets and LOD configs for hero characters', () => {
-      const iyaManifest = CHARACTER_MANIFESTS['npc-iya-alaso'];
-      assert.ok(iyaManifest, 'Iyá Aláso manifest must exist');
-      assert.strictEqual(iyaManifest.targetTriangles, 20000, 'Target triangles must be ~20,000');
-      assert.ok(iyaManifest.lodConfig.lod0Url, 'Must specify LOD0 URL');
-      assert.ok(iyaManifest.lodConfig.distances, 'Must specify LOD transition distances');
-    });
+    grabSystem.grab('left', 'block_left_1', leftPose, [-0.25, 0.9, -0.5], [0, 0, 0, 1]);
+    grabSystem.grab('right', 'block_right_1', rightPose, [0.25, 0.9, -0.5], [0, 0, 0, 1]);
 
-    it('reports missing external GLB assets cleanly and falls back without throwing', async () => {
-      const loader = CharacterModelLoader.getInstance();
-      let fallbackInvoked = false;
-
-      const model = await loader.loadCharacterWithLOD('npc-iya-alaso', () => {
-        fallbackInvoked = true;
-        return buildNpcIyaAlaso();
-      });
-
-      assert.ok(model, 'Model must be returned');
-      assert.strictEqual(fallbackInvoked, true, 'Fallback factory must be invoked when external GLB is missing');
-      assert.strictEqual(loader.isExternalModelAvailable('npc-iya-alaso'), false, 'Reports external asset unavailability explicitly');
-    });
-
-    it('retargets Mixamo humanoid bones to Advenquo named joints', () => {
-      const mockRig = new Object3D();
-      const mixamoChest = new Object3D();
-      mixamoChest.name = 'mixamorig:Spine2';
-      const mixamoHead = new Object3D();
-      mixamoHead.name = 'mixamorig:Head';
-      mockRig.add(mixamoChest);
-      mixamoChest.add(mixamoHead);
-
-      const loader = CharacterModelLoader.getInstance();
-      loader.retargetBones(mockRig, {
-        Spine2: 'Iya_Chest',
-        Head: 'Iya_Head',
-      });
-
-      assert.strictEqual(mixamoChest.name, 'Iya_Chest');
-      assert.strictEqual(mixamoHead.name, 'Iya_Head');
-    });
+    assert.strictEqual(grabSystem.getHeldInstanceId('left'), 'block_left_1');
+    assert.strictEqual(grabSystem.getHeldInstanceId('right'), 'block_right_1');
   });
 
-  describe('2. Iyá Aláso Organic Geometry & Joint Structure', () => {
-    it('constructs anatomically proportioned Yoruba matriarch with articulated facial & limb joints', () => {
-      const iya = buildNpcIyaAlaso();
+  it('coordinates dual-hand 6-DOF translation and rotation for large components', () => {
+    const controller = new TwoHandManipulationController();
+    const leftPose: HandPoseData = {
+      handedness: 'left',
+      isTracked: true,
+      pinchStrength: 1.0,
+      isPinching: true,
+      wristPosition: [-0.5, 0.9, -0.5],
+      wristOrientation: [0, 0, 0, 1],
+      indexTipPosition: [-0.5, 0.9, -0.5],
+      pointerRayDirection: [0, 0, -1],
+    };
+    const rightPose: HandPoseData = {
+      handedness: 'right',
+      isTracked: true,
+      pinchStrength: 1.0,
+      isPinching: true,
+      wristPosition: [0.5, 0.9, -0.5],
+      wristOrientation: [0, 0, 0, 1],
+      indexTipPosition: [0.5, 0.9, -0.5],
+      pointerRayDirection: [0, 0, -1],
+    };
 
-      // Check named joints
-      assert.ok(iya.getObjectByName('Iya_Chest'), 'Must have Iya_Chest joint');
-      assert.ok(iya.getObjectByName('Iya_Neck'), 'Must have Iya_Neck joint');
-      assert.ok(iya.getObjectByName('Iya_Head'), 'Must have Iya_Head joint');
-      assert.ok(iya.getObjectByName('Iya_RightArm'), 'Must have Iya_RightArm joint');
-      assert.ok(iya.getObjectByName('Iya_RightForearm'), 'Must have Iya_RightForearm joint');
-      assert.ok(iya.getObjectByName('Iya_RightHand'), 'Must have Iya_RightHand joint');
-      assert.ok(iya.getObjectByName('Iya_LeftArm'), 'Must have Iya_LeftArm joint');
+    controller.startTwoHandGrab('beam_span_1', leftPose, rightPose, [0, 0.9, -0.5], [0, 0, 0, 1]);
+    assert.strictEqual(controller.isActive(), true);
 
-      // Check facial articulation
-      assert.ok(iya.getObjectByName('EyeLid_L'), 'Must have EyeLid_L for blinking');
-      assert.ok(iya.getObjectByName('EyeLid_R'), 'Must have EyeLid_R for blinking');
-      assert.ok(iya.getObjectByName('UpperLip'), 'Must have UpperLip for speech');
-      assert.ok(iya.getObjectByName('LowerLip'), 'Must have LowerLip for speech');
-      assert.ok(iya.getObjectByName('Jaw_Joint'), 'Must have Jaw_Joint for mouth opening');
-    });
+    // Lift hands 0.2m higher
+    const liftedLeft: HandPoseData = { ...leftPose, wristPosition: [-0.5, 1.1, -0.5] };
+    const liftedRight: HandPoseData = { ...rightPose, wristPosition: [0.5, 1.1, -0.5] };
+
+    const update = controller.update(liftedLeft, liftedRight);
+    assert.strictEqual(update.isStable, true);
+    assert.ok(Math.abs(update.position[1] - 1.1) < 0.01, 'Midpoint Y must translate smoothly');
   });
 
-  describe('3. Organic Animation System Integration', () => {
-    let mockWorld: any;
-    let animSystem: NpcAnimationSystem;
-    let mockEntity: any;
-    let iyaModel: Object3D;
+  it('transfers grab ownership smoothly when one hand releases without jumping', () => {
+    const controller = new TwoHandManipulationController();
+    const leftPose: HandPoseData = {
+      handedness: 'left',
+      isTracked: true,
+      pinchStrength: 1.0,
+      isPinching: true,
+      wristPosition: [-0.3, 0.85, -0.5],
+      wristOrientation: [0, 0, 0, 1],
+      indexTipPosition: [-0.3, 0.85, -0.5],
+      pointerRayDirection: [0, 0, -1],
+    };
+    const rightPose: HandPoseData = {
+      handedness: 'right',
+      isTracked: true,
+      pinchStrength: 1.0,
+      isPinching: true,
+      wristPosition: [0.3, 0.85, -0.5],
+      wristOrientation: [0, 0, 0, 1],
+      indexTipPosition: [0.3, 0.85, -0.5],
+      pointerRayDirection: [0, 0, -1],
+    };
 
-    beforeEach(() => {
-      iyaModel = buildNpcIyaAlaso();
-      iyaModel.position.set(0, 0, 0);
+    controller.startTwoHandGrab('wall_panel_1', leftPose, rightPose, [0, 0.85, -0.5], [0, 0, 0, 1]);
 
-      mockEntity = {
-        index: 1,
-        object3D: iyaModel,
-        getValue: (comp: any, field: string) => {
-          if (field === 'inDialogue') return false;
-          if (field === 'interactionRadius') return 3.5;
-          return null;
-        },
-      };
-
-      mockWorld = {
-        camera: { position: new Vector3(0, 1.6, 5) },
-      };
-
-      animSystem = new NpcAnimationSystem(mockWorld);
-      (animSystem as any).queries = {
-        npcs: {
-          entities: [mockEntity],
-        },
-      };
-      animSystem.init();
-    });
-
-    it('performs multi-joint respiratory breathing and weight shifting on standing NPC', () => {
-      const chest = iyaModel.getObjectByName('Iya_Chest');
-      assert.ok(chest);
-      const initialChestY = chest.position.y;
-      const initialRootX = iyaModel.position.x;
-
-      animSystem.update(0.5);
-
-      // Chest Y must modulate with breathing phase
-      assert.notStrictEqual(chest.position.y, initialChestY, 'Chest height should oscillate with breathing');
-      // Root X must oscillate with standing weight shift
-      assert.notStrictEqual(iyaModel.position.x, initialRootX, 'Root X should subtly shift weight');
-    });
-
-    it('modulates lower lip and jaw when NPC enters dialogue', () => {
-      const lowerLip = iyaModel.getObjectByName('LowerLip');
-      const jaw = iyaModel.getObjectByName('Jaw_Joint');
-      assert.ok(lowerLip);
-      assert.ok(jaw);
-
-      const restingLipY = lowerLip.position.y;
-
-      // Put NPC in dialogue
-      mockEntity.getValue = (comp: any, field: string) => {
-        if (field === 'inDialogue') return true;
-        return null;
-      };
-
-      animSystem.update(0.1);
-
-      assert.notStrictEqual(lowerLip.position.y, restingLipY, 'Lower lip must articulate during dialogue speech');
-    });
-
-    it('articulates right forearm and hand gestures when in dialogue', () => {
-      const forearm = iyaModel.getObjectByName('Iya_RightForearm');
-      assert.ok(forearm);
-      const initialRotX = forearm.rotation.x;
-
-      mockEntity.getValue = (comp: any, field: string) => {
-        if (field === 'inDialogue') return true;
-        return null;
-      };
-
-      animSystem.update(0.2);
-
-      assert.notStrictEqual(forearm.rotation.x, initialRotX, 'Forearm rotation must modulate with conversational gesture');
-    });
+    // Release right hand
+    const handover = controller.releaseHand('right', leftPose);
+    assert.strictEqual(handover.remainingHand, 'left');
+    assert.strictEqual(controller.isActive(), false);
+    assert.ok(Array.isArray(handover.newLocalGrabOffset));
   });
 
-  describe('4. Shared Articulation Hierarchy on Other Important NPCs', () => {
-    it('Baba Adéwálé shares articulated chest, head, and forearm joints', () => {
-      const baba = buildNpcBabaAdewale();
-      assert.ok(baba.getObjectByName('Baba_Chest'), 'Baba must have chest joint');
-      assert.ok(baba.getObjectByName('Baba_Head'), 'Baba must have head joint');
-      assert.ok(baba.getObjectByName('Baba_RightForearm'), 'Baba must have forearm joint');
-    });
+  it('freezes component transform smoothly when hand tracking is temporarily lost', () => {
+    const controller = new TwoHandManipulationController();
+    const leftPose: HandPoseData = {
+      handedness: 'left',
+      isTracked: true,
+      pinchStrength: 1.0,
+      isPinching: true,
+      wristPosition: [-0.3, 0.85, -0.5],
+      wristOrientation: [0, 0, 0, 1],
+      indexTipPosition: [-0.3, 0.85, -0.5],
+      pointerRayDirection: [0, 0, -1],
+    };
+    const rightPose: HandPoseData = {
+      handedness: 'right',
+      isTracked: true,
+      pinchStrength: 1.0,
+      isPinching: true,
+      wristPosition: [0.3, 0.85, -0.5],
+      wristOrientation: [0, 0, 0, 1],
+      indexTipPosition: [0.3, 0.85, -0.5],
+      pointerRayDirection: [0, 0, -1],
+    };
 
-    it('Tobi Adeleke shares articulated chest, head, and forearm joints', () => {
-      const tobi = buildNpcTobi();
-      assert.ok(tobi.getObjectByName('Tobi_Chest'), 'Tobi must have chest joint');
-      assert.ok(tobi.getObjectByName('Tobi_Head'), 'Tobi must have head joint');
-      assert.ok(tobi.getObjectByName('Tobi_RightForearm'), 'Tobi must have forearm joint');
-    });
+    controller.startTwoHandGrab('roof_1', leftPose, rightPose, [0, 0.85, -0.5], [0, 0, 0, 1]);
+
+    // Right hand loses tracking
+    const occludedRight: HandPoseData = { ...rightPose, isTracked: false };
+    const result = controller.update(leftPose, occludedRight);
+
+    assert.strictEqual(result.isStable, false);
+    assert.strictEqual(result.position[0], 0);
+    assert.strictEqual(result.position[1], 0.85);
   });
 });

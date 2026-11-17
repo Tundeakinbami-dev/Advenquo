@@ -63,9 +63,12 @@ export class CharacterAnimationController {
   private hasBasePosition = false;
 
   // Callbacks
-  private onStateChange?: (state: CharacterAnimationState) => void;
-  private onActionComplete?: (actionName: string) => void;
+  public onStateChange?: (state: CharacterAnimationState) => void;
+  public onActionComplete?: (actionName: string) => void;
   private boundOnFinished: (event: any) => void;
+
+  // Track if current playing clip has a root position track
+  private hasRootPosTrack = false;
 
   constructor(root: Object3D, options: ControllerOptions = {}) {
     this.root = root;
@@ -161,6 +164,11 @@ export class CharacterAnimationController {
     nextAction.setEffectiveTimeScale(this.playbackSpeed);
     nextAction.setEffectiveWeight(1.0);
 
+    const nextClip = nextAction.getClip();
+    this.hasRootPosTrack = nextClip.tracks.some(
+      (t) => t.name === '.position' || t.name === `${this.root.name}.position`,
+    );
+
     if (prevAction && prevAction !== nextAction) {
       // Perform cross-fade transition
       prevAction.fadeOut(fadeDuration);
@@ -202,6 +210,11 @@ export class CharacterAnimationController {
     if (finishedAction === this.currentAction && this.isOneShotActive) {
       this.isOneShotActive = false;
 
+      // Restore baseline elevation immediately if root position was tracked
+      if (this.hasRootPosTrack) {
+        this.root.position.y = this.basePosition.y;
+      }
+
       // Notify action complete callback
       this.onActionComplete?.(finishedState);
 
@@ -214,10 +227,26 @@ export class CharacterAnimationController {
   /**
    * Per-frame update step.
    * Frame-budget friendly: zero heap allocation during update.
+   * Clamps horizontal root motion to prevent drift/teleportation while preserving vertical leaps.
    */
   public update(delta: number): void {
-    if (delta > 0) {
-      this.mixer.update(delta * this.playbackSpeed);
+    if (delta <= 0) return;
+
+    // Cache current external horizontal coordinates from root
+    const currentX = this.root.position.x;
+    const currentZ = this.root.position.z;
+    const hadRootPosTrack = this.hasRootPosTrack;
+
+    if (!this.isOneShotActive) {
+      this.basePosition.y = this.root.position.y;
+    }
+
+    this.mixer.update(delta * this.playbackSpeed);
+
+    if (hadRootPosTrack) {
+      // Isolate vertical leap from horizontal coordinates
+      const deltaY = this.isOneShotActive ? this.root.position.y : 0;
+      this.root.position.set(currentX, this.basePosition.y + deltaY, currentZ);
     }
   }
 

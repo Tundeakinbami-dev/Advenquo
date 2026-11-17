@@ -1,561 +1,214 @@
 /**
- * Advenquo — In-VR Navigation, World Travel & Journal Tablet System.
+ * Advenquo: Builder Tablet HUD System
  *
  * Coordinates the spatial UI tablet (`vr-nav-tablet`) inside WebXR.
- *
- * Capabilities:
- * - Switches tabs: Missions, Connected World Map, World Now, Passport & Journal, Comfort & Locomotion
- * - Seamless open-world travel across all 4 Nigerian environments in VR
- * - Real-time comfort & locomotion tuning:
- *   - Toggles Snap Turn (45°) vs Smooth Turn on `LocomotionSystem`
- *   - Adjusts Comfort Assist vignette strength
- *   - Returns player to safe origin [0, 0, 0]
- * - Displays active mission objectives and persistent progress (XP, Level, Vocabulary)
- * - Presents verified contemporary World Now intelligence reports
+ * Presents active construction project stages, instructions, engineering checks,
+ * and handles in-VR actions (Validate, Undo, Reset).
  */
 
 import {
-  Object3D,
   createSystem,
-  LocomotionSystem,
-  TurningMethod,
-  UIKit,
+  Object3D,
   UIKitMLAsset,
-  Vector3,
 } from '@iwsdk/core';
 
-import { missionEngine } from './game/mission-engine.js';
-import { storage } from './game/storage.js';
-import { getAllCombinedStories } from './game/world-now-data.js';
-import { WorldStreamingSystem } from './world-streaming-system.js';
-import { PlayerControllerSystem } from './player-controller-system.js';
-import { loadYorubaFontFamilies } from './yoruba-font.js';
+import { challengeManager } from './construction/progression/challenge-manager.js';
+import { assemblySystem } from './construction/assembly/assembly-system.js';
+import { blueprintManager } from './construction/blueprints/blueprint-manager.js';
 
 export class VRTabletSystem extends createSystem({}) {
   private static instance: VRTabletSystem | null = null;
   private tablet: UIKitMLAsset | null = null;
   private tabletAnchor: Object3D | null = null;
-  private isTabletDismissed = false;
-  private activeTab: 'missions' | 'travel' | 'worldnow' | 'journal' | 'settings' = 'missions';
-  private currentStoryIndex = 0;
+  private lastStageIndex = -1;
+
+  // Cached elements
+  private elProjectTitle: ReturnType<UIKitMLAsset['getElementById']> | null = null;
+  private elStageCounter: ReturnType<UIKitMLAsset['getElementById']> | null = null;
+  private elInstruction: ReturnType<UIKitMLAsset['getElementById']> | null = null;
+  private elCriticalCheck: ReturnType<UIKitMLAsset['getElementById']> | null = null;
+  private elStatusText: ReturnType<UIKitMLAsset['getElementById']> | null = null;
 
   public static getInstance(): VRTabletSystem | null {
     return VRTabletSystem.instance;
   }
 
-  // Cached views
-  private viewMissions: any = null;
-  private viewTravel: any = null;
-  private viewWorldNow: any = null;
-  private viewJournal: any = null;
-  private viewSettings: any = null;
+  public getTabletAnchor(): Object3D | null {
+    return this.tabletAnchor;
+  }
 
-  // Cached tab buttons & labels
-  private tabBtnMissions: any = null;
-  private tabBtnTravel: any = null;
-  private tabBtnWorldNow: any = null;
-  private tabBtnJournal: any = null;
-  private tabBtnSettings: any = null;
+  public isTabletVisible(): boolean {
+    return this.tablet ? this.tablet.visible : false;
+  }
 
-  private tabLblMissions: UIKit.Text | null = null;
-  private tabLblTravel: UIKit.Text | null = null;
-  private tabLblWorldNow: UIKit.Text | null = null;
-  private tabLblJournal: UIKit.Text | null = null;
-  private tabLblSettings: UIKit.Text | null = null;
+  public summonTablet(): void {
+    if (this.tablet) this.tablet.visible = true;
+  }
 
-  // Cached travel buttons
-  private btnTravelMarket: any = null;
-  private btnTravelUrban: any = null;
-  private btnTravelPalace: any = null;
-  private btnTravelBeach: any = null;
+  public dismissTablet(): void {
+    if (this.tablet) this.tablet.visible = false;
+  }
 
-  // Cached data elements
-  private missionTitleEl: UIKit.Text | null = null;
-  private missionPromptEl: UIKit.Text | null = null;
-  private missionStepEl: UIKit.Text | null = null;
-  private missionXpEl: UIKit.Text | null = null;
+  public toggleTablet(): void {
+    if (this.tablet) {
+      this.tablet.visible = !this.tablet.visible;
+    }
+  }
 
-  private newsTitleEl: UIKit.Text | null = null;
-  private newsSummaryEl: UIKit.Text | null = null;
-  private newsSourceEl: UIKit.Text | null = null;
-  private newsCounterEl: UIKit.Text | null = null;
-  private newsBadgeTextEl: UIKit.Text | null = null;
-  private btnNewsPrev: any = null;
-  private btnNewsNext: any = null;
+  public repositionInFrontOfPlayer(distance = 0.85): void {
+    if (!this.tabletAnchor) return;
 
-  private levelEl: UIKit.Text | null = null;
-  private xpEl: UIKit.Text | null = null;
-  private stampsEl: UIKit.Text | null = null;
-  private vocabEl: UIKit.Text | null = null;
+    const head = (this.player as any)?.head as Object3D | undefined;
+    const yaw = head ? head.rotation.y : 0;
 
-  private btnToggleTurn: any = null;
-  private lblToggleTurn: UIKit.Text | null = null;
-  private btnToggleVignette: any = null;
-  private lblToggleVignette: UIKit.Text | null = null;
-  private btnResetPos: any = null;
+    const offsetX = -Math.sin(yaw) * distance;
+    const offsetZ = -Math.cos(yaw) * distance;
 
-  // Locomotion state cache
-  private isSnapTurn = true;
-  private isVignetteActive = true;
+    this.tabletAnchor.position.set(offsetX, 1.25, offsetZ);
+    this.tabletAnchor.rotation.set(0, yaw, 0);
+  }
 
   init(): void {
     VRTabletSystem.instance = this;
-    if (typeof window !== 'undefined') {
-      (window as any).__vrTabletSystem = this;
-    }
-
     this.tablet = this.world.getSceneObject<UIKitMLAsset>('vr-nav-tablet') ?? null;
     if (!this.tablet) return;
-    void loadYorubaFontFamilies().then((fontFamilies) => {
-      this.tablet?.document.rootElement.setProperties({ fontFamilies } as never);
-    }).catch((error: unknown) => console.error('Yoruba font atlas failed to load:', error));
 
-    this._setupPlayerAnchor();
-
-    // Cache views
-    this.viewMissions = this.tablet.getElementById('view-missions');
-    this.viewTravel = this.tablet.getElementById('view-travel');
-    this.viewWorldNow = this.tablet.getElementById('view-worldnow');
-    this.viewJournal = this.tablet.getElementById('view-journal');
-    this.viewSettings = this.tablet.getElementById('view-settings');
-
-    // Cache tab buttons
-    this.tabBtnMissions = this.tablet.getElementById('tab-btn-missions');
-    this.tabBtnTravel = this.tablet.getElementById('tab-btn-travel');
-    this.tabBtnWorldNow = this.tablet.getElementById('tab-btn-worldnow');
-    this.tabBtnJournal = this.tablet.getElementById('tab-btn-journal');
-    this.tabBtnSettings = this.tablet.getElementById('tab-btn-settings');
-
-    this.tabLblMissions = this.tablet.getElementById<UIKit.Text>('tab-lbl-missions');
-    this.tabLblTravel = this.tablet.getElementById<UIKit.Text>('tab-lbl-travel');
-    this.tabLblWorldNow = this.tablet.getElementById<UIKit.Text>('tab-lbl-worldnow');
-    this.tabLblJournal = this.tablet.getElementById<UIKit.Text>('tab-lbl-journal');
-    this.tabLblSettings = this.tablet.getElementById<UIKit.Text>('tab-lbl-settings');
-
-    // Cache travel buttons
-    this.btnTravelMarket = this.tablet.getElementById('btn-travel-market');
-    this.btnTravelUrban = this.tablet.getElementById('btn-travel-urban');
-    this.btnTravelPalace = this.tablet.getElementById('btn-travel-palace');
-    this.btnTravelBeach = this.tablet.getElementById('btn-travel-beach');
-
-    // Wire travel buttons
-    const onTravelMarket = (): void => {
-      WorldStreamingSystem.getInstance()?.travelTo('nigerian_market', 'Lagos Island Artisan Market');
-      this._switchTab('travel');
-    };
-    const onTravelUrban = (): void => {
-      WorldStreamingSystem.getInstance()?.travelTo('lagos_urban', 'Danfo Bus to Yaba Silicon Lagoon');
-      this._switchTab('travel');
-    };
-    const onTravelPalace = (): void => {
-      WorldStreamingSystem.getInstance()?.travelTo('heritage_iga', 'Royal Procession to Iga Idunganran Palace');
-      this._switchTab('travel');
-    };
-    const onTravelBeach = (): void => {
-      WorldStreamingSystem.getInstance()?.travelTo('beach_waterfront', 'Harbour Ferry to Tarkwa Bay Coastal Haven');
-      this._switchTab('travel');
-    };
-
-    this.btnTravelMarket?.addEventListener('click', onTravelMarket);
-    this.btnTravelUrban?.addEventListener('click', onTravelUrban);
-    this.btnTravelPalace?.addEventListener('click', onTravelPalace);
-    this.btnTravelBeach?.addEventListener('click', onTravelBeach);
-
-    // Cache mission elements
-    this.missionTitleEl = this.tablet.getElementById<UIKit.Text>('tablet-mission-title');
-    this.missionPromptEl = this.tablet.getElementById<UIKit.Text>('tablet-mission-prompt');
-    this.missionStepEl = this.tablet.getElementById<UIKit.Text>('tablet-step-text');
-    this.missionXpEl = this.tablet.getElementById<UIKit.Text>('tablet-xp-text');
-
-    // Cache news elements
-    this.newsTitleEl = this.tablet.getElementById<UIKit.Text>('tablet-news-title');
-    this.newsSummaryEl = this.tablet.getElementById<UIKit.Text>('tablet-news-summary');
-    this.newsSourceEl = this.tablet.getElementById<UIKit.Text>('tablet-news-source');
-    this.newsCounterEl = this.tablet.getElementById<UIKit.Text>('tablet-news-counter');
-    this.newsBadgeTextEl = this.tablet.getElementById<UIKit.Text>('tablet-news-badge-text');
-    this.btnNewsPrev = this.tablet.getElementById('btn-news-prev');
-    this.btnNewsNext = this.tablet.getElementById('btn-news-next');
-
-    // Wire news navigation
-    const onNewsPrev = (): void => {
-      const stories = getAllCombinedStories();
-      if (stories.length === 0) return;
-      this.currentStoryIndex = (this.currentStoryIndex - 1 + stories.length) % stories.length;
-      this._refreshData();
-    };
-
-    const onNewsNext = (): void => {
-      const stories = getAllCombinedStories();
-      if (stories.length === 0) return;
-      this.currentStoryIndex = (this.currentStoryIndex + 1) % stories.length;
-      this._refreshData();
-    };
-
-    this.btnNewsPrev?.addEventListener('click', onNewsPrev);
-    this.btnNewsNext?.addEventListener('click', onNewsNext);
-
-    // Cache journal elements
-    this.levelEl = this.tablet.getElementById<UIKit.Text>('tablet-player-level');
-    this.xpEl = this.tablet.getElementById<UIKit.Text>('tablet-player-xp');
-    this.stampsEl = this.tablet.getElementById<UIKit.Text>('tablet-stamps-count');
-    this.vocabEl = this.tablet.getElementById<UIKit.Text>('tablet-vocab-preview');
-
-    // Cache settings buttons
-    this.btnToggleTurn = this.tablet.getElementById('btn-toggle-turn');
-    this.lblToggleTurn = this.tablet.getElementById<UIKit.Text>('lbl-toggle-turn');
-    this.btnToggleVignette = this.tablet.getElementById('btn-toggle-vignette');
-    this.lblToggleVignette = this.tablet.getElementById<UIKit.Text>('lbl-toggle-vignette');
-    this.btnResetPos = this.tablet.getElementById('btn-reset-pos');
-
-    // Wire Tab Clicks
-    const onMissionsTab = (): void => this._switchTab('missions');
-    const onTravelTab = (): void => this._switchTab('travel');
-    const onWorldNowTab = (): void => this._switchTab('worldnow');
-    const onJournalTab = (): void => this._switchTab('journal');
-    const onSettingsTab = (): void => this._switchTab('settings');
-
-    this.tabBtnMissions?.addEventListener('click', onMissionsTab);
-    this.tabBtnTravel?.addEventListener('click', onTravelTab);
-    this.tabBtnWorldNow?.addEventListener('click', onWorldNowTab);
-    this.tabBtnJournal?.addEventListener('click', onJournalTab);
-    this.tabBtnSettings?.addEventListener('click', onSettingsTab);
-
-    // Wire Recenter & Dismiss buttons
-    const btnRecenter = this.tablet.getElementById('tab-btn-recenter');
-    const btnDismiss = this.tablet.getElementById('tab-btn-dismiss');
-    const btnRecenterSetting = this.tablet.getElementById('btn-recenter-setting');
-
-    const onRecenterClick = (): void => this.repositionInFrontOfPlayer();
-    const onDismissClick = (): void => this.dismissTablet();
-
-    btnRecenter?.addEventListener('click', onRecenterClick);
-    btnDismiss?.addEventListener('click', onDismissClick);
-    btnRecenterSetting?.addEventListener('click', onRecenterClick);
-
-    // Wire Settings actions
-    const onToggleTurn = (): void => this._toggleTurningMethod();
-    const onToggleVignette = (): void => this._toggleComfortVignette();
-    const onResetPos = (): void => this._resetPlayerPosition();
-
-    this.btnToggleTurn?.addEventListener('click', onToggleTurn);
-    this.btnToggleVignette?.addEventListener('click', onToggleVignette);
-    this.btnResetPos?.addEventListener('click', onResetPos);
-
-    // Global keyboard and custom event hooks for summoning/repositioning
-    const onKeyDown = (e: KeyboardEvent): void => {
-      if ((e.target as HTMLElement)?.tagName === 'INPUT' || (e.target as HTMLElement)?.tagName === 'TEXTAREA') return;
-      if (e.code === 'KeyT') {
-        this.toggleTablet();
-      } else if (e.code === 'KeyR' && (e.ctrlKey || e.altKey)) {
-        this.repositionInFrontOfPlayer();
-      }
-    };
-
-    const onSummon = (): void => this.summonTablet();
-    const onDismissEvent = (): void => this.dismissTablet();
-    const onToggle = (): void => this.toggleTablet();
-    const onRecenterEvent = (): void => this.repositionInFrontOfPlayer();
-
-    if (typeof window !== 'undefined') {
-      window.addEventListener('keydown', onKeyDown);
-      window.addEventListener('advenquo:summon-tablet', onSummon);
-      window.addEventListener('advenquo:dismiss-tablet', onDismissEvent);
-      window.addEventListener('advenquo:toggle-tablet', onToggle);
-      window.addEventListener('advenquo:recenter-tablet', onRecenterEvent);
-    }
-
-    this.cleanupFuncs.push(
-      () => this.tabBtnMissions?.removeEventListener('click', onMissionsTab),
-      () => this.tabBtnTravel?.removeEventListener('click', onTravelTab),
-      () => this.tabBtnWorldNow?.removeEventListener('click', onWorldNowTab),
-      () => this.tabBtnJournal?.removeEventListener('click', onJournalTab),
-      () => this.tabBtnSettings?.removeEventListener('click', onSettingsTab),
-      () => btnRecenter?.removeEventListener('click', onRecenterClick),
-      () => btnDismiss?.removeEventListener('click', onDismissClick),
-      () => btnRecenterSetting?.removeEventListener('click', onRecenterClick),
-      () => this.btnTravelMarket?.removeEventListener('click', onTravelMarket),
-      () => this.btnTravelUrban?.removeEventListener('click', onTravelUrban),
-      () => this.btnTravelPalace?.removeEventListener('click', onTravelPalace),
-      () => this.btnTravelBeach?.removeEventListener('click', onTravelBeach),
-      () => this.btnToggleTurn?.removeEventListener('click', onToggleTurn),
-      () => this.btnToggleVignette?.removeEventListener('click', onToggleVignette),
-      () => this.btnResetPos?.removeEventListener('click', onResetPos),
-      () => this.btnNewsPrev?.removeEventListener('click', onNewsPrev),
-      () => this.btnNewsNext?.removeEventListener('click', onNewsNext),
-      () => {
-        if (typeof window !== 'undefined') {
-          window.removeEventListener('keydown', onKeyDown);
-          window.removeEventListener('advenquo:summon-tablet', onSummon);
-          window.removeEventListener('advenquo:dismiss-tablet', onDismissEvent);
-          window.removeEventListener('advenquo:toggle-tablet', onToggle);
-          window.removeEventListener('advenquo:recenter-tablet', onRecenterEvent);
-        }
-      },
-      () => {
-        VRTabletSystem.instance = null;
-      },
-    );
-
-    // Initial update
-    this._refreshData();
-  }
-
-  update(delta: number): void {
-    // Ensure anchor remains mounted to player if player became available after init
-    const player = this.player ?? (this.world as any)?.player;
-    if (this.tablet && player && typeof player.add === 'function') {
-      if (!this.tabletAnchor || this.tabletAnchor.parent !== player) {
-        this._setupPlayerAnchor();
-      }
-    }
-  }
-
-  private _switchTab(tab: 'missions' | 'travel' | 'worldnow' | 'journal' | 'settings'): void {
-    this.activeTab = tab;
-
-    // Toggle views
-    this.viewMissions?.setProperties({ display: tab === 'missions' ? 'flex' : 'none' });
-    this.viewTravel?.setProperties({ display: tab === 'travel' ? 'flex' : 'none' });
-    this.viewWorldNow?.setProperties({ display: tab === 'worldnow' ? 'flex' : 'none' });
-    this.viewJournal?.setProperties({ display: tab === 'journal' ? 'flex' : 'none' });
-    this.viewSettings?.setProperties({ display: tab === 'settings' ? 'flex' : 'none' });
-
-    // Update tab bar styles
-    this.tabBtnMissions?.setProperties({
-      backgroundColor: tab === 'missions' ? '#f5d370' : 'rgba(255, 255, 255, 0.1)',
-    });
-    this.tabLblMissions?.setProperties({
-      color: tab === 'missions' ? '#1a237e' : '#ffffff',
-    });
-
-    this.tabBtnTravel?.setProperties({
-      backgroundColor: tab === 'travel' ? '#f5d370' : 'rgba(255, 255, 255, 0.1)',
-    });
-    this.tabLblTravel?.setProperties({
-      color: tab === 'travel' ? '#1a237e' : '#ffffff',
-    });
-
-    this.tabBtnWorldNow?.setProperties({
-      backgroundColor: tab === 'worldnow' ? '#f5d370' : 'rgba(255, 255, 255, 0.1)',
-    });
-    this.tabLblWorldNow?.setProperties({
-      color: tab === 'worldnow' ? '#1a237e' : '#ffffff',
-    });
-
-    this.tabBtnJournal?.setProperties({
-      backgroundColor: tab === 'journal' ? '#f5d370' : 'rgba(255, 255, 255, 0.1)',
-    });
-    this.tabLblJournal?.setProperties({
-      color: tab === 'journal' ? '#1a237e' : '#ffffff',
-    });
-
-    this.tabBtnSettings?.setProperties({
-      backgroundColor: tab === 'settings' ? '#f5d370' : 'rgba(255, 255, 255, 0.1)',
-    });
-    this.tabLblSettings?.setProperties({
-      color: tab === 'settings' ? '#1a237e' : '#ffffff',
-    });
-
-    this._refreshData();
-  }
-
-  private _refreshData(): void {
-    const state = storage.getState();
-
-    // 1. Refresh Missions view
-    const active = missionEngine.getActiveMissionState();
-    const allMissions = missionEngine.getAllMissions();
-    const curMission = allMissions.find((m) => m.id === (active?.missionId || 'mission_yoruba_greetings')) || allMissions[0];
-    const curStep = curMission.steps[active?.currentStepIndex || 0] || curMission.steps[0];
-
-    this.missionTitleEl?.setProperties({ text: curMission.title } as never);
-    this.missionPromptEl?.setProperties({ text: curStep.prompt } as never);
-    this.missionStepEl?.setProperties({
-      text: `Step ${(active?.currentStepIndex || 0) + 1} of ${curMission.steps.length}`,
-    } as never);
-    this.missionXpEl?.setProperties({ text: `+${curMission.learningObjectives[0]?.xpReward || 150} XP` } as never);
-
-    // 2. Refresh World Now News
-    const stories = getAllCombinedStories();
-    if (stories.length > 0) {
-      const story = stories[this.currentStoryIndex % stories.length];
-      this.newsTitleEl?.setProperties({ text: story.headline } as never);
-      this.newsSummaryEl?.setProperties({ text: story.summary } as never);
-      this.newsSourceEl?.setProperties({ text: `Source: ${story.publisher}` } as never);
-      this.newsCounterEl?.setProperties({
-        text: `Story ${(this.currentStoryIndex % stories.length) + 1} / ${stories.length}`,
-      } as never);
-      this.newsBadgeTextEl?.setProperties({
-        text: `${story.verificationLevel.toUpperCase()} • ${story.category.toUpperCase()}`,
-      } as never);
-    }
-
-    // 3. Refresh Journal & Profile
-    this.levelEl?.setProperties({ text: `Level ${state.profile.guardianLevel}` } as never);
-    this.xpEl?.setProperties({ text: `${state.profile.totalXp} XP` } as never);
-    this.stampsEl?.setProperties({
-      text: `${state.passport.stamps.length} / 4 Stamps`,
-    } as never);
-
-    if (state.passport.vocabulary.length > 0) {
-      const vocab = state.passport.vocabulary[state.passport.vocabulary.length - 1];
-      this.vocabEl?.setProperties({
-        text: `"${vocab.term}" — ${vocab.englishGloss}`,
-      } as never);
-    }
-  }
-
-  private _toggleTurningMethod(): void {
-    const locomotionSystem = this.world.getSystem(LocomotionSystem);
-    if (!locomotionSystem) return;
-
-    this.isSnapTurn = !this.isSnapTurn;
-    const newMethod = this.isSnapTurn ? TurningMethod.SnapTurn : TurningMethod.SmoothTurn;
-    locomotionSystem.config.turningMethod.value = newMethod;
-
-    this.lblToggleTurn?.setProperties({
-      text: this.isSnapTurn ? 'Snap Turn (45°)' : 'Smooth Turn (180°/s)',
-    } as never);
-  }
-
-  private _toggleComfortVignette(): void {
-    const locomotionSystem = this.world.getSystem(LocomotionSystem);
-    if (!locomotionSystem) return;
-
-    this.isVignetteActive = !this.isVignetteActive;
-    locomotionSystem.config.comfortAssist.value = this.isVignetteActive ? 0.5 : 0.0;
-
-    this.lblToggleVignette?.setProperties({
-      text: this.isVignetteActive ? 'Active (Low Motion)' : 'Disabled (Full Field)',
-    } as never);
-  }
-
-  private _resetPlayerPosition(): void {
-    const curLoc = WorldStreamingSystem.getInstance()?.getCurrentLocation();
-    const spawnX = curLoc?.spawnPosition[0] || 0;
-    const spawnZ = curLoc?.spawnPosition[2] || 0;
-
-    const locomotionSystem = this.world.getSystem(LocomotionSystem);
-    if (locomotionSystem) {
-      locomotionSystem.setPlayerPosition(new Vector3(spawnX, 0, spawnZ));
-    }
-    const pc = PlayerControllerSystem.getInstance();
-    if (pc) {
-      pc.teleportTo(spawnX, spawnZ, 0);
-    }
-  }
-
-  /**
-   * Sets up the dedicated player-relative anchor and parents the tablet under it.
-   */
-  private _setupPlayerAnchor(): void {
-    if (!this.tablet) return;
-
-    if (!this.tabletAnchor) {
+    if (this.player) {
       this.tabletAnchor = new Object3D();
-      this.tabletAnchor.name = 'VRTabletPlayerAnchor';
+      this.tabletAnchor.name = 'TabletAnchor';
+      this.tabletAnchor.position.set(0, 1.25, -0.85);
+      this.player.add(this.tabletAnchor);
+      this.tablet.parent?.remove(this.tablet);
+      this.tabletAnchor.add(this.tablet);
     }
 
-    const player = this.player ?? (this.world as any)?.player;
-    if (player && typeof player.add === 'function') {
-      if (this.tabletAnchor.parent !== player) {
-        player.add(this.tabletAnchor);
+    if (this.world && (this.world as any).scene) {
+      (this.world as any).scene.add(blueprintManager.getWorkspaceAnchor());
+    }
+
+    this.elProjectTitle = this.tablet.getElementById('tablet-project-title');
+    this.elStageCounter = this.tablet.getElementById('tablet-stage-counter');
+    this.elInstruction = this.tablet.getElementById('tablet-instruction-text');
+    this.elCriticalCheck = this.tablet.getElementById('tablet-critical-check');
+    this.elStatusText = this.tablet.getElementById('tablet-status-text');
+
+    const btnValidate = this.tablet.getElementById('btn-tablet-validate');
+    const btnUndo = this.tablet.getElementById('btn-tablet-undo');
+    const btnReset = this.tablet.getElementById('btn-tablet-reset');
+    const btnBlueprint = this.tablet.getElementById('btn-tablet-blueprint');
+    const btnPin = this.tablet.getElementById('btn-tablet-pin');
+    const btnHint = this.tablet.getElementById('btn-tablet-hint');
+
+    const onBlueprint = (): void => {
+      const visible = blueprintManager.toggleVisibility();
+      if (this.elStatusText) {
+        this.elStatusText.setProperties({
+          text: visible ? 'Blueprint Mode Pinned in Workspace' : 'Blueprint Mode Hidden',
+        });
       }
-      if (this.tablet.parent !== this.tabletAnchor) {
-        this.tabletAnchor.add(this.tablet);
+    };
+
+    const onPin = (): void => {
+      const current = blueprintManager.getPinPlacement();
+      const next = current === 'left' ? 'right' : 'left';
+      blueprintManager.setPinPlacement(next);
+      if (this.elStatusText) {
+        this.elStatusText.setProperties({
+          text: `Blueprint Pinned ${next === 'left' ? 'Left' : 'Right'} of Workstation`,
+        });
       }
-    }
+    };
 
-    this.repositionInFrontOfPlayer();
-  }
-
-  /**
-   * Positions the tablet at a comfortable distance (0.7m-1.0m) and height (~1.25m)
-   * directly in front of the player, facing the player's viewpoint.
-   */
-  public repositionInFrontOfPlayer(distance = 0.85): void {
-    if (!this.tablet) return;
-
-    const targetHeight = 1.25;
-    let localYaw = 0;
-
-    // Detect player's horizontal look direction
-    if (this.player?.head) {
-      localYaw = this.player.head.rotation.y;
-    } else if (this.world?.camera) {
-      localYaw = this.world.camera.rotation.y;
-    }
-
-    const sinYaw = Math.sin(localYaw);
-    const cosYaw = Math.cos(localYaw);
-
-    // Forward vector in player-local space is (-sinYaw, 0, -cosYaw)
-    const rawOffsetX = -sinYaw * distance;
-    const rawOffsetZ = -cosYaw * distance;
-    const offsetX = Math.abs(rawOffsetX) < 1e-5 ? 0 : rawOffsetX;
-    const offsetZ = Math.abs(rawOffsetZ) < 1e-5 ? 0 : rawOffsetZ;
-
-    if (this.tabletAnchor) {
-      this.tabletAnchor.position.set(offsetX, targetHeight, offsetZ);
-      // Tilt slightly upward (-10° on X) and orient to face the player
-      this.tabletAnchor.rotation.set(-0.15, localYaw, 0, 'YXZ');
-      this.tablet.position.set(0, 0, 0);
-      this.tablet.rotation.set(0, 0, 0);
-    } else {
-      // Fallback if player rig anchor is not attached
-      const playerPos = this.player?.position ?? new Vector3(0, 0, 0);
-      this.tablet.position.set(
-        playerPos.x + offsetX,
-        playerPos.y + targetHeight,
-        playerPos.z + offsetZ,
+    const onHint = (): void => {
+      const hint = blueprintManager.getAssistance().getVisualHint(
+        challengeManager.getCurrentStageIndex(),
+        assemblySystem.getGraph().getAllNodes() as any,
       );
-      this.tablet.rotation.set(-0.15, localYaw, 0, 'YXZ');
-    }
+      if (this.elStatusText && hint) {
+        this.elStatusText.setProperties({
+          text: `Hint: Next ${hint.description} at [${hint.targetPosition.map((n) => n.toFixed(1)).join(', ')}]`,
+        });
+      }
+    };
+
+    const onValidate = (): void => {
+      const assessment = challengeManager.evaluateProgress(assemblySystem.getGraph());
+      if (this.elStatusText) {
+        if (assessment.passed) {
+          const stars = assessment.scoreBreakdown?.starRating ?? 3;
+          this.elStatusText.setProperties({
+            text: `Validation Passed! Score: ${assessment.score} / 100 (${stars} Stars)`,
+          });
+        } else {
+          const firstErr =
+            assessment.stabilityErrors[0] ||
+            assessment.placementErrors[0] ||
+            assessment.connectionErrors[0] ||
+            'Assembly incomplete';
+          this.elStatusText.setProperties({
+            text: `Validation Alert: ${firstErr}`,
+          });
+        }
+      }
+    };
+
+    const onUndo = (): void => {
+      const graph = assemblySystem.getGraph();
+      const nodes = graph.getAllNodes().filter((n) => !n.isGrounded && n.structuralRole !== 'foundation');
+      if (nodes.length > 0) {
+        const lastNode = nodes[nodes.length - 1];
+        assemblySystem.unregisterBlock(lastNode.instanceId);
+        if (this.elStatusText) {
+          this.elStatusText.setProperties({ text: `Removed ${lastNode.instanceId}` });
+        }
+      }
+    };
+
+    const onReset = (): void => {
+      challengeManager.setActiveChallenge('small_house_challenge');
+      this.lastStageIndex = -1;
+      if (this.elStatusText) {
+        this.elStatusText.setProperties({ text: 'Challenge reset. Ready to build.' });
+      }
+    };
+
+    if (btnValidate) btnValidate.addEventListener('click', onValidate);
+    if (btnUndo) btnUndo.addEventListener('click', onUndo);
+    if (btnReset) btnReset.addEventListener('click', onReset);
+    if (btnBlueprint) btnBlueprint.addEventListener('click', onBlueprint);
+    if (btnPin) btnPin.addEventListener('click', onPin);
+    if (btnHint) btnHint.addEventListener('click', onHint);
+
+    this.cleanupFuncs.push(() => {
+      if (btnValidate) btnValidate.removeEventListener('click', onValidate);
+      if (btnUndo) btnUndo.removeEventListener('click', onUndo);
+      if (btnReset) btnReset.removeEventListener('click', onReset);
+      if (btnBlueprint) btnBlueprint.removeEventListener('click', onBlueprint);
+      if (btnPin) btnPin.removeEventListener('click', onPin);
+      if (btnHint) btnHint.removeEventListener('click', onHint);
+    });
   }
 
-  /**
-   * Summons the tablet in front of the player and makes it visible.
-   */
-  public summonTablet(): void {
+  update(): void {
     if (!this.tablet) return;
-    this.isTabletDismissed = false;
-    this.repositionInFrontOfPlayer();
-    this.tablet.visible = true;
-    if (this.tabletAnchor) this.tabletAnchor.visible = true;
-  }
 
-  /**
-   * Dismisses the tablet to clear the player's field of view.
-   */
-  public dismissTablet(): void {
-    if (!this.tablet) return;
-    this.isTabletDismissed = true;
-    this.tablet.visible = false;
-    if (this.tabletAnchor) this.tabletAnchor.visible = false;
-  }
+    const stage = challengeManager.getCurrentStageInfo();
+    if (stage && stage.stageIndex !== this.lastStageIndex) {
+      this.lastStageIndex = stage.stageIndex;
+      const bp = challengeManager.getBlueprint();
 
-  /**
-   * Toggles the visibility and summoning of the tablet.
-   */
-  public toggleTablet(): void {
-    if (this.isTabletVisible()) {
-      this.dismissTablet();
-    } else {
-      this.summonTablet();
+      if (this.elProjectTitle && bp) {
+        this.elProjectTitle.setProperties({ text: bp.title });
+      }
+      if (this.elStageCounter) {
+        this.elStageCounter.setProperties({ text: `Stage ${stage.stageIndex} / 6: ${stage.title}` });
+      }
+      if (this.elInstruction) {
+        this.elInstruction.setProperties({ text: stage.instruction });
+      }
+      if (this.elCriticalCheck) {
+        this.elCriticalCheck.setProperties({ text: `Critical: ${stage.criticalCheck}` });
+      }
     }
-  }
-
-  /**
-   * Returns whether the tablet is currently visible.
-   */
-  public isTabletVisible(): boolean {
-    return Boolean(this.tablet?.visible && (!this.tabletAnchor || this.tabletAnchor.visible));
-  }
-
-  /**
-   * Returns the dedicated player-relative anchor Object3D.
-   */
-  public getTabletAnchor(): Object3D | null {
-    return this.tabletAnchor;
   }
 }

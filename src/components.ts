@@ -1,32 +1,21 @@
 /**
- * Advenquo — Component registry.
+ * Advenquo: VR Construction & Building Game — Component Registry
  *
- * All components must be listed here so the IWSDK editor can inspect them
- * and scene JSON can author their fields.
+ * All authored components must be registered here for IWSDK runtime
+ * and editor scene inspection.
  */
 
 import { defineComponents } from '@iwsdk/core';
-import { CulturalObject } from './cultural-object-component.js';
-import { NPCCharacter } from './npc-component.js';
-import { NPCMovement } from './npc-movement-component.js';
 import { CharacterAnimation } from './character-animation-component.js';
-import { AdventureState, AdventureItem } from './adventure-mission-component.js';
 import {
-  LocationAnchor,
-  EnvironmentAtmosphere,
-  WorldTravelState,
-  InteractiveDoor,
-} from './location-component.js';
+  ConstructionBlock,
+  ConstructionSnapHost,
+  ConstructionWorkshopState,
+} from './construction/core/construction-components.js';
 
 export default defineComponents([
-  CulturalObject,
-  NPCCharacter,
-  NPCMovement,
   CharacterAnimation,
-  AdventureState,
-  AdventureItem,
-  LocationAnchor,
-  EnvironmentAtmosphere,
-  WorldTravelState,
-  InteractiveDoor,
+  ConstructionBlock,
+  ConstructionSnapHost,
+  ConstructionWorkshopState,
 ]);

@@ -45,57 +45,11 @@ export interface CharacterModelManifest {
 }
 
 export const CHARACTER_MANIFESTS: Record<string, CharacterModelManifest> = {
-  'npc-iya-alaso': {
-    characterId: 'npc-iya-alaso',
-    name: 'Iyá Aláso (Master Adire Artisan)',
-    culture: 'Yoruba Nigerian Matriarch',
-    description: 'Elderly Yoruba woman with authentic facial anatomy, tailored indigo Adire attire, pleated Gele, and coral regalia.',
-    targetTriangles: 20000,
-    lodConfig: {
-      lod0Url: '/assets/characters/iya-alaso/iya-alaso.glb',
-      lod1Url: '/assets/characters/iya-alaso/iya-alaso-lod1.glb',
-      lod2Url: '/assets/characters/iya-alaso/iya-alaso-lod2.glb',
-      distances: [0, 3.5, 12.0],
-    },
-    boneMap: {
-      hips: 'Hips',
-      spine: 'Spine',
-      chest: 'Iya_Chest',
-      neck: 'Iya_Neck',
-      head: 'Iya_Head',
-      leftArm: 'Iya_LeftArm',
-      rightArm: 'Iya_RightArm',
-      rightForearm: 'Iya_RightForearm',
-    },
-    isLicensedModelAvailable: false,
-    missingAssetNotice: 'Production GLB asset (/assets/characters/iya-alaso/iya-alaso.glb) pending licensed artist delivery. Fallback to procedural organic mesh active.',
-  },
-  'npc-baba-adewale': {
-    characterId: 'npc-baba-adewale',
-    name: 'Baba Adéwálé (Elder Historian)',
-    culture: 'Yoruba Nigerian Elder',
-    description: 'Elderly Yoruba historian wearing embroidered royal purple Agbada and beaded Fila cap.',
-    targetTriangles: 18000,
-    lodConfig: {
-      lod0Url: '/assets/characters/baba-adewale/baba-adewale.glb',
-      distances: [0, 3.5, 12.0],
-    },
-    boneMap: {
-      hips: 'Hips',
-      chest: 'Baba_Chest',
-      neck: 'Baba_Neck',
-      head: 'Baba_Head',
-      rightForearm: 'Baba_RightForearm',
-      leftArm: 'Baba_LeftArm',
-    },
-    isLicensedModelAvailable: false,
-    missingAssetNotice: 'Production GLB asset (/assets/characters/baba-adewale/baba-adewale.glb) pending licensed artist delivery. Fallback to procedural organic mesh active.',
-  },
   'npc-tobi': {
     characterId: 'npc-tobi',
-    name: 'Tobi Adeleke (Tech Architect)',
-    culture: 'Contemporary Lagosian Youth',
-    description: 'Young tech innovator wearing Ankara-accented urban casual attire and smart glasses.',
+    name: 'Tobi Adeleke (Lead Architect & Site Inspector)',
+    culture: 'Contemporary Lagosian Architect',
+    description: 'Lead architect wearing construction supervisor attire and inspection gear.',
     targetTriangles: 16000,
     lodConfig: {
       lod0Url: '/assets/characters/tobi/tobi.glb',
