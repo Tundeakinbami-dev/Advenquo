@@ -188,10 +188,22 @@ export const CONSTRUCTION_CATALOG: Record<ComponentType, ComponentSpecification>
       {
         id: 'ftg_top_anchor',
         type: 'column_anchor',
-        role: 'female',
+        role: 'male',
         localPosition: [0, 0.15, 0],
         localNormal: [0, 1, 0],
-        compatibleTypes: ['reinforced_column', 'column', 'concrete_block', 'sandcrete_block', 'steel_connector'],
+        compatibleTypes: [
+          'reinforced_column',
+          'column',
+          'concrete_block',
+          'sandcrete_block',
+          'steel_connector',
+          'small_brick',
+          'large_brick',
+          'square_block',
+          'rectangular_block',
+          'corner_wall',
+          'internal_partition',
+        ],
       },
       {
         id: 'ftg_bottom_ground',
@@ -752,6 +764,318 @@ export const CONSTRUCTION_CATALOG: Record<ComponentType, ComponentSpecification>
         localPosition: [0, 0, 1.5],
         localNormal: [0, 0, 1],
         compatibleTypes: ['bridge_section'],
+      },
+    ],
+  },
+
+  // 18. Small Brick
+  small_brick: {
+    type: 'small_brick',
+    name: 'Small Masonry Brick',
+    description: 'Compact modular terracotta brick for precision masonry courses and detail work.',
+    dimensions: [0.20, 0.065, 0.10],
+    massKg: 2.8,
+    structuralRole: 'compressive_masonry',
+    material: MATERIAL_SPECS.terracotta_clay,
+    requiresTwoHands: false,
+    snapPoints: [
+      {
+        id: 'small_brick_top_stud',
+        type: 'stud_socket',
+        role: 'male',
+        localPosition: [0, 0.0325, 0],
+        localNormal: [0, 1, 0],
+        compatibleTypes: ['small_brick', 'clay_brick', 'horizontal_beam', 'beam', 'roof_panel'],
+      },
+      {
+        id: 'small_brick_bottom_socket',
+        type: 'stud_socket',
+        role: 'female',
+        localPosition: [0, -0.0325, 0],
+        localNormal: [0, -1, 0],
+        compatibleTypes: ['small_brick', 'clay_brick', 'concrete_block', 'foundation_block'],
+      },
+    ],
+  },
+
+  // 19. Large Brick
+  large_brick: {
+    type: 'large_brick',
+    name: 'Large Masonry Brick',
+    description: 'Expanded masonry unit providing fast linear wall courses with high thermal mass.',
+    dimensions: [0.30, 0.12, 0.15],
+    massKg: 7.5,
+    structuralRole: 'compressive_masonry',
+    material: MATERIAL_SPECS.terracotta_clay,
+    requiresTwoHands: false,
+    snapPoints: [
+      {
+        id: 'large_brick_top_stud',
+        type: 'stud_socket',
+        role: 'male',
+        localPosition: [0, 0.06, 0],
+        localNormal: [0, 1, 0],
+        compatibleTypes: ['large_brick', 'clay_brick', 'horizontal_beam', 'beam', 'roof_panel'],
+      },
+      {
+        id: 'large_brick_bottom_socket',
+        type: 'stud_socket',
+        role: 'female',
+        localPosition: [0, -0.06, 0],
+        localNormal: [0, -1, 0],
+        compatibleTypes: ['large_brick', 'concrete_block', 'foundation_block'],
+      },
+    ],
+  },
+
+  // 20. Square Block
+  square_block: {
+    type: 'square_block',
+    name: 'Square Concrete Block',
+    description: 'Equilateral masonry block for quoin corners, piers, and sturdy column pedestals.',
+    dimensions: [0.30, 0.20, 0.30],
+    massKg: 22.0,
+    structuralRole: 'compressive_masonry',
+    material: MATERIAL_SPECS.aggregate_concrete_block,
+    requiresTwoHands: false,
+    snapPoints: [
+      {
+        id: 'square_block_top',
+        type: 'stud_socket',
+        role: 'male',
+        localPosition: [0, 0.10, 0],
+        localNormal: [0, 1, 0],
+        compatibleTypes: ['square_block', 'concrete_block', 'clay_brick', 'reinforced_column', 'column'],
+      },
+      {
+        id: 'square_block_bottom',
+        type: 'stud_socket',
+        role: 'female',
+        localPosition: [0, -0.10, 0],
+        localNormal: [0, -1, 0],
+        compatibleTypes: ['square_block', 'foundation_block', 'concrete_block'],
+      },
+    ],
+  },
+
+  // 21. Rectangular Block
+  rectangular_block: {
+    type: 'rectangular_block',
+    name: 'Rectangular Base Block',
+    description: 'Standard load-bearing masonry block for perimeter foundation walls and bearing courses.',
+    dimensions: [0.40, 0.20, 0.20],
+    massKg: 16.0,
+    structuralRole: 'compressive_masonry',
+    material: MATERIAL_SPECS.aggregate_concrete_block,
+    requiresTwoHands: false,
+    snapPoints: [
+      {
+        id: 'rect_block_top',
+        type: 'stud_socket',
+        role: 'male',
+        localPosition: [0, 0.10, 0],
+        localNormal: [0, 1, 0],
+        compatibleTypes: ['rectangular_block', 'concrete_block', 'clay_brick', 'wall_panel', 'beam', 'horizontal_beam'],
+      },
+      {
+        id: 'rect_block_bottom',
+        type: 'stud_socket',
+        role: 'female',
+        localPosition: [0, -0.10, 0],
+        localNormal: [0, -1, 0],
+        compatibleTypes: ['rectangular_block', 'concrete_block', 'foundation_block'],
+      },
+    ],
+  },
+
+  // 22. Corner Wall
+  corner_wall: {
+    type: 'corner_wall',
+    name: 'Reinforced Corner Wall',
+    description: 'Pre-formed 90-degree corner wall section providing structural rigidity and fast envelope assembly.',
+    dimensions: [0.60, 2.40, 0.60],
+    massKg: 280.0,
+    structuralRole: 'wall_partition',
+    material: MATERIAL_SPECS.reinforced_structural_concrete,
+    requiresTwoHands: true,
+    snapPoints: [
+      {
+        id: 'corner_bottom_mount',
+        type: 'stud_socket',
+        role: 'female',
+        localPosition: [0, -1.2, 0],
+        localNormal: [0, -1, 0],
+        compatibleTypes: ['foundation_block', 'concrete_block', 'floor_component', 'floor_slab'],
+      },
+      {
+        id: 'corner_top_seat',
+        type: 'beam_seat',
+        role: 'female',
+        localPosition: [0, 1.2, 0],
+        localNormal: [0, 1, 0],
+        compatibleTypes: ['horizontal_beam', 'beam', 'roof_truss', 'roof_panel'],
+      },
+    ],
+  },
+
+  // 23. Internal Partition
+  internal_partition: {
+    type: 'internal_partition',
+    name: 'Internal Room Partition',
+    description: 'Lightweight interior partition panel for bedroom, corridor, and bathroom room separation.',
+    dimensions: [0.90, 2.40, 0.10],
+    massKg: 140.0,
+    structuralRole: 'wall_partition',
+    material: MATERIAL_SPECS.sandcrete,
+    requiresTwoHands: true,
+    snapPoints: [
+      {
+        id: 'partition_bottom',
+        type: 'stud_socket',
+        role: 'female',
+        localPosition: [0, -1.2, 0],
+        localNormal: [0, -1, 0],
+        compatibleTypes: ['floor_component', 'floor_slab', 'foundation_block'],
+      },
+      {
+        id: 'partition_top',
+        type: 'beam_seat',
+        role: 'female',
+        localPosition: [0, 1.2, 0],
+        localNormal: [0, 1, 0],
+        compatibleTypes: ['horizontal_beam', 'beam', 'roof_truss'],
+      },
+    ],
+  },
+
+  // 24. Door Leaf
+  door: {
+    type: 'door',
+    name: 'Solid Core Timber Door',
+    description: 'Panel door leaf sized to fit standard modular door frames with brass hinge hardware.',
+    dimensions: [0.82, 2.04, 0.05],
+    massKg: 28.0,
+    structuralRole: 'architectural_opening',
+    material: MATERIAL_SPECS.hardwood_timber,
+    requiresTwoHands: false,
+    snapPoints: [
+      {
+        id: 'door_hinge_mount',
+        type: 'frame_slot',
+        role: 'neutral',
+        localPosition: [-0.41, 0, 0],
+        localNormal: [-1, 0, 0],
+        compatibleTypes: ['door_frame'],
+      },
+    ],
+  },
+
+  // 25. Window Glazing
+  window: {
+    type: 'window',
+    name: 'Glazed Casement Window',
+    description: 'Tempered glass sash panel with aluminum divider muntins for natural illumination.',
+    dimensions: [0.92, 1.12, 0.04],
+    massKg: 18.0,
+    structuralRole: 'architectural_opening',
+    material: MATERIAL_SPECS.architectural_glazing_frame,
+    requiresTwoHands: false,
+    snapPoints: [
+      {
+        id: 'window_frame_slot',
+        type: 'frame_slot',
+        role: 'neutral',
+        localPosition: [0, 0, 0],
+        localNormal: [0, 0, 1],
+        compatibleTypes: ['window_frame'],
+      },
+    ],
+  },
+
+  // 26. Roofing Material
+  roofing_material: {
+    type: 'roofing_material',
+    name: 'Corrugated Zinc Roof Sheet',
+    description: 'Corrugated galvanized zinc alloy sheet for weather protection and stormwater runoff.',
+    dimensions: [1.40, 0.02, 1.00],
+    massKg: 12.0,
+    structuralRole: 'weather_enclosure',
+    material: MATERIAL_SPECS.corrugated_zinc_roofing,
+    requiresTwoHands: false,
+    snapPoints: [
+      {
+        id: 'zinc_sheet_seat',
+        type: 'roof_ridge',
+        role: 'female',
+        localPosition: [0, -0.01, 0],
+        localNormal: [0, -1, 0],
+        compatibleTypes: ['roof_truss', 'roof_panel', 'horizontal_beam', 'beam'],
+      },
+    ],
+  },
+
+  // 27. Floor Finish
+  floor_finish: {
+    type: 'floor_finish',
+    name: 'Ceramic Floor Deck Finish',
+    description: 'Polished vitrified floor tiles mounted on cement bed for finished interior living spaces.',
+    dimensions: [1.20, 0.02, 1.20],
+    massKg: 32.0,
+    structuralRole: 'surface_finish',
+    material: MATERIAL_SPECS.ceramic_tile,
+    requiresTwoHands: false,
+    snapPoints: [
+      {
+        id: 'floor_finish_seat',
+        type: 'stud_socket',
+        role: 'female',
+        localPosition: [0, -0.01, 0],
+        localNormal: [0, -1, 0],
+        compatibleTypes: ['floor_component', 'floor_slab'],
+      },
+    ],
+  },
+
+  // 28. Wall Finish
+  wall_finish: {
+    type: 'wall_finish',
+    name: 'Plaster Wall Finish',
+    description: 'Hydraulic lime and sand stucco wall cladding panel for clean architectural surfaces.',
+    dimensions: [1.20, 2.40, 0.02],
+    massKg: 45.0,
+    structuralRole: 'surface_finish',
+    material: MATERIAL_SPECS.plaster_finish,
+    requiresTwoHands: true,
+    snapPoints: [
+      {
+        id: 'wall_finish_mount',
+        type: 'panel_edge',
+        role: 'female',
+        localPosition: [0, 0, -0.01],
+        localNormal: [0, 0, -1],
+        compatibleTypes: ['wall_panel', 'corner_wall', 'internal_partition'],
+      },
+    ],
+  },
+
+  // 29. Decorative Element
+  decorative_element: {
+    type: 'decorative_element',
+    name: 'Architectural Cornice Trim',
+    description: 'Classical molded eave cornice trim with geometric Nigerian decorative motifs.',
+    dimensions: [0.60, 0.15, 0.15],
+    massKg: 8.5,
+    structuralRole: 'decorative',
+    material: MATERIAL_SPECS.decorative_brass,
+    requiresTwoHands: false,
+    snapPoints: [
+      {
+        id: 'cornice_rear_mount',
+        type: 'stud_socket',
+        role: 'female',
+        localPosition: [0, 0, -0.075],
+        localNormal: [0, 0, -1],
+        compatibleTypes: ['wall_panel', 'horizontal_beam', 'beam', 'reinforced_column', 'column'],
       },
     ],
   },

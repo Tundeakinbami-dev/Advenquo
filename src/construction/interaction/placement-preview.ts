@@ -12,6 +12,7 @@ import {
   Mesh,
   MeshBasicMaterial,
   Object3D,
+  Quaternion,
   SphereGeometry,
   Vector3,
 } from '@iwsdk/core';
@@ -59,12 +60,8 @@ export class PlacementPreview {
     heldType: ComponentType,
     candidate: SnapCandidate | null,
     fallbackWorldPos: Vector3,
+    heldRotation?: Quaternion,
   ): void {
-    if (!candidate) {
-      this.root.visible = false;
-      return;
-    }
-
     this.root.visible = true;
 
     // Ensure mesh matches component type
@@ -79,20 +76,36 @@ export class PlacementPreview {
       this.currentPreviewType = heldType;
     }
 
-    if (candidate.isValid) {
+    if (candidate && candidate.isValid) {
       // Valid placement: snap ghost to candidate target transform
       this.previewMaterial.color.setHex(0x00e676); // Emerald Green
       this.markerMaterial.color.setHex(0x00e676);
       this.previewMesh.position.copy(candidate.snappedPosition);
       this.previewMesh.quaternion.copy(candidate.snappedRotation);
+      this.snapMarker.visible = true;
       this.snapMarker.position.copy(candidate.targetSnapPoint.worldPosition);
-    } else {
+    } else if (candidate && !candidate.isValid) {
       // Invalid placement: show red warning at target socket
       this.previewMaterial.color.setHex(0xff5252); // Coral / Crimson
       this.markerMaterial.color.setHex(0xff5252);
       this.previewMesh.position.copy(candidate.snappedPosition);
       this.previewMesh.quaternion.copy(candidate.snappedRotation);
+      this.snapMarker.visible = true;
       this.snapMarker.position.copy(candidate.targetSnapPoint.worldPosition);
+    } else {
+      // Direct placement on building pad: emerald green ghost at world hit point
+      const spec = getComponentSpec(heldType);
+      const halfH = spec.dimensions[1] / 2;
+      this.previewMaterial.color.setHex(0x00e676); // Emerald Green
+      this.previewMesh.position.set(
+        fallbackWorldPos.x,
+        Math.max(0.05 + halfH, fallbackWorldPos.y),
+        fallbackWorldPos.z,
+      );
+      if (heldRotation) {
+        this.previewMesh.quaternion.copy(heldRotation);
+      }
+      this.snapMarker.visible = false;
     }
   }
 

@@ -128,4 +128,40 @@ export const MATERIAL_SPECS: Record<string, MaterialPhysicalProperties> = {
     roughness: 0.3,
     metalness: 0.7,
   },
+
+  plaster_finish: {
+    name: 'Mineral Stucco & Hydraulic Plaster',
+    densityKgM3: 1600.0,
+    compressiveStrengthMpa: 10.0,
+    tensileStrengthMpa: 1.5,
+    friction: 0.7,
+    restitution: 0.05,
+    colorHex: 0xf1f5f9, // Smooth architectural off-white
+    roughness: 0.9,
+    metalness: 0.02,
+  },
+
+  ceramic_tile: {
+    name: 'Vitrified Ceramic Floor Tile',
+    densityKgM3: 2300.0,
+    compressiveStrengthMpa: 60.0,
+    tensileStrengthMpa: 15.0,
+    friction: 0.6,
+    restitution: 0.15,
+    colorHex: 0xcbd5e1, // Cool architectural tile grey
+    roughness: 0.25,
+    metalness: 0.1,
+  },
+
+  decorative_brass: {
+    name: 'Architectural Cast Brass Trim',
+    densityKgM3: 8400.0,
+    compressiveStrengthMpa: 250.0,
+    tensileStrengthMpa: 300.0,
+    friction: 0.45,
+    restitution: 0.2,
+    colorHex: 0xd4af37, // Rich metallic satin gold / brass
+    roughness: 0.35,
+    metalness: 0.85,
+  },
 };

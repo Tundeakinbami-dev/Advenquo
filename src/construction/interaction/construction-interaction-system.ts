@@ -26,6 +26,8 @@ import type { SnapCandidate } from '../assembly/snap-point.js';
 import { ConstructionBlock } from '../core/construction-components.js';
 import type { ComponentType } from '../core/construction-types.js';
 import { constructionPhysicsManager } from '../physics/construction-physics-manager.js';
+import { challengeManager } from '../progression/challenge-manager.js';
+import { constructionTutorialManager } from '../progression/construction-tutorial-manager.js';
 import { PlacementPreview } from './placement-preview.js';
 
 export class ConstructionInteractionSystem extends createSystem({
@@ -83,6 +85,7 @@ export class ConstructionInteractionSystem extends createSystem({
 
     // Wake up physics body for kinematic manipulation
     constructionPhysicsManager.activateComponentForGrab(instanceId);
+    constructionTutorialManager.onComponentSelected(entity.getValue(ConstructionBlock, 'componentType') as ComponentType);
 
     // If it was previously part of the assembly, temporarily detach it
     if (isPlaced) {
@@ -97,6 +100,8 @@ export class ConstructionInteractionSystem extends createSystem({
     if (!instanceId) return;
 
     entity.setValue(ConstructionBlock, 'isHeld', false);
+    let isStacked = false;
+    let hasConnection = false;
 
     if (this.activeCandidate && this.activeCandidate.isValid) {
       // Snap commit!
@@ -110,6 +115,8 @@ export class ConstructionInteractionSystem extends createSystem({
         entity.object3D.position.copy(result.snappedPosition);
         entity.object3D.quaternion.copy(result.snappedRotation);
         entity.setValue(ConstructionBlock, 'isPlaced', true);
+        isStacked = result.snappedPosition.y > 0.15;
+        hasConnection = true;
 
         // Optimize physics body to STATIC for Quest 3 frame-rate safety
         constructionPhysicsManager.optimizePlacedComponent(instanceId);
@@ -119,6 +126,14 @@ export class ConstructionInteractionSystem extends createSystem({
       // Free physics settlement
       constructionPhysicsManager.releaseComponentToPhysics(instanceId);
     }
+
+    constructionTutorialManager.onComponentPlaced({
+      instanceId,
+      componentType,
+      isStacked,
+      hasConnection,
+    });
+    challengeManager.evaluateProgress(assemblySystem.getGraph());
 
     this.preview.hide();
     this.activeCandidate = null;
@@ -145,6 +160,7 @@ export class ConstructionInteractionSystem extends createSystem({
 
       object3D.getWorldPosition(this.tempPos);
       object3D.getWorldQuaternion(this.tempQuat);
+      constructionTutorialManager.onComponentMoved(this.tempPos);
 
       // Find nearest valid snap socket candidate
       this.activeCandidate = assemblySystem.findBestSnapCandidate(

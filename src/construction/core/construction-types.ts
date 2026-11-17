@@ -10,20 +10,26 @@
  */
 
 export type ComponentType =
-  // Individual components
+  // Basic building blocks
   | 'clay_brick'
+  | 'small_brick'
+  | 'large_brick'
   | 'sandcrete_block'
   | 'concrete_block'
+  | 'square_block'
+  | 'rectangular_block'
   | 'foundation_block'
   | 'timber_piece'
   | 'rebar'
   | 'steel_connector'
-  // Larger components
+  // Structural components
   | 'reinforced_column'
   | 'column'
   | 'horizontal_beam'
   | 'beam'
   | 'wall_panel'
+  | 'corner_wall'
+  | 'internal_partition'
   | 'floor_component'
   | 'floor_slab'
   | 'staircase'
@@ -31,7 +37,15 @@ export type ComponentType =
   | 'window_frame'
   | 'roof_truss'
   | 'roof_panel'
-  | 'bridge_section';
+  | 'bridge_section'
+  // Architectural components
+  | 'door'
+  | 'window'
+  // Finishing components
+  | 'roofing_material'
+  | 'floor_finish'
+  | 'wall_finish'
+  | 'decorative_element';
 
 export type StructuralRole =
   | 'foundation'
@@ -44,7 +58,10 @@ export type StructuralRole =
   | 'portal_frame'
   | 'truss_support'
   | 'weather_enclosure'
-  | 'span_deck';
+  | 'span_deck'
+  | 'surface_finish'
+  | 'architectural_opening'
+  | 'decorative';
 
 export type SnapSocketRole = 'male' | 'female' | 'neutral';
 

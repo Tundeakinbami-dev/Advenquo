@@ -22,9 +22,14 @@ import {
 } from '@iwsdk/core';
 
 import { challengeManager } from './construction/progression/challenge-manager.js';
+import {
+  constructionTutorialManager,
+  type TutorialStep,
+} from './construction/progression/construction-tutorial-manager.js';
 import { assemblySystem } from './construction/assembly/assembly-system.js';
 import { desktopConstructionController } from './construction/interaction/desktop-interaction.js';
 import type { ComponentType } from './construction/core/construction-types.js';
+import { getComponentSpec } from './construction/materials/construction-catalog.js';
 
 export class ResponsiveUISystem extends createSystem({}) {
   private celebrateShown = false;
@@ -39,6 +44,7 @@ export class ResponsiveUISystem extends createSystem({}) {
     this._detectDeviceAndWebXR();
     this._wireNavigationAndModals();
     this._wireConstructionPalette();
+    this._wireTutorialHUD();
     this._wireCameraResize();
     this._wireVisibilityState();
   }
@@ -78,20 +84,84 @@ export class ResponsiveUISystem extends createSystem({}) {
     }
   }
 
+  private _wireTutorialHUD(): void {
+    const unsub = constructionTutorialManager.subscribe((step: TutorialStep, completed: boolean) => {
+      const stepIndicator = document.getElementById('tutorial-step-indicator');
+      const tutorialText = document.getElementById('tutorial-text');
+      if (stepIndicator) {
+        stepIndicator.textContent = completed
+          ? 'Tutorial Complete! 🎉'
+          : `Tutorial ${step.index}/8: ${step.title}`;
+      }
+      if (tutorialText) {
+        tutorialText.textContent = completed
+          ? 'You have mastered modular construction! Keep building freely.'
+          : step.instruction;
+      }
+    });
+    this.cleanupFuncs.push(unsub);
+  }
+
   private _wireConstructionPalette(): void {
+    const categoryTabs = document.querySelectorAll<HTMLElement>('.category-tab');
     const cards = document.querySelectorAll<HTMLElement>('.construction-card');
+
+    categoryTabs.forEach((tab) => {
+      tab.addEventListener('click', (e) => {
+        e.stopPropagation();
+        categoryTabs.forEach((t) => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+
+        const selectedCategory = tab.dataset.category;
+        cards.forEach((card) => {
+          const cardCat = card.dataset.category;
+          if (!selectedCategory || selectedCategory === 'all' || cardCat === selectedCategory) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      });
+    });
+
     cards.forEach((card) => {
       const compType = card.dataset.componentType as ComponentType;
       if (!compType) return;
 
       const onSelect = (e: Event): void => {
         e.preventDefault();
+        e.stopPropagation();
+
+        cards.forEach((c) => c.classList.remove('active', 'selected'));
+        card.classList.add('active', 'selected');
+
+        const spec = getComponentSpec(compType);
+        const name = card.querySelector('.card-name')?.textContent || spec?.name || compType;
+        const dims = spec ? `${spec.dimensions[0]}m × ${spec.dimensions[1]}m × ${spec.dimensions[2]}m` : '';
+
         desktopConstructionController.selectComponent(
           `spawned_${compType}_${Date.now().toString(36)}`,
           compType,
-          new Vector3(0, 1.2, -1.8),
+          new Vector3(0, 0.5, -2.5),
         );
-        this._showToast(`Selected ${card.querySelector('.card-name')?.textContent || compType}. Move mouse & click to place.`);
+
+        // Update instruction banners as required by specification
+        const statusEl = document.getElementById('selection-status-text');
+        if (statusEl) {
+          statusEl.textContent = `${name.toUpperCase()} SELECTED (${dims}): Click on the construction pad to place.`;
+        }
+        document.getElementById('btn-cancel-selection')?.classList.remove('hidden');
+
+        const tutText = document.getElementById('tutorial-text');
+        if (tutText) {
+          tutText.textContent = `${name.toUpperCase()} SELECTED: Click on the construction pad to place.`;
+        }
+
+        this._showToast(`Selected ${name}. Click on the construction pad to place.`);
       };
 
       card.addEventListener('click', onSelect);
@@ -102,8 +172,53 @@ export class ResponsiveUISystem extends createSystem({}) {
       });
     });
 
-    // Wire dock controls
-    document.getElementById('btn-dock-validate')?.addEventListener('click', () => {
+    // Wire Cancel Selection Button
+    document.getElementById('btn-cancel-selection')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      desktopConstructionController.cancelPlacement();
+      cards.forEach((c) => c.classList.remove('active', 'selected'));
+      const statusEl = document.getElementById('selection-status-text');
+      if (statusEl) {
+        statusEl.textContent = 'Select a building material to begin construction.';
+      }
+      document.getElementById('btn-cancel-selection')?.classList.add('hidden');
+      const tutText = document.getElementById('tutorial-text');
+      if (tutText) {
+        tutText.textContent = 'Select a building material to begin construction.';
+      }
+    });
+
+    // Handle component placed and placement cancelled events
+    const handleComponentPlaced = (e: Event): void => {
+      const detail = (e as CustomEvent).detail;
+      const spec = detail?.componentType ? getComponentSpec(detail.componentType) : null;
+      const name = spec?.name || detail?.componentType || 'Component';
+      const statusEl = document.getElementById('selection-status-text');
+      if (statusEl) {
+        statusEl.textContent = `Placed ${name} on the pad! Select another material or click placed block to move.`;
+      }
+      document.getElementById('btn-cancel-selection')?.classList.add('hidden');
+    };
+    window.addEventListener('advenquo-component-placed', handleComponentPlaced);
+    this.cleanupFuncs.push(() => {
+      window.removeEventListener('advenquo-component-placed', handleComponentPlaced);
+    });
+
+    const handlePlacementCancelled = (): void => {
+      cards.forEach((c) => c.classList.remove('active', 'selected'));
+      const statusEl = document.getElementById('selection-status-text');
+      if (statusEl) {
+        statusEl.textContent = 'Select a building material to begin construction.';
+      }
+      document.getElementById('btn-cancel-selection')?.classList.add('hidden');
+    };
+    window.addEventListener('advenquo-placement-cancelled', handlePlacementCancelled);
+    this.cleanupFuncs.push(() => {
+      window.removeEventListener('advenquo-placement-cancelled', handlePlacementCancelled);
+    });
+
+    // Wire dock & panel controls
+    const handleValidate = (): void => {
       const graph = assemblySystem.getGraph();
       const result = challengeManager.evaluateProgress(graph);
       if (result.passed) {
@@ -112,25 +227,38 @@ export class ResponsiveUISystem extends createSystem({}) {
         const err = result.placementErrors[0] || result.stabilityErrors[0] || result.feedbackNotes[0] || 'Validation incomplete';
         this._showToast(`Validation: ${err}`);
       }
-    });
+    };
+    document.getElementById('btn-dock-validate')?.addEventListener('click', handleValidate);
+    document.getElementById('btn-panel-validate')?.addEventListener('click', handleValidate);
 
-    document.getElementById('btn-dock-undo')?.addEventListener('click', () => {
+    const handleUndo = (): void => {
       const undone = desktopConstructionController.undoLastPlacement();
       if (undone) {
         this._showToast(`Undid placement of ${undone}`);
       } else {
         this._showToast('Nothing to undo.');
       }
-    });
+    };
+    document.getElementById('btn-dock-undo')?.addEventListener('click', handleUndo);
+    document.getElementById('btn-panel-undo')?.addEventListener('click', handleUndo);
 
-    document.getElementById('btn-dock-reset')?.addEventListener('click', () => {
+    const handleReset = (): void => {
       assemblySystem.reset();
       challengeManager.reset();
+      constructionTutorialManager.reset();
       desktopConstructionController.reset();
       this.celebrateShown = false;
       this._updateConstructionHUD(1, 'Foundation Inspection');
-      this._showToast('Construction project reset.');
-    });
+      cards.forEach((c) => c.classList.remove('active', 'selected'));
+      const statusEl = document.getElementById('selection-status-text');
+      if (statusEl) {
+        statusEl.textContent = 'Select a building material to begin construction.';
+      }
+      document.getElementById('btn-cancel-selection')?.classList.add('hidden');
+      this._showToast('Construction project and tutorial reset.');
+    };
+    document.getElementById('btn-dock-reset')?.addEventListener('click', handleReset);
+    document.getElementById('btn-panel-reset')?.addEventListener('click', handleReset);
   }
 
   // ── Private Setup Methods ────────────────────────────────────────────────
@@ -214,15 +342,15 @@ export class ResponsiveUISystem extends createSystem({}) {
 
       const aspect = window.innerWidth / window.innerHeight;
 
-      // Base pose authored in iwsdk.config.json: position [0, 1.2, 0.35], lookAt [0, 0.95, -0.75]
-      const baseZ = 0.35;
-      const baseY = 1.2;
+      // Base pose authored in iwsdk.config.json: position [0, 1.45, 0.4], lookAt [0, 0.95, -1.8]
+      const baseZ = 0.4;
+      const baseY = 1.45;
 
       camera.aspect = aspect;
       camera.updateProjectionMatrix();
 
       // Only perform initial static pose reset if player controller is not active
-      const hasPlayerMoved = camera.position.x !== 0 || camera.position.z !== 0.35;
+      const hasPlayerMoved = Math.abs(camera.position.x) > 0.05 || Math.abs(camera.position.z - baseZ) > 0.05;
       if (!hasPlayerMoved) {
         if (aspect < 1.1) {
           const portraitScale = Math.min(1.1 / Math.max(aspect, 0.4), 2.2);
@@ -234,7 +362,7 @@ export class ResponsiveUISystem extends createSystem({}) {
           camera.position.set(0, baseY, baseZ);
           camera.fov = 50;
         }
-        camera.lookAt(0, 0.95, -0.75);
+        camera.lookAt(0, 0.95, -1.8);
         camera.updateProjectionMatrix();
       }
     };
@@ -313,10 +441,9 @@ export class ResponsiveUISystem extends createSystem({}) {
       this._closeMobileDrawer();
       this._openModal('projects-modal-backdrop');
     };
-    const scrollToMaterials = (): void => {
+    const toggleMaterials = (forceOpen?: boolean): void => {
       this._closeMobileDrawer();
-      const dock = document.getElementById('artefact-dock');
-      dock?.scrollIntoView({ behavior: 'smooth' });
+      this._toggleMaterialsPanel(forceOpen);
     };
 
     document.getElementById('nav-how-to-play')?.addEventListener('click', openHelp);
@@ -325,8 +452,10 @@ export class ResponsiveUISystem extends createSystem({}) {
     document.getElementById('drawer-link-about')?.addEventListener('click', openAbout);
     document.getElementById('nav-projects')?.addEventListener('click', openProjects);
     document.getElementById('drawer-link-projects')?.addEventListener('click', openProjects);
-    document.getElementById('nav-materials')?.addEventListener('click', scrollToMaterials);
-    document.getElementById('drawer-link-materials')?.addEventListener('click', scrollToMaterials);
+    document.getElementById('nav-materials')?.addEventListener('click', () => toggleMaterials());
+    document.getElementById('fab-materials-toggle')?.addEventListener('click', () => toggleMaterials());
+    document.getElementById('btn-close-materials')?.addEventListener('click', () => this._toggleMaterialsPanel(false));
+    document.getElementById('drawer-link-materials')?.addEventListener('click', () => toggleMaterials(true));
     document.getElementById('nav-workshop')?.addEventListener('click', () => {
       this._closeAllModals();
       this._closeMobileDrawer();
@@ -368,8 +497,33 @@ export class ResponsiveUISystem extends createSystem({}) {
       if (e.key === 'Escape') {
         this._closeAllModals();
         this._closeMobileDrawer();
+        this._toggleMaterialsPanel(false);
       }
     });
+  }
+
+  private _toggleMaterialsPanel(forceOpen?: boolean): void {
+    const panel = document.getElementById('materials-side-panel');
+    const fab = document.getElementById('fab-materials-toggle');
+    const navBtn = document.getElementById('nav-materials');
+    if (!panel) return;
+
+    const shouldOpen = forceOpen !== undefined ? forceOpen : !panel.classList.contains('open');
+    if (shouldOpen) {
+      panel.classList.add('open');
+      panel.setAttribute('aria-hidden', 'false');
+      fab?.setAttribute('aria-expanded', 'true');
+      fab?.classList.add('active');
+      navBtn?.classList.add('active');
+      navBtn?.setAttribute('aria-expanded', 'true');
+    } else {
+      panel.classList.remove('open');
+      panel.setAttribute('aria-hidden', 'true');
+      fab?.setAttribute('aria-expanded', 'false');
+      fab?.classList.remove('active');
+      navBtn?.classList.remove('active');
+      navBtn?.setAttribute('aria-expanded', 'false');
+    }
   }
 
 

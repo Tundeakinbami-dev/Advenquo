@@ -40,6 +40,8 @@ export class CinematicCameraSystem extends createSystem({}) {
   private bobElapsed = 0;
   private isMoving = false;
   private bobIntensity = 1.0;
+  private currentBobOffsetY = 0;
+  private currentBobOffsetX = 0;
 
   // Active dialogue target
   private dialogueTargetPos = new Vector3();
@@ -166,16 +168,39 @@ export class CinematicCameraSystem extends createSystem({}) {
         camera.position.lerp(this.savedExplorationCameraPosition, Math.min(1, delta * 8));
       }
     } else {
-      // Exploration Mode: Add natural walking head-bob
+      // Exploration Mode: Add natural walking head-bob without accumulated drift
       if (this.isMoving) {
         this.bobElapsed += delta * 9.5; // ~2 steps per second
-        const verticalBob = Math.sin(this.bobElapsed) * 0.025 * this.bobIntensity;
-        const lateralBob = Math.cos(this.bobElapsed * 0.5) * 0.012 * this.bobIntensity;
+        const targetBobY = Math.sin(this.bobElapsed) * 0.025 * this.bobIntensity;
+        const targetBobX = Math.cos(this.bobElapsed * 0.5) * 0.012 * this.bobIntensity;
 
-        camera.position.y += verticalBob * 0.1;
-        camera.position.x += lateralBob * 0.1;
+        // Apply delta change so the offset never drifts over time
+        const deltaBobY = targetBobY - this.currentBobOffsetY;
+        const deltaBobX = targetBobX - this.currentBobOffsetX;
+
+        camera.position.y += deltaBobY;
+        camera.position.x += deltaBobX;
+
+        this.currentBobOffsetY = targetBobY;
+        this.currentBobOffsetX = targetBobX;
       } else {
-        this.bobElapsed = 0;
+        if (Math.abs(this.currentBobOffsetY) > 0.0001 || Math.abs(this.currentBobOffsetX) > 0.0001) {
+          const decay = Math.min(1, delta * 10);
+          const removeY = this.currentBobOffsetY * decay;
+          const removeX = this.currentBobOffsetX * decay;
+          camera.position.y -= removeY;
+          camera.position.x -= removeX;
+          this.currentBobOffsetY -= removeY;
+          this.currentBobOffsetX -= removeX;
+        } else {
+          if (this.currentBobOffsetY !== 0 || this.currentBobOffsetX !== 0) {
+            camera.position.y -= this.currentBobOffsetY;
+            camera.position.x -= this.currentBobOffsetX;
+            this.currentBobOffsetY = 0;
+            this.currentBobOffsetX = 0;
+          }
+          this.bobElapsed = 0;
+        }
       }
     }
   }

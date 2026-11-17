@@ -32,7 +32,7 @@ export class BlueprintManager {
   private guide: ConstructionGuide;
   private assistance: BlueprintAssistance;
 
-  private modeState: BlueprintModeState = 'study';
+  private modeState: BlueprintModeState = 'hidden';
   private pinPlacement: PinPlacement = 'left';
   private selectedComponentId: string | null = null;
 
@@ -55,6 +55,7 @@ export class BlueprintManager {
     this.workspaceAnchor = new Object3D();
     this.workspaceAnchor.name = 'BlueprintWorkspaceAnchor';
     this.workspaceAnchor.add(this.viewer.getContainerGroup());
+    this.workspaceAnchor.visible = false; // Hidden by default so construction area is clear
 
     this.updateWorkspaceTransform();
   }
@@ -153,24 +154,24 @@ export class BlueprintManager {
    */
   private updateWorkspaceTransform(): void {
     if (this.modeState === 'study') {
-      // In study mode, position prominently in front of the seated player
+      // In study mode before construction, positioned directly in front of seated player
       this.workspaceAnchor.position.set(0, 1.35, -1.5);
       this.workspaceAnchor.rotation.set(0, 0, 0);
-      this.workspaceAnchor.scale.set(0.35, 0.35, 0.35);
+      this.workspaceAnchor.scale.set(0.25, 0.25, 0.25);
     } else if (this.modeState === 'construction_pinned') {
       // Pinned beside the construction pad in seated reach
       if (this.pinPlacement === 'left') {
         this.workspaceAnchor.position.set(-1.15, 1.2, -1.1);
-        this.workspaceAnchor.rotation.set(0, (28 * Math.PI) / 180, 0); // Angled inward
+        this.workspaceAnchor.rotation.set(0, (25 * Math.PI) / 180, 0);
       } else if (this.pinPlacement === 'right') {
         this.workspaceAnchor.position.set(1.15, 1.2, -1.1);
-        this.workspaceAnchor.rotation.set(0, (-28 * Math.PI) / 180, 0);
+        this.workspaceAnchor.rotation.set(0, (-25 * Math.PI) / 180, 0);
       } else {
         // Front-top banner above table interaction zone
-        this.workspaceAnchor.position.set(0, 1.75, -1.35);
-        this.workspaceAnchor.rotation.set((-15 * Math.PI) / 180, 0, 0);
+        this.workspaceAnchor.position.set(0, 2.1, -2.2);
+        this.workspaceAnchor.rotation.set((-20 * Math.PI) / 180, 0, 0);
       }
-      this.workspaceAnchor.scale.set(0.22, 0.22, 0.22);
+      this.workspaceAnchor.scale.set(0.18, 0.18, 0.18);
     }
   }
 

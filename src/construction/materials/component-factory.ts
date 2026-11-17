@@ -420,6 +420,134 @@ export function createComponentMesh(type: ComponentType): Object3D {
       root.add(barrierR);
       break;
     }
+
+    case 'small_brick': {
+      const body = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      root.add(body);
+      const studGeo = new CylinderGeometry(0.018, 0.018, 0.012, 10);
+      const stud = new Mesh(studGeo, studMat);
+      stud.position.set(0, h / 2 + 0.006, 0);
+      root.add(stud);
+      break;
+    }
+
+    case 'large_brick': {
+      const body = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      root.add(body);
+      const studGeo = new CylinderGeometry(0.028, 0.028, 0.016, 12);
+      for (const offset of [-0.08, 0.08]) {
+        const stud = new Mesh(studGeo, studMat);
+        stud.position.set(offset, h / 2 + 0.008, 0);
+        root.add(stud);
+      }
+      break;
+    }
+
+    case 'square_block': {
+      const body = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      root.add(body);
+      const studGeo = new CylinderGeometry(0.035, 0.035, 0.02, 12);
+      const stud = new Mesh(studGeo, studMat);
+      stud.position.set(0, h / 2 + 0.01, 0);
+      root.add(stud);
+      break;
+    }
+
+    case 'rectangular_block': {
+      const body = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      root.add(body);
+      const studGeo = new CylinderGeometry(0.03, 0.03, 0.02, 12);
+      for (const offset of [-0.1, 0.1]) {
+        const stud = new Mesh(studGeo, studMat);
+        stud.position.set(offset, h / 2 + 0.01, 0);
+        root.add(stud);
+      }
+      break;
+    }
+
+    case 'corner_wall': {
+      // L-shaped wall assembly
+      const arm1 = new Mesh(new BoxGeometry(w, h, 0.15), mainMat);
+      arm1.position.set(0, 0, d / 2 - 0.075);
+      arm1.castShadow = true;
+      root.add(arm1);
+      const arm2 = new Mesh(new BoxGeometry(0.15, h, d - 0.15), mainMat);
+      arm2.position.set(-w / 2 + 0.075, 0, -0.075);
+      arm2.castShadow = true;
+      root.add(arm2);
+      break;
+    }
+
+    case 'internal_partition': {
+      const partition = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      partition.castShadow = true;
+      partition.receiveShadow = true;
+      root.add(partition);
+      break;
+    }
+
+    case 'door': {
+      // Hardwood door leaf with brass handle
+      const leaf = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      leaf.castShadow = true;
+      root.add(leaf);
+      const handleMat = new MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.2 });
+      const handle = new Mesh(new CylinderGeometry(0.015, 0.015, 0.12), handleMat);
+      handle.rotation.z = Math.PI / 2;
+      handle.position.set(w / 2 - 0.08, 0, d / 2 + 0.02);
+      root.add(handle);
+      break;
+    }
+
+    case 'window': {
+      // Glass pane with frame muntins
+      const glassMat = new MeshStandardMaterial({ color: 0x88ccff, transparent: true, opacity: 0.65, roughness: 0.1 });
+      const pane = new Mesh(new BoxGeometry(w * 0.9, h * 0.9, 0.01), glassMat);
+      root.add(pane);
+      const muntinMat = new MeshStandardMaterial({ color: 0x222222, metalness: 0.7, roughness: 0.3 });
+      const mVert = new Mesh(new BoxGeometry(0.02, h, 0.025), muntinMat);
+      root.add(mVert);
+      const mHoriz = new Mesh(new BoxGeometry(w, 0.02, 0.025), muntinMat);
+      root.add(mHoriz);
+      break;
+    }
+
+    case 'roofing_material': {
+      // Corrugated zinc profile sheet
+      const sheet = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      sheet.castShadow = true;
+      root.add(sheet);
+      break;
+    }
+
+    case 'floor_finish': {
+      const tile = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      tile.receiveShadow = true;
+      root.add(tile);
+      break;
+    }
+
+    case 'wall_finish': {
+      const plaster = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      plaster.receiveShadow = true;
+      root.add(plaster);
+      break;
+    }
+
+    case 'decorative_element': {
+      const molding = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      molding.castShadow = true;
+      root.add(molding);
+      break;
+    }
   }
 
   return root;

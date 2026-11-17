@@ -34,14 +34,14 @@ export class PlayerControllerSystem extends createSystem({}) {
 
   // Position & Orientation
   private currentYaw = 0; // Radians
-  private currentPitch = 0; // Radians (clamped -60° to +60°)
-  private walkSpeed = 3.6; // Meters/sec
+  private currentPitch = -0.22; // Radians (initial angle looking down toward building pad)
+  private walkSpeed = 2.4; // Meters/sec (comfortable seated workshop navigation)
 
-  // Boundary limits (Ìsàlẹ̀ Èkó courtyard)
-  private minX = -6.8;
-  private maxX = 6.8;
-  private minZ = -6.4;
-  private maxZ = 6.4;
+  // Boundary limits (Workshop Seated Area & Building Pad vicinity)
+  private minX = -3.0;
+  private maxX = 3.0;
+  private minZ = -0.6;
+  private maxZ = 2.0;
 
   // Input states
   private keysDown: Record<string, boolean> = {};
@@ -88,9 +88,9 @@ export class PlayerControllerSystem extends createSystem({}) {
     const camera = this.world.camera;
     if (camera instanceof PerspectiveCamera) {
       // The camera is a child of the persistent player rig. Keep its local
-      // headset/eye offset intact and move the player origin below.
-      this.currentYaw = 0;
-      this.currentPitch = 0;
+      // headset/eye offset intact and sync pitch/yaw with authored orientation.
+      this.currentYaw = camera.rotation.y || 0;
+      this.currentPitch = camera.rotation.x !== 0 ? camera.rotation.x : -0.22;
     }
 
     // Attach Keyboard Listeners
@@ -115,56 +115,51 @@ export class PlayerControllerSystem extends createSystem({}) {
       this.touchLookActive = false;
     };
 
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
-    window.addEventListener('blur', onWindowBlur);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('keyup', onKeyUp);
+      window.addEventListener('blur', onWindowBlur);
 
-    this.cleanupFuncs.push(() => {
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
-      window.removeEventListener('blur', onWindowBlur);
-    });
+      this.cleanupFuncs.push(() => {
+        window.removeEventListener('keydown', onKeyDown);
+        window.removeEventListener('keyup', onKeyUp);
+        window.removeEventListener('blur', onWindowBlur);
+      });
+    }
 
     // Attach Mouse Look Drag Listeners to Scene Container
-    const sceneContainer = document.getElementById('scene-container');
+    const sceneContainer = typeof document !== 'undefined' ? document.getElementById('scene-container') : null;
     if (sceneContainer) {
       const onMouseDown = (e: MouseEvent): void => {
-        // Pointer lock gives desktop FPS-style look; retain drag-look as a
-        // fallback for browsers that decline the request.
-        if (e.button === 0 && !this.isImmersiveXR) {
+        // Dedicated DesktopConstructionController handles left-click building and right-click orbit.
+        // PlayerControllerSystem retains free drag-look only when Alt key is pressed without locking cursor.
+        if (e.altKey && !this.isImmersiveXR) {
           this.isPointerDragging = true;
           this.lastPointerX = e.clientX;
           this.lastPointerY = e.clientY;
-          if (document.pointerLockElement !== sceneContainer) {
-            // Embedded preview frames may reject pointer lock. Keep the
-            // drag-look fallback active and consume that expected rejection.
-            try {
-              const lockRequest = sceneContainer.requestPointerLock?.();
-              if (lockRequest) void lockRequest.catch(() => {
-                this.isPointerDragging = true;
-              });
-            } catch {
-              this.isPointerDragging = true;
-            }
-          }
         }
       };
 
       const onMouseMove = (e: MouseEvent): void => {
         if ((!this.isPointerDragging && document.pointerLockElement !== sceneContainer) || this.isImmersiveXR) return;
         const locked = document.pointerLockElement === sceneContainer;
-        const dx = locked ? e.movementX : e.clientX - this.lastPointerX;
-        const dy = locked ? e.movementY : e.clientY - this.lastPointerY;
+        let dx = locked ? e.movementX : e.clientX - this.lastPointerX;
+        let dy = locked ? e.movementY : e.clientY - this.lastPointerY;
         this.lastPointerX = e.clientX;
         this.lastPointerY = e.clientY;
+
+        // Guard against pointer-lock transition spikes
+        if (Math.abs(dx) > 80) dx = Math.sign(dx) * 80;
+        if (Math.abs(dy) > 80) dy = Math.sign(dy) * 80;
 
         const sensitivity = 0.0032;
         this.currentYaw -= dx * sensitivity;
         this.currentPitch -= dy * sensitivity;
 
-        // Clamp pitch to [-1.0, 1.0] rad (~ -57° to +57°)
-        const pitchLimit = 1.0;
-        this.currentPitch = Math.max(-pitchLimit, Math.min(pitchLimit, this.currentPitch));
+        // Clamp pitch to comfortable seated workshop inspection: looking down at pad vs up at structure
+        const minPitch = -1.1; // ~ -63°
+        const maxPitch = 0.6;  // ~ +34°
+        this.currentPitch = Math.max(minPitch, Math.min(maxPitch, this.currentPitch));
       };
 
       const onMouseUp = (): void => {
@@ -232,7 +227,7 @@ export class PlayerControllerSystem extends createSystem({}) {
 
             const touchSens = 0.005;
             this.currentYaw -= dx * touchSens;
-            this.currentPitch = Math.max(-1.0, Math.min(1.0, this.currentPitch - dy * touchSens));
+            this.currentPitch = Math.max(-1.1, Math.min(0.6, this.currentPitch - dy * touchSens));
           }
         }
       };
@@ -354,11 +349,6 @@ export class PlayerControllerSystem extends createSystem({}) {
         // Dynamic perimeter clamp
         newX = Math.max(this.minX, Math.min(this.maxX, newX));
         newZ = Math.max(this.minZ, Math.min(this.maxZ, newZ));
-
-        // Prevent walking through market veranda back wall (z < -4.1) when in market boundaries
-        if (this.minX >= -7 && this.maxX <= 7 && newZ < -4.1) {
-          newZ = -4.1;
-        }
 
         player.position.x = newX;
         player.position.z = newZ;
