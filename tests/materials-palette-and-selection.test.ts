@@ -12,6 +12,8 @@
 
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { Quaternion, Vector3 } from '@iwsdk/core';
 
 import {
@@ -20,6 +22,8 @@ import {
   type ComponentType,
 } from '../src/construction/materials/construction-catalog.js';
 
+import { createComponentMesh } from '../src/construction/materials/component-factory.js';
+import { MaterialSelector } from '../src/construction/ui/material-selector.js';
 import { PlacementPreview } from '../src/construction/interaction/placement-preview.js';
 import { DesktopConstructionController } from '../src/construction/interaction/desktop-interaction.js';
 import {
@@ -358,6 +362,135 @@ describe('Advenquo: Materials Palette & Object Selection', () => {
       // Both brick 1 and brick 2 are connected to foundation and grounded
       assert.strictEqual(graph.isConnectedToGround('brick_1'), true);
       assert.strictEqual(graph.isConnectedToGround('brick_2'), true);
+    });
+  });
+
+  // ── 7. Complete Construction Materials Catalogue (6 Categories A-F & 31 Items) ──
+  describe('7. Complete Materials Catalogue Across All 6 Required Categories', () => {
+    const CATEGORIES_A_TO_F: Record<string, ComponentType[]> = {
+      'A. Basic building blocks': [
+        'clay_brick',
+        'half_brick',
+        'square_block',
+        'large_brick',
+        'foundation_block',
+        'corner_block',
+      ],
+      'B. Structural components': [
+        'foundation_section',
+        'floor_component',
+        'reinforced_column',
+        'horizontal_beam',
+        'lintel_beam',
+        'rebar',
+        'steel_connector',
+      ],
+      'C. Walls and partitions': [
+        'wall_panel',
+        'half_wall_panel',
+        'internal_partition',
+        'corner_wall',
+      ],
+      'D. Doors and windows': [
+        'door_frame',
+        'door',
+        'window_frame',
+        'window',
+        'window_lintel',
+      ],
+      'E. Roofing': [
+        'roof_slab',
+        'roof_panel',
+        'roof_truss',
+        'roof_ridge',
+        'roofing_material',
+      ],
+      'F. Finishing materials': [
+        'floor_finish',
+        'wall_finish',
+        'paint_texture',
+        'decorative_element',
+      ],
+    };
+
+    it('verifies all 31 components across 6 categories exist and have valid specifications', () => {
+      let totalComponents = 0;
+      for (const [categoryName, components] of Object.entries(CATEGORIES_A_TO_F)) {
+        assert.ok(components.length >= 4, `${categoryName} must have multiple components`);
+        for (const type of components) {
+          totalComponents++;
+          const spec = getComponentSpec(type);
+          assert.ok(spec, `Catalog must contain specification for ${type}`);
+          assert.strictEqual(spec.type, type);
+          assert.ok(spec.name.length > 0, `${type} must have a name`);
+          assert.ok(spec.dimensions[0] > 0, `${type} width must be positive`);
+          assert.ok(spec.dimensions[1] > 0, `${type} height must be positive`);
+          assert.ok(spec.dimensions[2] > 0, `${type} depth must be positive`);
+          assert.ok(spec.massKg > 0, `${type} mass must be positive`);
+          assert.ok(spec.snapPoints.length > 0, `${type} must have snap points`);
+          assert.ok(spec.material, `${type} must have material properties`);
+        }
+      }
+      assert.strictEqual(totalComponents, 31, 'Must define exactly 31 construction components');
+    });
+
+    it('verifies half_brick is genuinely half the length of standard brick with matching height & depth', () => {
+      const standard = getComponentSpec('clay_brick');
+      const half = getComponentSpec('half_brick');
+
+      // Standard is [0.24, 0.08, 0.12]
+      assert.strictEqual(standard.dimensions[0], 0.24, 'Standard brick width is 0.24m');
+      // Half must be exactly 0.12 (half of 0.24)
+      assert.strictEqual(half.dimensions[0], 0.12, 'Half brick width must be exactly 0.12m (half of standard)');
+      assert.strictEqual(half.dimensions[1], standard.dimensions[1], 'Half brick height matches standard brick');
+      assert.strictEqual(half.dimensions[2], standard.dimensions[2], 'Half brick depth matches standard brick');
+      assert.strictEqual(half.massKg, standard.massKg / 2, 'Half brick mass is half of standard brick');
+    });
+
+    it('verifies every single component produces a real, renderable Three.js Object3D mesh', () => {
+      const allTypes = Object.values(CATEGORIES_A_TO_F).flat();
+      for (const type of allTypes) {
+        const mesh = createComponentMesh(type);
+        assert.ok(mesh, `createComponentMesh('${type}') must return a Three.js Object3D`);
+        assert.strictEqual(mesh.name, `ConstructionMesh_${type}`);
+        assert.ok(mesh.children.length > 0, `${type} mesh must contain geometry meshes`);
+      }
+    });
+
+    it('verifies MaterialSelector initializes with all 31 components for VR arc palette', () => {
+      const selector = new MaterialSelector();
+      const slots = selector.getSeatedPaletteSlots([0, 0.5, -2.5]);
+      assert.strictEqual(slots.length, 31, 'Seated arc palette must offer all 31 components');
+      for (const slot of slots) {
+        assert.ok(slot.isUnlocked, `${slot.type} should be unlocked`);
+        assert.ok(slot.palletPosition, `${slot.type} must have 3D arc position`);
+      }
+    });
+
+    it('verifies index.html contains all 6 category tabs and cards for all 31 components', () => {
+      const htmlPath = resolve(process.cwd(), 'index.html');
+      const html = readFileSync(htmlPath, 'utf-8');
+
+      // Category tabs
+      assert.ok(html.includes('data-category="blocks"'), 'Must have blocks category tab');
+      assert.ok(html.includes('data-category="structural"'), 'Must have structural category tab');
+      assert.ok(html.includes('data-category="walls"'), 'Must have walls category tab');
+      assert.ok(html.includes('data-category="openings"'), 'Must have openings category tab');
+      assert.ok(html.includes('data-category="roof"'), 'Must have roof category tab');
+      assert.ok(html.includes('data-category="finishing"'), 'Must have finishing category tab');
+
+      // Component count badge
+      assert.ok(html.includes('id="materials-count-badge"'), 'Must have component count badge');
+      assert.ok(html.includes('31 Components'), 'Badge must display total component count');
+
+      // Every component must have a card
+      const allTypes = Object.values(CATEGORIES_A_TO_F).flat();
+      for (const type of allTypes) {
+        assert.ok(
+          html.includes(`data-component-type="${type}"`),
+          `index.html must have a card for component type '${type}'`,
+        );
+      }
     });
   });
 });

@@ -26,6 +26,11 @@ import {
   constructionTutorialManager,
   type TutorialStep,
 } from './construction/progression/construction-tutorial-manager.js';
+import {
+  blueprintProgressionEngine,
+  type TaskProgressSummary,
+} from './construction/progression/blueprint-progression-engine.js';
+import { BlueprintRenderer } from './construction/blueprints/blueprint-renderer.js';
 import { assemblySystem } from './construction/assembly/assembly-system.js';
 import { desktopConstructionController } from './construction/interaction/desktop-interaction.js';
 import type { ComponentType } from './construction/core/construction-types.js';
@@ -45,6 +50,8 @@ export class ResponsiveUISystem extends createSystem({}) {
     this._wireNavigationAndModals();
     this._wireConstructionPalette();
     this._wireTutorialHUD();
+    this._wireBlueprintDock();
+    this._wireBottomToolbar();
     this._wireCameraResize();
     this._wireVisibilityState();
   }
@@ -85,21 +92,193 @@ export class ResponsiveUISystem extends createSystem({}) {
   }
 
   private _wireTutorialHUD(): void {
-    const unsub = constructionTutorialManager.subscribe((step: TutorialStep, completed: boolean) => {
+    const updateUI = (step: TutorialStep, completed: boolean) => {
       const stepIndicator = document.getElementById('tutorial-step-indicator');
+      const stepTitle = document.getElementById('tutorial-step-title');
       const tutorialText = document.getElementById('tutorial-text');
+      const hintText = document.getElementById('tutorial-hint-text');
+      const collapsedText = document.getElementById('tutorial-collapsed-text');
+      const backBtn = document.getElementById('btn-tutorial-back') as HTMLButtonElement | null;
+      const nextBtn = document.getElementById('btn-tutorial-next') as HTMLButtonElement | null;
+
+      const total = constructionTutorialManager.getTotalSteps();
       if (stepIndicator) {
         stepIndicator.textContent = completed
-          ? 'Tutorial Complete! 🎉'
-          : `Tutorial ${step.index}/8: ${step.title}`;
+          ? 'Completed'
+          : `Step ${step.index} of ${total}`;
+      }
+      if (stepTitle) {
+        stepTitle.textContent = completed ? 'Tutorial Completed! 🎉' : step.title;
       }
       if (tutorialText) {
         tutorialText.textContent = completed
-          ? 'You have mastered modular construction! Keep building freely.'
+          ? 'You have mastered modular construction! Keep building freely or validate your structure.'
           : step.instruction;
       }
-    });
+      if (hintText) {
+        hintText.textContent = completed ? 'Use the bottom toolbar to Validate or switch Blueprints.' : step.hint;
+      }
+      if (collapsedText) {
+        collapsedText.textContent = completed
+          ? 'Tutorial Complete 🎉'
+          : `Step ${step.index}/${total}: ${step.title}`;
+      }
+
+      // Update dots
+      for (let i = 1; i <= total; i++) {
+        const dot = document.querySelector(`.tut-dot[data-step="${i}"]`);
+        if (dot) {
+          dot.classList.remove('active', 'completed');
+          if (completed || i < step.index) {
+            dot.classList.add('completed');
+          } else if (i === step.index) {
+            dot.classList.add('active');
+          }
+        }
+      }
+
+      // Update Back / Next controls state
+      if (backBtn) {
+        backBtn.disabled = step.index <= 1;
+        backBtn.style.opacity = step.index <= 1 ? '0.4' : '1';
+        backBtn.style.cursor = step.index <= 1 ? 'not-allowed' : 'pointer';
+      }
+      if (nextBtn) {
+        nextBtn.disabled = completed || step.index >= total;
+        nextBtn.style.opacity = (completed || step.index >= total) ? '0.4' : '1';
+        nextBtn.style.cursor = (completed || step.index >= total) ? 'not-allowed' : 'pointer';
+      }
+    };
+
+    const unsub = constructionTutorialManager.subscribe(updateUI);
     this.cleanupFuncs.push(unsub);
+
+    // Initial update
+    updateUI(constructionTutorialManager.getCurrentStep(), constructionTutorialManager.isTutorialCompleted());
+
+    // Wire Next & Back buttons
+    document.getElementById('btn-tutorial-back')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      constructionTutorialManager.previousStep();
+    });
+
+    document.getElementById('btn-tutorial-next')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      constructionTutorialManager.nextStep();
+    });
+
+    // Wire Collapse & Close buttons
+    const tutorialPanel = document.getElementById('tutorial-panel');
+    const collapsedPill = document.getElementById('tutorial-collapsed-pill');
+
+    const collapseTutorial = () => {
+      tutorialPanel?.classList.add('collapsed');
+      collapsedPill?.classList.remove('hidden');
+    };
+
+    const expandTutorial = () => {
+      tutorialPanel?.classList.remove('collapsed');
+      collapsedPill?.classList.add('hidden');
+    };
+
+    const toggleTutorial = () => {
+      if (tutorialPanel?.classList.contains('collapsed')) {
+        expandTutorial();
+      } else {
+        collapseTutorial();
+      }
+    };
+
+    document.getElementById('btn-tutorial-collapse')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      collapseTutorial();
+    });
+
+    document.getElementById('btn-tutorial-close')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      collapseTutorial();
+    });
+
+    collapsedPill?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      expandTutorial();
+    });
+
+    document.getElementById('nav-tutorial-toggle')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleTutorial();
+    });
+
+    document.getElementById('btn-toolbar-tutorial')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleTutorial();
+    });
+  }
+
+  private _wireBottomToolbar(): void {
+    // Wire bottom toolbar buttons
+    document.getElementById('btn-toolbar-materials')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this._toggleMaterialsPanel();
+    });
+
+    const handleValidate = (): void => {
+      const graph = assemblySystem.getGraph();
+      const result = challengeManager.evaluateProgress(graph);
+      if (result.passed) {
+        this._openModal('completion-modal-backdrop');
+      } else {
+        const err = result.placementErrors[0] || result.stabilityErrors[0] || result.feedbackNotes[0] || 'Validation incomplete';
+        this._showToast(`Validation: ${err}`);
+      }
+    };
+    document.getElementById('btn-toolbar-validate')?.addEventListener('click', handleValidate);
+
+    const handleUndo = (): void => {
+      const undone = desktopConstructionController.undoLastPlacement();
+      if (undone) {
+        this._showToast(`Undid placement of ${undone}`);
+      } else {
+        this._showToast('Nothing to undo.');
+      }
+    };
+    document.getElementById('btn-toolbar-undo')?.addEventListener('click', handleUndo);
+
+    const handleReset = (): void => {
+      assemblySystem.reset();
+      challengeManager.reset();
+      constructionTutorialManager.reset();
+      desktopConstructionController.reset();
+      this.celebrateShown = false;
+      this._updateConstructionHUD(1, 'Foundation Inspection');
+      const cards = document.querySelectorAll<HTMLElement>('.construction-card');
+      cards.forEach((c) => c.classList.remove('active', 'selected'));
+      const statusEl = document.getElementById('selection-status-text');
+      if (statusEl) {
+        statusEl.textContent = 'Select a building material to begin construction.';
+      }
+      document.getElementById('btn-cancel-selection')?.classList.add('hidden');
+      document.getElementById('placement-status-chip')?.classList.add('hidden');
+      this._showToast('Construction project and tutorial reset.');
+    };
+    document.getElementById('btn-toolbar-reset')?.addEventListener('click', handleReset);
+
+    document.getElementById('btn-toolbar-blueprint')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this._toggleBlueprintPanel();
+    });
+
+    // Wire Controls popover
+    const controlsPopover = document.getElementById('controls-popover');
+    document.getElementById('btn-toolbar-controls')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      controlsPopover?.classList.toggle('hidden');
+    });
+
+    document.getElementById('btn-close-controls-popover')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      controlsPopover?.classList.add('hidden');
+    });
   }
 
   private _wireConstructionPalette(): void {
@@ -149,6 +328,17 @@ export class ResponsiveUISystem extends createSystem({}) {
           new Vector3(0, 0.5, -2.5),
         );
 
+        const nextTarget = blueprintProgressionEngine.getNextTargetForComponent(compType);
+        if (nextTarget) {
+          desktopConstructionController.getPreview().showTargetGuide(
+            nextTarget.position,
+            nextTarget.rotation,
+            nextTarget.dimensions,
+          );
+          blueprintProgressionEngine.setActiveTarget(nextTarget.id);
+          this._renderBlueprintSVG();
+        }
+
         // Update instruction banners as required by specification
         const statusEl = document.getElementById('selection-status-text');
         if (statusEl) {
@@ -159,6 +349,13 @@ export class ResponsiveUISystem extends createSystem({}) {
         const tutText = document.getElementById('tutorial-text');
         if (tutText) {
           tutText.textContent = `${name.toUpperCase()} SELECTED: Click on the construction pad to place.`;
+        }
+
+        const chip = document.getElementById('placement-status-chip');
+        const chipText = document.getElementById('active-placement-text');
+        if (chip && chipText) {
+          chipText.textContent = `Holding ${name} (${dims}) · Click on pad to place`;
+          chip.classList.remove('hidden');
         }
 
         this._showToast(`Selected ${name}. Click on the construction pad to place.`);
@@ -172,9 +369,8 @@ export class ResponsiveUISystem extends createSystem({}) {
       });
     });
 
-    // Wire Cancel Selection Button
-    document.getElementById('btn-cancel-selection')?.addEventListener('click', (e) => {
-      e.stopPropagation();
+    // Wire Cancel Selection Buttons
+    const cancelSelection = (): void => {
       desktopConstructionController.cancelPlacement();
       cards.forEach((c) => c.classList.remove('active', 'selected'));
       const statusEl = document.getElementById('selection-status-text');
@@ -182,10 +378,21 @@ export class ResponsiveUISystem extends createSystem({}) {
         statusEl.textContent = 'Select a building material to begin construction.';
       }
       document.getElementById('btn-cancel-selection')?.classList.add('hidden');
+      document.getElementById('placement-status-chip')?.classList.add('hidden');
       const tutText = document.getElementById('tutorial-text');
       if (tutText) {
         tutText.textContent = 'Select a building material to begin construction.';
       }
+    };
+
+    document.getElementById('btn-cancel-selection')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cancelSelection();
+    });
+
+    document.getElementById('btn-cancel-placement-chip')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cancelSelection();
     });
 
     // Handle component placed and placement cancelled events
@@ -193,11 +400,24 @@ export class ResponsiveUISystem extends createSystem({}) {
       const detail = (e as CustomEvent).detail;
       const spec = detail?.componentType ? getComponentSpec(detail.componentType) : null;
       const name = spec?.name || detail?.componentType || 'Component';
+      const val = detail?.validation;
+
       const statusEl = document.getElementById('selection-status-text');
       if (statusEl) {
-        statusEl.textContent = `Placed ${name} on the pad! Select another material or click placed block to move.`;
+        if (val && !val.isValid) {
+          statusEl.textContent = `Placement adjustment: ${val.feedback}`;
+        } else {
+          statusEl.textContent = `Placed ${name} on the pad! Select another material or inspect the blueprint.`;
+        }
       }
       document.getElementById('btn-cancel-selection')?.classList.add('hidden');
+      document.getElementById('placement-status-chip')?.classList.add('hidden');
+
+      if (val && !val.isValid) {
+        this._showToast(`⚠️ ${val.feedback}`);
+      } else if (val && val.isValid) {
+        this._showToast(`✅ ${val.feedback}`);
+      }
     };
     window.addEventListener('advenquo-component-placed', handleComponentPlaced);
     this.cleanupFuncs.push(() => {
@@ -211,6 +431,7 @@ export class ResponsiveUISystem extends createSystem({}) {
         statusEl.textContent = 'Select a building material to begin construction.';
       }
       document.getElementById('btn-cancel-selection')?.classList.add('hidden');
+      document.getElementById('placement-status-chip')?.classList.add('hidden');
     };
     window.addEventListener('advenquo-placement-cancelled', handlePlacementCancelled);
     this.cleanupFuncs.push(() => {
@@ -498,6 +719,7 @@ export class ResponsiveUISystem extends createSystem({}) {
         this._closeAllModals();
         this._closeMobileDrawer();
         this._toggleMaterialsPanel(false);
+        document.getElementById('controls-popover')?.classList.add('hidden');
       }
     });
   }
@@ -524,6 +746,242 @@ export class ResponsiveUISystem extends createSystem({}) {
       navBtn?.classList.remove('active');
       navBtn?.setAttribute('aria-expanded', 'false');
     }
+  }
+
+  private _toggleBlueprintPanel(forceOpen?: boolean): void {
+    const bpPanel = document.getElementById('blueprint-dock-panel');
+    if (!bpPanel) return;
+
+    const shouldOpen = forceOpen !== undefined ? forceOpen : bpPanel.classList.contains('hidden');
+    if (shouldOpen) {
+      bpPanel.classList.remove('hidden');
+      if (window.innerWidth < 1200) {
+        document.getElementById('tutorial-panel')?.classList.add('collapsed');
+        document.getElementById('tutorial-collapsed-pill')?.classList.remove('hidden');
+      }
+      this._renderBlueprintSVG();
+    } else {
+      bpPanel.classList.add('hidden');
+    }
+  }
+
+  private _wireBlueprintDock(): void {
+    const bpPanel = document.getElementById('blueprint-dock-panel');
+    const svgContainer = document.getElementById('blueprint-svg-container');
+    const svgViewport = document.getElementById('blueprint-svg-viewport');
+
+    let bpZoom = 1.0;
+    let bpPanX = 0;
+    let bpPanY = 0;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+
+    const updateSvgTransform = () => {
+      if (svgContainer) {
+        svgContainer.style.transform = `translate(${bpPanX}px, ${bpPanY}px) scale(${bpZoom})`;
+      }
+    };
+
+    document.getElementById('btn-bp-zoom-in')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      bpZoom = Math.min(2.5, bpZoom + 0.25);
+      updateSvgTransform();
+    });
+
+    document.getElementById('btn-bp-zoom-out')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      bpZoom = Math.max(0.5, bpZoom - 0.25);
+      updateSvgTransform();
+    });
+
+    document.getElementById('btn-bp-zoom-reset')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      bpZoom = 1.0;
+      bpPanX = 0;
+      bpPanY = 0;
+      updateSvgTransform();
+    });
+
+    document.getElementById('btn-bp-close')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this._toggleBlueprintPanel(false);
+    });
+
+    // Panning inside SVG viewport
+    svgViewport?.addEventListener('mousedown', (e) => {
+      if ((e.target as HTMLElement).closest('.blueprint-target-marker')) return;
+      isDragging = true;
+      dragStartX = e.clientX - bpPanX;
+      dragStartY = e.clientY - bpPanY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      bpPanX = e.clientX - dragStartX;
+      bpPanY = e.clientY - dragStartY;
+      updateSvgTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    // Subscribe to BlueprintProgressionEngine for authoritative automatic UI updates
+    const unsub = blueprintProgressionEngine.subscribe((summary) => {
+      const levelTitleEl = document.getElementById('bp-level-title');
+      const taskBadgeEl = document.getElementById('bp-task-badge');
+      const currentTaskNameEl = document.getElementById('bp-current-task-name');
+      const overallPercentEl = document.getElementById('bp-overall-percent');
+      const progressFillEl = document.getElementById('bp-progress-bar-fill');
+      const progressBarTrack = document.getElementById('bp-progress-bar-track');
+      const statRequiredEl = document.getElementById('bp-stat-required');
+      const statPlacedEl = document.getElementById('bp-stat-placed');
+      const statRemainingEl = document.getElementById('bp-stat-remaining');
+      const taskInstructionEl = document.getElementById('bp-task-instruction');
+      const criticalCheckEl = document.getElementById('bp-critical-check');
+
+      if (levelTitleEl) levelTitleEl.textContent = summary.currentLevelName;
+      if (taskBadgeEl) taskBadgeEl.textContent = `Task ${summary.currentTaskIndex} of ${summary.totalTasks}`;
+      if (currentTaskNameEl) currentTaskNameEl.textContent = summary.currentTaskTitle;
+      if (overallPercentEl) overallPercentEl.textContent = `${summary.overallLevelCompletionPercent}% Completed`;
+      if (progressFillEl) progressFillEl.style.width = `${summary.overallLevelCompletionPercent}%`;
+      if (progressBarTrack) progressBarTrack.setAttribute('aria-valuenow', `${summary.overallLevelCompletionPercent}`);
+      if (statRequiredEl) statRequiredEl.textContent = `${summary.requiredInTask}`;
+      if (statPlacedEl) statPlacedEl.textContent = `${summary.placedInTask}`;
+      if (statRemainingEl) statRemainingEl.textContent = `${summary.remainingInTask}`;
+      if (taskInstructionEl) taskInstructionEl.textContent = summary.currentTaskInstruction;
+      if (criticalCheckEl) criticalCheckEl.textContent = summary.currentTaskCriticalCheck;
+
+      // Synchronize Header Stage Pill
+      const counterEl = document.getElementById('web-counter');
+      if (counterEl) {
+        counterEl.textContent = `Task ${summary.currentTaskIndex} / ${summary.totalTasks}: ${summary.currentTaskTitle}`;
+      }
+
+      for (let i = 1; i <= 6; i++) {
+        const dot = document.getElementById(`dot-stage-${i}`);
+        if (!dot) continue;
+        dot.classList.remove('active', 'completed');
+        if (i === summary.currentTaskIndex) {
+          dot.classList.add('active');
+        } else if (i < summary.currentTaskIndex) {
+          dot.classList.add('completed');
+        }
+      }
+
+      this._renderBlueprintSVG();
+    });
+    this.cleanupFuncs.push(unsub);
+
+    // Initial render
+    this._renderBlueprintSVG();
+
+    // Event listeners for automatic progression events
+    const onTaskCompleted = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      this._showToast(`🎉 Task ${detail?.taskIndex} Completed: ${detail?.taskTitle}! Advancing to next task...`);
+    };
+
+    const onTaskAdvanced = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      this._showToast(`🚀 Loaded Task ${detail?.newTaskIndex}: ${detail?.newTaskTitle}`);
+      const nextTarget = blueprintProgressionEngine.getNextRequiredTarget();
+      if (nextTarget) {
+        desktopConstructionController.getPreview().showTargetGuide(
+          nextTarget.position,
+          nextTarget.rotation,
+          nextTarget.dimensions,
+        );
+      }
+    };
+
+    const onLevelCompleted = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      const celebrateTitle = document.getElementById('celebrate-title');
+      const celebrateBody = document.getElementById('celebrate-body');
+      if (celebrateTitle) {
+        celebrateTitle.textContent = 'Level Completed! 🏆 Master Builder';
+      }
+      if (celebrateBody) {
+        const newly = detail?.newlyUnlocked && detail.newlyUnlocked.length > 0 ? ` Next unlocked: ${detail.newlyUnlocked.join(', ')}!` : '';
+        celebrateBody.textContent = `All tasks in ${detail?.levelId} have been successfully constructed and validated! +250 XP Awarded.${newly}`;
+      }
+      this._openModal('completion-modal-backdrop');
+    };
+
+    window.addEventListener('advenquo-task-completed', onTaskCompleted);
+    window.addEventListener('advenquo-task-advanced', onTaskAdvanced);
+    window.addEventListener('advenquo-level-completed', onLevelCompleted);
+
+    this.cleanupFuncs.push(() => {
+      window.removeEventListener('advenquo-task-completed', onTaskCompleted);
+      window.removeEventListener('advenquo-task-advanced', onTaskAdvanced);
+      window.removeEventListener('advenquo-level-completed', onLevelCompleted);
+    });
+  }
+
+  private _renderBlueprintSVG(): void {
+    const svgContainer = document.getElementById('blueprint-svg-container');
+    if (!svgContainer) return;
+
+    const design = blueprintProgressionEngine.getDesign();
+    const renderer = new BlueprintRenderer(design);
+    const summary = blueprintProgressionEngine.getProgressSummary();
+    const statuses = blueprintProgressionEngine.getAllTargetStatuses();
+
+    const targetMarkers = new Map<
+      string,
+      {
+        number: number;
+        status: 'pending' | 'required' | 'placed_valid' | 'placed_needs_adjustment' | 'invalid';
+        isHighlighted?: boolean;
+      }
+    >();
+
+    let counter = 1;
+    for (const comp of design.components) {
+      targetMarkers.set(comp.id, {
+        number: counter++,
+        status: statuses.get(comp.id) || 'pending',
+        isHighlighted: comp.id === summary.activeTargetId,
+      });
+    }
+
+    const svgString = renderer.renderFloorPlanSVG({
+      widthPx: 520,
+      heightPx: 380,
+      targetMarkers,
+      activeTargetId: summary.activeTargetId,
+      activeTaskIndex: summary.currentTaskIndex,
+    });
+
+    svgContainer.innerHTML = svgString;
+    this._wireSvgMarkers(svgContainer);
+  }
+
+  private _wireSvgMarkers(container: HTMLElement): void {
+    const markers = container.querySelectorAll<HTMLElement>('.blueprint-target-marker');
+    markers.forEach((marker) => {
+      marker.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetId = marker.dataset.targetId;
+        const compType = marker.dataset.componentType as ComponentType;
+        if (!targetId) return;
+
+        blueprintProgressionEngine.setActiveTarget(targetId);
+        const target = blueprintProgressionEngine.getActiveTarget();
+        if (target) {
+          desktopConstructionController.getPreview().showTargetGuide(
+            target.position,
+            target.rotation,
+            target.dimensions,
+          );
+          this._showToast(`Target selected: ${target.description || compType.replace(/_/g, ' ')}`);
+        }
+        this._renderBlueprintSVG();
+      });
+    });
   }
 
 

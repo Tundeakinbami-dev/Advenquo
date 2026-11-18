@@ -35,7 +35,7 @@ export class ChallengeManager {
 
   public selectBlueprint(blueprintId: string): BlueprintDefinition {
     this.currentBlueprint = getBlueprintById(blueprintId);
-    this.reset();
+    this.reset(true);
     return this.currentBlueprint;
   }
 
@@ -110,7 +110,10 @@ export class ChallengeManager {
     return this.isCompleted;
   }
 
-  public reset(): void {
+  public reset(preserveBlueprint: boolean = false): void {
+    if (!preserveBlueprint) {
+      this.currentBlueprint = SMALL_HOUSE_BLUEPRINT;
+    }
     this.currentStageIndex = 1;
     this.isCompleted = false;
     this.lastAssessment = null;

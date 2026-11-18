@@ -71,20 +71,20 @@ const stages: BlueprintStageItem[] = [
     stageIndex: 5,
     title: 'Phase 5: Engineered Roof Trusses',
     instruction:
-      'Lift king-post timber trusses onto wall heads and fasten corrugated zinc roofing panels.',
+      'Lift king-post timber trusses onto wall heads to establish the primary roof load-bearing structure.',
     criticalCheck: 'Truss heels must bear squarely on wall head plates.',
   },
   {
     stageIndex: 6,
-    title: 'Phase 6: Architectural Finishing',
-    instruction: 'Install hardwood fascia boards and eaves finishing along roof perimeters.',
-    criticalCheck: 'Finishing elements must be secured along eaves.',
+    title: 'Phase 6: Roofing & Weather Enclosure',
+    instruction: 'Fasten corrugated zinc roofing panels over roof trusses to complete weather enclosure.',
+    criticalCheck: 'Roof panels must overlap and align with roof pitch.',
   },
   {
     stageIndex: 7,
-    title: 'Phase 7: Inspection & Certification',
-    instruction: 'Perform final architectural audit against blueprint design to receive score.',
-    criticalCheck: 'All structural components must satisfy alignment tolerances.',
+    title: 'Phase 7: Architectural Finishing',
+    instruction: 'Install hardwood fascia boards and eaves finishing along roof perimeters.',
+    criticalCheck: 'Finishing elements must be secured along eaves.',
   },
 ];
 

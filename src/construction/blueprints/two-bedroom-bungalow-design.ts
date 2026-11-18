@@ -540,13 +540,13 @@ export const BUNGALOW_COMPONENTS: DesignComponent[] = [
     criticalLoadBearing: true,
   },
 
-  // ── 8. ROOFING MATERIALS (Stage 5) ───────────────────────────────────────
+  // ── 8. ROOFING MATERIALS (Stage 6) ───────────────────────────────────────
   {
     id: 'bung_roof_deck_w',
     componentType: 'roof_panel',
     structuralRole: 'weather_enclosure',
     layerId: 'roofing_materials',
-    stageIndex: 5,
+    stageIndex: 6,
     position: [-1.7, 3.25, -2.5],
     rotation: [0, 0, 0.2079, 0.9781], // ~24 deg pitch
     dimensions: [3.6, 0.1, 5.2],
@@ -558,7 +558,7 @@ export const BUNGALOW_COMPONENTS: DesignComponent[] = [
     componentType: 'roof_panel',
     structuralRole: 'weather_enclosure',
     layerId: 'roofing_materials',
-    stageIndex: 5,
+    stageIndex: 6,
     position: [1.7, 3.25, -2.5],
     rotation: [0, 0, -0.2079, 0.9781], // -24 deg pitch
     dimensions: [3.6, 0.1, 5.2],
@@ -566,13 +566,13 @@ export const BUNGALOW_COMPONENTS: DesignComponent[] = [
     criticalLoadBearing: true,
   },
 
-  // ── 9. FINISHING ELEMENTS (Stage 6) ──────────────────────────────────────
+  // ── 9. FINISHING ELEMENTS (Stage 7) ──────────────────────────────────────
   {
     id: 'bung_finish_fascia_front',
     componentType: 'timber_piece',
     structuralRole: 'weather_enclosure',
     layerId: 'finishing',
-    stageIndex: 6,
+    stageIndex: 7,
     position: [0.0, 2.7, 0.1],
     rotation: [0, 0, 0, 1],
     dimensions: [6.6, 0.2, 0.05],
@@ -583,7 +583,7 @@ export const BUNGALOW_COMPONENTS: DesignComponent[] = [
     componentType: 'timber_piece',
     structuralRole: 'weather_enclosure',
     layerId: 'finishing',
-    stageIndex: 6,
+    stageIndex: 7,
     position: [0.0, 2.7, -5.1],
     rotation: [0, 0, 0, 1],
     dimensions: [6.6, 0.2, 0.05],

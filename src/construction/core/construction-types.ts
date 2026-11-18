@@ -12,6 +12,7 @@
 export type ComponentType =
   // Basic building blocks
   | 'clay_brick'
+  | 'half_brick'
   | 'small_brick'
   | 'large_brick'
   | 'sandcrete_block'
@@ -19,15 +20,19 @@ export type ComponentType =
   | 'square_block'
   | 'rectangular_block'
   | 'foundation_block'
+  | 'corner_block'
   | 'timber_piece'
   | 'rebar'
   | 'steel_connector'
   // Structural components
+  | 'foundation_section'
   | 'reinforced_column'
   | 'column'
   | 'horizontal_beam'
   | 'beam'
+  | 'lintel_beam'
   | 'wall_panel'
+  | 'half_wall_panel'
   | 'corner_wall'
   | 'internal_partition'
   | 'floor_component'
@@ -35,8 +40,11 @@ export type ComponentType =
   | 'staircase'
   | 'door_frame'
   | 'window_frame'
+  | 'window_lintel'
   | 'roof_truss'
   | 'roof_panel'
+  | 'roof_slab'
+  | 'roof_ridge'
   | 'bridge_section'
   // Architectural components
   | 'door'
@@ -45,6 +53,7 @@ export type ComponentType =
   | 'roofing_material'
   | 'floor_finish'
   | 'wall_finish'
+  | 'paint_texture'
   | 'decorative_element';
 
 export type StructuralRole =

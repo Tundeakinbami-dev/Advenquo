@@ -41,6 +41,7 @@ import { CONSTRUCTION_CATALOG, getComponentSpec } from '../materials/constructio
 import { constructionPhysicsManager } from '../physics/construction-physics-manager.js';
 import { challengeManager } from '../progression/challenge-manager.js';
 import { constructionTutorialManager } from '../progression/construction-tutorial-manager.js';
+import { blueprintProgressionEngine } from '../progression/blueprint-progression-engine.js';
 import { PlacementPreview } from './placement-preview.js';
 
 export interface DesktopHeldItem {
@@ -381,6 +382,13 @@ export class DesktopConstructionController {
     assemblySystem.unregisterBlock(instanceId);
     constructionTutorialManager.onComponentSelected(type);
 
+    const nextTarget = blueprintProgressionEngine.getNextTargetForComponent(type);
+    if (nextTarget) {
+      this.preview.showTargetGuide(nextTarget.position, nextTarget.rotation, nextTarget.dimensions);
+    } else {
+      this.preview.hideTargetGuide();
+    }
+
     this.moveHeldComponent(initialPos);
   }
 
@@ -404,6 +412,7 @@ export class DesktopConstructionController {
     }
     this.placedMeshesMap.delete(instanceId);
     assemblySystem.unregisterBlock(instanceId);
+    blueprintProgressionEngine.onComponentRemoved(instanceId);
     constructionPhysicsManager.activateComponentForGrab(instanceId);
 
     this.moveHeldComponent(this.heldItem.position);
@@ -475,6 +484,7 @@ export class DesktopConstructionController {
     const instanceId = this.heldItem.instanceId;
     this.cancelPlacement();
     assemblySystem.unregisterBlock(instanceId);
+    blueprintProgressionEngine.onComponentRemoved(instanceId);
     return true;
   }
 
@@ -496,6 +506,7 @@ export class DesktopConstructionController {
     this.heldItem = null;
     this.activeCandidate = null;
     this.preview.hide();
+    this.preview.hideTargetGuide();
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('advenquo-placement-cancelled'));
     }
@@ -550,6 +561,18 @@ export class DesktopConstructionController {
       hasConnection,
     });
 
+    // Evaluate progression with authoritative blueprint progression engine
+    const valResult = blueprintProgressionEngine.onComponentPlaced({
+      instanceId,
+      componentType,
+      position: placePos,
+      rotation: placeRot,
+    });
+
+    if (valResult.isValid) {
+      this.preview.hideTargetGuide();
+    }
+
     // Evaluate progression
     challengeManager.evaluateProgress(assemblySystem.getGraph());
 
@@ -565,6 +588,7 @@ export class DesktopConstructionController {
             componentType,
             isStacked,
             hasConnection,
+            validation: valResult,
           },
         }),
       );
@@ -613,6 +637,7 @@ export class DesktopConstructionController {
     if (!lastId) return null;
 
     assemblySystem.unregisterBlock(lastId);
+    blueprintProgressionEngine.onComponentRemoved(lastId);
     constructionPhysicsManager.activateComponentForGrab(lastId);
 
     const entry = this.placedMeshesMap.get(lastId);
@@ -634,6 +659,8 @@ export class DesktopConstructionController {
     this.activeCandidate = null;
     this.placementHistory = [];
     this.preview.hide();
+    this.preview.hideTargetGuide();
+    blueprintProgressionEngine.resetCurrentLevel();
 
     for (const [, val] of this.placedMeshesMap.entries()) {
       if (val.entity?.dispose) {

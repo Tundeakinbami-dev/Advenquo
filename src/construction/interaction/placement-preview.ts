@@ -28,6 +28,8 @@ export class PlacementPreview {
   private snapMarker: Mesh;
   private previewMaterial: MeshBasicMaterial;
   private markerMaterial: MeshBasicMaterial;
+  private guideMesh: Mesh | null = null;
+  private guideMaterial: MeshBasicMaterial;
 
   constructor() {
     this.root = new Object3D();
@@ -45,6 +47,13 @@ export class PlacementPreview {
       color: 0x00e676,
       transparent: true,
       opacity: 0.8,
+    });
+
+    this.guideMaterial = new MeshBasicMaterial({
+      color: 0x38bdf8, // Blueprint cyan guide
+      transparent: true,
+      opacity: 0.35,
+      wireframe: true,
     });
 
     // Snap target indicator sphere
@@ -109,7 +118,55 @@ export class PlacementPreview {
     }
   }
 
+  public showTargetGuide(
+    position: [number, number, number] | Vector3,
+    rotation: [number, number, number, number] | Quaternion,
+    dimensions: [number, number, number] = [0.4, 0.2, 0.2],
+  ): void {
+    this.root.visible = true;
+
+    if (!this.guideMesh) {
+      this.guideMesh = new Mesh(
+        new BoxGeometry(dimensions[0], dimensions[1], dimensions[2]),
+        this.guideMaterial,
+      );
+      this.guideMesh.name = 'Blueprint3DTargetGuide';
+      this.root.add(this.guideMesh);
+    } else {
+      this.guideMesh.geometry.dispose();
+      this.guideMesh.geometry = new BoxGeometry(dimensions[0], dimensions[1], dimensions[2]);
+      this.guideMesh.visible = true;
+    }
+
+    if (position instanceof Vector3) {
+      this.guideMesh.position.copy(position);
+    } else {
+      this.guideMesh.position.set(...position);
+    }
+
+    if (rotation instanceof Quaternion) {
+      this.guideMesh.quaternion.copy(rotation);
+    } else {
+      this.guideMesh.quaternion.set(...rotation);
+    }
+  }
+
+  public hideTargetGuide(): void {
+    if (this.guideMesh) {
+      this.guideMesh.visible = false;
+    }
+    if (!this.previewMesh?.visible && !this.snapMarker?.visible) {
+      this.root.visible = false;
+    }
+  }
+
   public hide(): void {
-    this.root.visible = false;
+    if (this.previewMesh) {
+      this.previewMesh.visible = false;
+    }
+    this.snapMarker.visible = false;
+    if (!this.guideMesh || !this.guideMesh.visible) {
+      this.root.visible = false;
+    }
   }
 }

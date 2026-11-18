@@ -8,12 +8,14 @@
 import { defineComponents } from '@iwsdk/core';
 import { CharacterAnimation } from './character-animation-component.js';
 import {
+  BlueprintPlacementGuide,
   ConstructionBlock,
   ConstructionSnapHost,
   ConstructionWorkshopState,
 } from './construction/core/construction-components.js';
 
 export default defineComponents([
+  BlueprintPlacementGuide,
   CharacterAnimation,
   ConstructionBlock,
   ConstructionSnapHost,

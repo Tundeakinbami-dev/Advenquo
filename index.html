@@ -61,11 +61,24 @@
           <button type="button" class="nav-btn active" id="nav-workshop">Workshop</button>
           <button type="button" class="nav-btn" id="nav-projects">Projects</button>
           <button type="button" class="nav-btn nav-btn-materials" id="nav-materials" aria-haspopup="dialog" aria-expanded="false">🧱 MATERIALS</button>
+          <button type="button" class="nav-btn" id="nav-tutorial-toggle">💡 Tutorial</button>
           <button type="button" class="nav-btn" id="nav-how-to-play">How to Build</button>
           <button type="button" class="nav-btn" id="nav-about">About</button>
         </nav>
 
         <div class="header-actions">
+          <div class="workshop-stage-pill" id="stage-pill-wrap">
+            <span class="progress-text" id="web-counter">Stage 1 / 6: Foundation Inspection</span>
+            <div class="progress-dots" id="stage-progress-dots" aria-hidden="true">
+              <div class="progress-dot active" id="dot-stage-1" title="Stage 1: Foundation"></div>
+              <div class="progress-dot" id="dot-stage-2" title="Stage 2: First Course"></div>
+              <div class="progress-dot" id="dot-stage-3" title="Stage 3: Walls"></div>
+              <div class="progress-dot" id="dot-stage-4" title="Stage 4: Openings"></div>
+              <div class="progress-dot" id="dot-stage-5" title="Stage 5: Support Lintel"></div>
+              <div class="progress-dot" id="dot-stage-6" title="Stage 6: Roof Panels"></div>
+            </div>
+          </div>
+
           <div class="device-badge" id="device-badge">
             <span class="status-dot"></span>
             <span id="device-status-text">Detecting device…</span>
@@ -88,44 +101,189 @@
         </div>
       </header>
 
-      <!-- Active Construction Project, Tutorial & Stage HUD -->
-      <div class="progress-hud" id="progress-hud">
-        <div class="hud-top-row">
-          <span class="progress-text" id="web-counter">Stage 1 / 6: Foundation Inspection</span>
-          <span class="tutorial-pill" id="tutorial-step-indicator">Tutorial 1/8: Select Foundation</span>
-        </div>
-        <div class="tutorial-instruction-bar" id="tutorial-instruction-bar">
-          <span class="tutorial-icon">💡</span>
-          <span class="tutorial-text" id="tutorial-text">Click or grab a Foundation Block from the Materials Bay below.</span>
-        </div>
-        <div class="progress-dots" aria-hidden="true">
-          <div class="progress-dot active" id="dot-stage-1" title="Stage 1: Foundation"></div>
-          <div class="progress-dot" id="dot-stage-2" title="Stage 2: First Course"></div>
-          <div class="progress-dot" id="dot-stage-3" title="Stage 3: Walls"></div>
-          <div class="progress-dot" id="dot-stage-4" title="Stage 4: Openings"></div>
-          <div class="progress-dot" id="dot-stage-5" title="Stage 5: Support Lintel"></div>
-          <div class="progress-dot" id="dot-stage-6" title="Stage 6: Roof Panels"></div>
+      <!-- Active Placement Status Floating Chip (Centered Top, Appears when holding an item) -->
+      <div class="placement-status-chip hidden" id="placement-status-chip" role="status" aria-live="polite">
+        <span class="status-pulse-dot" aria-hidden="true"></span>
+        <span class="placement-status-text" id="active-placement-text">Holding Component · Click on pad to place</span>
+        <div class="placement-actions-hint">
+          <span class="hint-kbd"><kbd>R</kbd> Rotate</span>
+          <button type="button" class="btn-cancel-placement-chip" id="btn-cancel-placement-chip" title="Cancel placement">✕ Cancel</button>
         </div>
       </div>
 
-      <!-- Desktop Construction Controls Quick Help Banner -->
-      <aside class="desktop-controls-banner" id="desktop-controls-banner" aria-label="Desktop Controls Guide">
-        <div class="banner-badge">💻 CONTROLS</div>
-        <div class="banner-keys">
-          <span class="key-item"><kbd>Left-Click</kbd> Card to Select</span>
-          <span class="key-item"><kbd>Left-Click</kbd> Pad to Place</span>
-          <span class="key-item"><kbd>Left-Drag</kbd> Move Component</span>
-          <span class="key-item"><kbd>R</kbd> Rotate 90° (<kbd>Shift+R</kbd> Rev)</span>
-          <span class="key-item"><kbd>Del</kbd> Remove</span>
-          <span class="key-item"><kbd>Ctrl+D</kbd> Duplicate</span>
-          <span class="key-item"><kbd>Esc</kbd> Cancel</span>
-          <span class="key-item"><kbd>Right-Drag</kbd> Orbit Camera</span>
-          <span class="key-item"><kbd>Middle-Drag</kbd> Pan</span>
-          <span class="key-item"><kbd>Wheel</kbd> Zoom</span>
+      <!-- Zone 1 (Left): Dedicated Compact Collapsible Tutorial Panel -->
+      <aside class="tutorial-panel" id="tutorial-panel" aria-label="Construction Tutorial Instructions">
+        <div class="tutorial-panel-header">
+          <div class="tutorial-title-row">
+            <span class="tutorial-icon-badge" aria-hidden="true">💡</span>
+            <div class="tutorial-meta">
+              <span class="tutorial-step-badge" id="tutorial-step-indicator">Step 1 of 8</span>
+              <h3 class="tutorial-step-title" id="tutorial-step-title">Select Foundation Block</h3>
+            </div>
+          </div>
+          <div class="tutorial-header-btns">
+            <button type="button" class="tutorial-icon-btn" id="btn-tutorial-collapse" aria-label="Collapse Tutorial" title="Collapse Tutorial">
+              <span class="collapse-icon">−</span>
+            </button>
+            <button type="button" class="tutorial-icon-btn" id="btn-tutorial-close" aria-label="Close Tutorial" title="Close Tutorial">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div class="tutorial-panel-body" id="tutorial-panel-body">
+          <p class="tutorial-instruction-text" id="tutorial-text">
+            Welcome to your construction workshop. Select a brick from Materials to begin.
+          </p>
+          <div class="tutorial-hint-box" id="tutorial-hint-box">
+            <span class="hint-tag">Hint</span>
+            <span class="hint-text" id="tutorial-hint-text">Open Materials and select a Brick or Foundation Block.</span>
+          </div>
+
+          <div class="tutorial-nav-row">
+            <button type="button" class="tutorial-nav-btn" id="btn-tutorial-back" aria-label="Previous step">
+              ◀ Back
+            </button>
+            <div class="tutorial-progress-dots" id="tutorial-dots" aria-hidden="true">
+              <span class="tut-dot active" data-step="1" title="Step 1"></span>
+              <span class="tut-dot" data-step="2" title="Step 2"></span>
+              <span class="tut-dot" data-step="3" title="Step 3"></span>
+              <span class="tut-dot" data-step="4" title="Step 4"></span>
+              <span class="tut-dot" data-step="5" title="Step 5"></span>
+              <span class="tut-dot" data-step="6" title="Step 6"></span>
+              <span class="tut-dot" data-step="7" title="Step 7"></span>
+              <span class="tut-dot" data-step="8" title="Step 8"></span>
+            </div>
+            <button type="button" class="tutorial-nav-btn" id="btn-tutorial-next" aria-label="Next step">
+              Next ▶
+            </button>
+          </div>
         </div>
       </aside>
 
-      <!-- Prominent Floating MATERIALS Button -->
+      <!-- Collapsed Tutorial Floating Pill (Left) -->
+      <button type="button" class="tutorial-collapsed-pill hidden" id="tutorial-collapsed-pill" aria-label="Open Tutorial Guide">
+        <span class="pill-icon">💡</span>
+        <span class="pill-text" id="tutorial-collapsed-text">Tutorial · Step 1/8</span>
+        <span class="pill-action">Show ＋</span>
+      </button>
+
+      <!-- Interactive Blueprint Dock Panel & Progress Tracker (Left / Dockable) -->
+      <aside class="blueprint-dock-panel hidden" id="blueprint-dock-panel" aria-label="Interactive Construction Blueprint and Floor Plan">
+        <div class="blueprint-panel-header">
+          <div class="blueprint-header-title-wrap">
+            <span class="blueprint-header-icon" aria-hidden="true">📐</span>
+            <div>
+              <div class="blueprint-header-top-row">
+                <h3 class="blueprint-header-title" id="bp-level-title">Two-Bedroom Bungalow</h3>
+                <span class="blueprint-badge" id="bp-task-badge">Task 1 of 7</span>
+              </div>
+              <p class="blueprint-header-sub" id="bp-task-subtitle">Architectural Floor Plan &bull; Click marker to inspect target</p>
+            </div>
+          </div>
+          <div class="blueprint-header-actions">
+            <button type="button" class="bp-icon-btn" id="btn-bp-zoom-in" title="Zoom in Floor Plan" aria-label="Zoom in Floor Plan">＋</button>
+            <button type="button" class="bp-icon-btn" id="btn-bp-zoom-out" title="Zoom out Floor Plan" aria-label="Zoom out Floor Plan">－</button>
+            <button type="button" class="bp-icon-btn" id="btn-bp-zoom-reset" title="Reset View" aria-label="Reset View">↺</button>
+            <button type="button" class="bp-icon-btn" id="btn-bp-close" title="Close Blueprint" aria-label="Close Blueprint">✕</button>
+          </div>
+        </div>
+
+        <!-- Progress Tracker Card -->
+        <div class="blueprint-progress-card" id="blueprint-progress-card">
+          <div class="progress-card-header">
+            <span class="progress-task-name" id="bp-current-task-name">Task 1: Foundation Course</span>
+            <span class="progress-percent-val" id="bp-overall-percent">0% Completed</span>
+          </div>
+          <div class="progress-bar-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="bp-progress-bar-track">
+            <div class="progress-bar-fill" id="bp-progress-bar-fill" style="width: 0%;"></div>
+          </div>
+          <div class="progress-metrics-row">
+            <span class="metric-item">Required: <strong id="bp-stat-required">4</strong></span>
+            <span class="metric-item">Placed: <strong id="bp-stat-placed">0</strong></span>
+            <span class="metric-item">Remaining: <strong id="bp-stat-remaining">4</strong></span>
+          </div>
+          <div class="task-instruction-box">
+            <span class="instruction-label">Instruction:</span>
+            <span class="instruction-body" id="bp-task-instruction">Position the foundation blocks onto the building pad.</span>
+          </div>
+          <div class="task-critical-check-box" id="bp-critical-box">
+            <span class="critical-icon">⚠️</span>
+            <span class="critical-text" id="bp-critical-check">Check footing depth and perimeter alignment.</span>
+          </div>
+        </div>
+
+        <!-- Interactive SVG Viewport Container -->
+        <div class="blueprint-svg-viewport" id="blueprint-svg-viewport">
+          <div class="blueprint-svg-container" id="blueprint-svg-container">
+            <!-- Dynamically injected SVG from BlueprintRenderer -->
+          </div>
+        </div>
+
+        <!-- Accessible Legend Footer -->
+        <div class="blueprint-legend-footer">
+          <span class="legend-chip"><span class="legend-dot status-valid"></span> Placed &amp; Valid</span>
+          <span class="legend-chip"><span class="legend-dot status-active"></span> Next Required</span>
+          <span class="legend-chip"><span class="legend-dot status-pending"></span> Pending</span>
+          <span class="legend-chip"><span class="legend-dot status-adjust"></span> Needs Adjust</span>
+          <span class="legend-chip"><span class="legend-dot status-error"></span> Error</span>
+        </div>
+      </aside>
+
+      <!-- Keyboard & Mouse Controls Reference Popover -->
+      <aside class="controls-popover hidden" id="controls-popover" role="dialog" aria-label="Keyboard and Mouse Controls Reference">
+        <div class="popover-header">
+          <span class="popover-title">⌨️ Controls Reference</span>
+          <button type="button" class="popover-close-btn" id="btn-close-controls-popover" aria-label="Close controls">✕</button>
+        </div>
+        <div class="popover-body">
+          <div class="popover-item"><kbd>Left-Click</kbd> <span>Select card / Place on building pad</span></div>
+          <div class="popover-item"><kbd>Left-Drag</kbd> <span>Move and reposition placed block</span></div>
+          <div class="popover-item"><kbd>R</kbd> / <kbd>Shift+R</kbd> <span>Rotate component 90°</span></div>
+          <div class="popover-item"><kbd>U</kbd> / <kbd>Ctrl+Z</kbd> <span>Undo last placement</span></div>
+          <div class="popover-item"><kbd>Del</kbd> <span>Delete selected block</span></div>
+          <div class="popover-item"><kbd>Esc</kbd> <span>Cancel selection / Close panels</span></div>
+          <div class="popover-item"><kbd>Right-Drag</kbd> <span>Orbit camera around workshop</span></div>
+          <div class="popover-item"><kbd>Middle-Drag</kbd> <span>Pan camera</span></div>
+          <div class="popover-item"><kbd>Mouse Wheel</kbd> <span>Zoom in / out</span></div>
+        </div>
+      </aside>
+
+      <!-- Dedicated Bottom Controls Toolbar (Zone Bottom) -->
+      <nav class="game-controls-toolbar" id="game-controls-toolbar" aria-label="Game Controls">
+        <div class="toolbar-content">
+          <button type="button" class="toolbar-btn primary-action" id="btn-toolbar-materials" aria-label="Toggle Materials Selection Panel">
+            <span class="tb-icon">🧱</span>
+            <span class="tb-label">Materials</span>
+          </button>
+          <button type="button" class="toolbar-btn" id="btn-toolbar-validate" aria-label="Validate Engineering Stability">
+            <span class="tb-icon">🔍</span>
+            <span class="tb-label">Validate</span>
+          </button>
+          <button type="button" class="toolbar-btn" id="btn-toolbar-undo" aria-label="Undo Last Component Placement">
+            <span class="tb-icon">↩️</span>
+            <span class="tb-label">Undo</span>
+          </button>
+          <button type="button" class="toolbar-btn" id="btn-toolbar-reset" aria-label="Reset Construction Project">
+            <span class="tb-icon">🔄</span>
+            <span class="tb-label">Reset</span>
+          </button>
+          <button type="button" class="toolbar-btn" id="btn-toolbar-blueprint" aria-label="Open Blueprint Library">
+            <span class="tb-icon">📐</span>
+            <span class="tb-label">Blueprints</span>
+          </button>
+          <button type="button" class="toolbar-btn" id="btn-toolbar-tutorial" aria-label="Toggle Tutorial Instructions">
+            <span class="tb-icon">💡</span>
+            <span class="tb-label">Tutorial</span>
+          </button>
+          <button type="button" class="toolbar-btn" id="btn-toolbar-controls" aria-label="Show Controls Guide">
+            <span class="tb-icon">⌨️</span>
+            <span class="tb-label">Controls</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Prominent Floating MATERIALS Button (Zone Right) -->
       <button type="button" class="floating-materials-fab" id="fab-materials-toggle" aria-label="Open Materials Selection Panel" aria-haspopup="dialog" aria-expanded="false">
         <span class="fab-icon">🧱</span>
         <span class="fab-label">MATERIALS</span>
@@ -137,7 +295,10 @@
           <div class="panel-header-title-wrap">
             <span class="panel-header-icon">📦</span>
             <div>
-              <h2 class="panel-header-title">MATERIALS</h2>
+              <div class="materials-header-top-row">
+                <h2 class="panel-header-title">MATERIALS</h2>
+                <span class="materials-count-pill" id="materials-count-badge">31 Components</span>
+              </div>
               <p class="panel-header-sub">Materials Supply Bay &bull; Click a component to spawn into the workspace</p>
             </div>
           </div>
@@ -151,86 +312,44 @@
           <button type="button" class="status-cancel-btn hidden" id="btn-cancel-selection" title="Cancel current selection">✕ Cancel</button>
         </div>
 
-        <!-- Material Category Filter Tabs (Requested Categories) -->
+        <!-- Material Category Filter Tabs (Organized Categories A through F) -->
         <div class="palette-category-tabs" role="tablist" aria-label="Material Categories">
-          <button type="button" class="category-tab active" data-category="all" role="tab" aria-selected="true">All</button>
-          <button type="button" class="category-tab" data-category="blocks" role="tab" aria-selected="false">🧱 Basic Blocks</button>
-          <button type="button" class="category-tab" data-category="foundation" role="tab" aria-selected="false">🏛️ Foundation</button>
-          <button type="button" class="category-tab" data-category="walls" role="tab" aria-selected="false">🏗️ Walls</button>
-          <button type="button" class="category-tab" data-category="openings" role="tab" aria-selected="false">🚪 Doors & Windows</button>
-          <button type="button" class="category-tab" data-category="roof" role="tab" aria-selected="false">🏠 Roof</button>
-          <button type="button" class="category-tab" data-category="finishing" role="tab" aria-selected="false">✨ Finishing</button>
+          <button type="button" class="category-tab active" data-category="all" role="tab" aria-selected="true">All (31)</button>
+          <button type="button" class="category-tab" data-category="blocks" role="tab" aria-selected="false">🧱 Basic Blocks (6)</button>
+          <button type="button" class="category-tab" data-category="structural" role="tab" aria-selected="false">🏛️ Structural (7)</button>
+          <button type="button" class="category-tab" data-category="walls" role="tab" aria-selected="false">🏗️ Walls &amp; Partitions (4)</button>
+          <button type="button" class="category-tab" data-category="openings" role="tab" aria-selected="false">🚪 Doors &amp; Windows (5)</button>
+          <button type="button" class="category-tab" data-category="roof" role="tab" aria-selected="false">🏠 Roofing (5)</button>
+          <button type="button" class="category-tab" data-category="finishing" role="tab" aria-selected="false">✨ Finishing (4)</button>
         </div>
 
         <!-- Scrollable Materials Cards List -->
         <div class="artefact-cards-container materials-cards-scroll-container" role="list" id="palette-cards-container">
-          <!-- ── Category: Basic Blocks ── -->
-          <article class="artefact-card construction-card" id="card-brick" data-category="blocks" data-component-type="clay_brick" role="listitem" tabindex="0">
+          <!-- ── Category A: Basic Building Blocks ── -->
+          <article class="artefact-card construction-card" id="card-brick-standard" data-category="blocks" data-component-type="clay_brick" role="listitem" tabindex="0">
             <div class="card-swatch swatch-brick" aria-hidden="true">
               <span class="swatch-stud"></span><span class="swatch-stud"></span>
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Brick</span>
+                <span class="card-name">Standard Brick</span>
                 <span class="card-badge">Basic Blocks</span>
               </div>
-              <div class="card-spec">0.24m × 0.12m × 0.08m · 3.5kg</div>
+              <div class="card-spec">0.24m × 0.08m × 0.12m · 4.4kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
 
-          <article class="artefact-card construction-card" id="card-brick-small" data-category="blocks" data-component-type="small_brick" role="listitem" tabindex="0">
-            <div class="card-swatch swatch-small-brick" aria-hidden="true">
+          <article class="artefact-card construction-card" id="card-brick-half" data-category="blocks" data-component-type="half_brick" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-half-brick" aria-hidden="true">
               <span class="swatch-stud"></span>
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Small Brick</span>
+                <span class="card-name">Half Brick</span>
                 <span class="card-badge">Basic Blocks</span>
               </div>
-              <div class="card-spec">0.20m × 0.065m × 0.10m · 2.2kg</div>
-            </div>
-            <button type="button" class="btn-card-select" tabindex="-1">Select</button>
-          </article>
-
-          <article class="artefact-card construction-card" id="card-brick-large" data-category="blocks" data-component-type="large_brick" role="listitem" tabindex="0">
-            <div class="card-swatch swatch-large-brick" aria-hidden="true">
-              <span class="swatch-stud"></span><span class="swatch-stud"></span>
-            </div>
-            <div class="card-details">
-              <div class="card-name-row">
-                <span class="card-name">Large Brick</span>
-                <span class="card-badge">Basic Blocks</span>
-              </div>
-              <div class="card-spec">0.40m × 0.12m × 0.20m · 9.5kg</div>
-            </div>
-            <button type="button" class="btn-card-select" tabindex="-1">Select</button>
-          </article>
-
-          <article class="artefact-card construction-card" id="card-concrete-block" data-category="blocks" data-component-type="concrete_block" role="listitem" tabindex="0">
-            <div class="card-swatch swatch-concrete-block" aria-hidden="true">
-              <span class="swatch-stud"></span><span class="swatch-stud"></span>
-            </div>
-            <div class="card-details">
-              <div class="card-name-row">
-                <span class="card-name">Concrete Block</span>
-                <span class="card-badge">Basic Blocks</span>
-              </div>
-              <div class="card-spec">0.40m × 0.20m × 0.20m · 16.0kg</div>
-            </div>
-            <button type="button" class="btn-card-select" tabindex="-1">Select</button>
-          </article>
-
-          <article class="artefact-card construction-card" id="card-sandcrete-block" data-category="blocks" data-component-type="sandcrete_block" role="listitem" tabindex="0">
-            <div class="card-swatch swatch-sandcrete-block" aria-hidden="true">
-              <span class="swatch-stud"></span><span class="swatch-stud"></span>
-            </div>
-            <div class="card-details">
-              <div class="card-name-row">
-                <span class="card-name">Sandcrete Block</span>
-                <span class="card-badge">Basic Blocks</span>
-              </div>
-              <div class="card-spec">0.45m × 0.225m × 0.15m · 18.5kg</div>
+              <div class="card-spec">0.12m × 0.08m × 0.12m · 2.2kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
@@ -249,57 +368,155 @@
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
 
-          <article class="artefact-card construction-card" id="card-block-rect" data-category="blocks" data-component-type="rectangular_block" role="listitem" tabindex="0">
-            <div class="card-swatch swatch-rect-block" aria-hidden="true">
+          <article class="artefact-card construction-card" id="card-block-large" data-category="blocks" data-component-type="large_brick" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-large-brick" aria-hidden="true">
               <span class="swatch-stud"></span><span class="swatch-stud"></span>
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Rectangular Block</span>
+                <span class="card-name">Large Concrete Block</span>
                 <span class="card-badge">Basic Blocks</span>
               </div>
-              <div class="card-spec">0.40m × 0.20m × 0.20m · 16.0kg</div>
+              <div class="card-spec">0.40m × 0.12m × 0.20m · 9.5kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
 
-          <!-- ── Category: Foundation ── -->
-          <article class="artefact-card construction-card" id="card-foundation-block" data-category="foundation" data-component-type="foundation_block" role="listitem" tabindex="0">
+          <article class="artefact-card construction-card" id="card-block-foundation" data-category="blocks" data-component-type="foundation_block" role="listitem" tabindex="0">
             <div class="card-swatch swatch-foundation" aria-hidden="true">
               <span class="swatch-dowel"></span>
             </div>
             <div class="card-details">
               <div class="card-name-row">
                 <span class="card-name">Foundation Block</span>
-                <span class="card-badge">Foundation</span>
+                <span class="card-badge">Basic Blocks</span>
               </div>
               <div class="card-spec">0.60m × 0.30m × 0.60m · 135.0kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
 
-          <article class="artefact-card construction-card" id="card-floor-slab" data-category="foundation" data-component-type="floor_component" role="listitem" tabindex="0">
+          <article class="artefact-card construction-card" id="card-block-corner" data-category="blocks" data-component-type="corner_block" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-corner-block" aria-hidden="true">
+              <span class="swatch-stud"></span><span class="swatch-stud"></span>
+            </div>
+            <div class="card-details">
+              <div class="card-name-row">
+                <span class="card-name">Corner Block</span>
+                <span class="card-badge">Basic Blocks</span>
+              </div>
+              <div class="card-spec">0.30m × 0.20m × 0.30m · 18.0kg</div>
+            </div>
+            <button type="button" class="btn-card-select" tabindex="-1">Select</button>
+          </article>
+
+          <!-- ── Category B: Structural Components ── -->
+          <article class="artefact-card construction-card" id="card-foundation-section" data-category="structural" data-component-type="foundation_section" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-foundation-section" aria-hidden="true">
+              <span class="swatch-dowel"></span>
+            </div>
+            <div class="card-details">
+              <div class="card-name-row">
+                <span class="card-name">Foundation Section</span>
+                <span class="card-badge">Structural</span>
+              </div>
+              <div class="card-spec">1.20m × 0.30m × 0.60m · 270.0kg</div>
+            </div>
+            <button type="button" class="btn-card-select" tabindex="-1">Select</button>
+          </article>
+
+          <article class="artefact-card construction-card" id="card-floor-slab" data-category="structural" data-component-type="floor_component" role="listitem" tabindex="0">
             <div class="card-swatch swatch-floor-slab" aria-hidden="true">
               <span class="swatch-slab-lines"></span>
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Floor Panel</span>
-                <span class="card-badge">Foundation</span>
+                <span class="card-name">Floor Slab</span>
+                <span class="card-badge">Structural</span>
               </div>
               <div class="card-spec">1.20m × 0.10m × 1.20m · 110.0kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
 
-          <!-- ── Category: Walls ── -->
-          <article class="artefact-card construction-card" id="card-wall" data-category="walls" data-component-type="wall_panel" role="listitem" tabindex="0">
+          <article class="artefact-card construction-card" id="card-column" data-category="structural" data-component-type="reinforced_column" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-column" aria-hidden="true">
+              <span class="swatch-column-post"></span>
+            </div>
+            <div class="card-details">
+              <div class="card-name-row">
+                <span class="card-name">Concrete Column</span>
+                <span class="card-badge">Structural</span>
+              </div>
+              <div class="card-spec">0.30m × 2.40m × 0.30m · 180.0kg</div>
+            </div>
+            <button type="button" class="btn-card-select" tabindex="-1">Select</button>
+          </article>
+
+          <article class="artefact-card construction-card" id="card-beam" data-category="structural" data-component-type="horizontal_beam" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-beam" aria-hidden="true">
+              <span class="swatch-beam-bar"></span>
+            </div>
+            <div class="card-details">
+              <div class="card-name-row">
+                <span class="card-name">Structural Beam</span>
+                <span class="card-badge">Structural</span>
+              </div>
+              <div class="card-spec">0.25m × 0.30m × 2.40m · 160.0kg</div>
+            </div>
+            <button type="button" class="btn-card-select" tabindex="-1">Select</button>
+          </article>
+
+          <article class="artefact-card construction-card" id="card-lintel-beam" data-category="structural" data-component-type="lintel_beam" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-lintel" aria-hidden="true">
+              <span class="swatch-beam-bar"></span>
+            </div>
+            <div class="card-details">
+              <div class="card-name-row">
+                <span class="card-name">Precast Lintel</span>
+                <span class="card-badge">Structural</span>
+              </div>
+              <div class="card-spec">1.20m × 0.15m × 0.20m · 72.0kg</div>
+            </div>
+            <button type="button" class="btn-card-select" tabindex="-1">Select</button>
+          </article>
+
+          <article class="artefact-card construction-card" id="card-rebar" data-category="structural" data-component-type="rebar" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-rebar" aria-hidden="true">
+              <span class="swatch-column-post"></span>
+            </div>
+            <div class="card-details">
+              <div class="card-name-row">
+                <span class="card-name">Reinforcement Rebar</span>
+                <span class="card-badge">Structural</span>
+              </div>
+              <div class="card-spec">0.04m × 2.00m × 0.04m · 19.7kg</div>
+            </div>
+            <button type="button" class="btn-card-select" tabindex="-1">Select</button>
+          </article>
+
+          <article class="artefact-card construction-card" id="card-steel-connector" data-category="structural" data-component-type="steel_connector" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-steel-connector" aria-hidden="true">
+              <span class="swatch-dowel"></span>
+            </div>
+            <div class="card-details">
+              <div class="card-name-row">
+                <span class="card-name">Steel Connector</span>
+                <span class="card-badge">Structural</span>
+              </div>
+              <div class="card-spec">0.15m × 0.15m × 0.15m · 5.2kg</div>
+            </div>
+            <button type="button" class="btn-card-select" tabindex="-1">Select</button>
+          </article>
+
+          <!-- ── Category C: Walls and Partitions ── -->
+          <article class="artefact-card construction-card" id="card-wall-panel" data-category="walls" data-component-type="wall_panel" role="listitem" tabindex="0">
             <div class="card-swatch swatch-wall-panel" aria-hidden="true">
               <span class="swatch-panel-lines"></span>
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Wall Panel</span>
+                <span class="card-name">Full Wall Section</span>
                 <span class="card-badge">Walls</span>
               </div>
               <div class="card-spec">1.20m × 2.40m × 0.15m · 240.0kg</div>
@@ -307,16 +524,16 @@
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
 
-          <article class="artefact-card construction-card" id="card-wall-corner" data-category="walls" data-component-type="corner_wall" role="listitem" tabindex="0">
-            <div class="card-swatch swatch-corner-wall" aria-hidden="true">
-              <span class="swatch-corner-lines"></span>
+          <article class="artefact-card construction-card" id="card-half-wall" data-category="walls" data-component-type="half_wall_panel" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-half-wall" aria-hidden="true">
+              <span class="swatch-panel-lines"></span>
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Corner Wall</span>
+                <span class="card-name">Half-Height Wall</span>
                 <span class="card-badge">Walls</span>
               </div>
-              <div class="card-spec">0.60m × 2.40m × 0.60m · 160.0kg</div>
+              <div class="card-spec">1.20m × 1.20m × 0.15m · 120.0kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
@@ -327,7 +544,7 @@
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Internal Partition</span>
+                <span class="card-name">Interior Partition</span>
                 <span class="card-badge">Walls</span>
               </div>
               <div class="card-spec">1.20m × 2.40m × 0.10m · 95.0kg</div>
@@ -335,35 +552,21 @@
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
 
-          <article class="artefact-card construction-card" id="card-column" data-category="walls" data-component-type="reinforced_column" role="listitem" tabindex="0">
-            <div class="card-swatch swatch-column" aria-hidden="true">
-              <span class="swatch-column-post"></span>
+          <article class="artefact-card construction-card" id="card-wall-corner" data-category="walls" data-component-type="corner_wall" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-corner-wall" aria-hidden="true">
+              <span class="swatch-corner-lines"></span>
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Column</span>
+                <span class="card-name">Corner Wall Section</span>
                 <span class="card-badge">Walls</span>
               </div>
-              <div class="card-spec">0.30m × 2.40m × 0.30m · 180.0kg</div>
+              <div class="card-spec">0.60m × 2.40m × 0.60m · 160.0kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
 
-          <article class="artefact-card construction-card" id="card-beam" data-category="walls" data-component-type="horizontal_beam" role="listitem" tabindex="0">
-            <div class="card-swatch swatch-beam" aria-hidden="true">
-              <span class="swatch-beam-bar"></span>
-            </div>
-            <div class="card-details">
-              <div class="card-name-row">
-                <span class="card-name">Horizontal Beam</span>
-                <span class="card-badge">Walls</span>
-              </div>
-              <div class="card-spec">0.25m × 0.30m × 2.40m · 160.0kg</div>
-            </div>
-            <button type="button" class="btn-card-select" tabindex="-1">Select</button>
-          </article>
-
-          <!-- ── Category: Doors and Windows ── -->
+          <!-- ── Category D: Doors and Windows ── -->
           <article class="artefact-card construction-card" id="card-door-frame" data-category="openings" data-component-type="door_frame" role="listitem" tabindex="0">
             <div class="card-swatch swatch-door-frame" aria-hidden="true">
               <span class="swatch-door-portal"></span>
@@ -371,7 +574,7 @@
             <div class="card-details">
               <div class="card-name-row">
                 <span class="card-name">Door Frame</span>
-                <span class="card-badge">Doors & Windows</span>
+                <span class="card-badge">Openings</span>
               </div>
               <div class="card-spec">1.00m × 2.20m × 0.15m · 32.0kg</div>
             </div>
@@ -384,10 +587,10 @@
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Door</span>
-                <span class="card-badge">Doors & Windows</span>
+                <span class="card-name">Standard Door</span>
+                <span class="card-badge">Openings</span>
               </div>
-              <div class="card-spec">0.90m × 2.10m × 0.05m · 22.0kg</div>
+              <div class="card-spec">0.82m × 2.04m × 0.05m · 28.0kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
@@ -399,7 +602,7 @@
             <div class="card-details">
               <div class="card-name-row">
                 <span class="card-name">Window Frame</span>
-                <span class="card-badge">Doors & Windows</span>
+                <span class="card-badge">Openings</span>
               </div>
               <div class="card-spec">1.20m × 1.20m × 0.15m · 24.0kg</div>
             </div>
@@ -412,39 +615,53 @@
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Window</span>
-                <span class="card-badge">Doors & Windows</span>
+                <span class="card-name">Casement Window</span>
+                <span class="card-badge">Openings</span>
               </div>
-              <div class="card-spec">1.10m × 1.10m × 0.04m · 14.0kg</div>
+              <div class="card-spec">0.92m × 1.12m × 0.04m · 18.0kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
 
-          <article class="artefact-card construction-card" id="card-staircase" data-category="openings" data-component-type="staircase" role="listitem" tabindex="0">
-            <div class="card-swatch swatch-staircase" aria-hidden="true">
-              <span class="swatch-stair-lines"></span>
+          <article class="artefact-card construction-card" id="card-window-lintel" data-category="openings" data-component-type="window_lintel" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-window-lintel" aria-hidden="true">
+              <span class="swatch-beam-bar"></span>
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Staircase</span>
-                <span class="card-badge">Doors & Windows</span>
+                <span class="card-name">Window Lintel</span>
+                <span class="card-badge">Openings</span>
               </div>
-              <div class="card-spec">1.00m × 2.40m × 2.40m · 350.0kg</div>
+              <div class="card-spec">1.40m × 0.15m × 0.20m · 84.0kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
 
-          <!-- ── Category: Roof ── -->
-          <article class="artefact-card construction-card" id="card-roof" data-category="roof" data-component-type="roof_panel" role="listitem" tabindex="0">
+          <!-- ── Category E: Roofing ── -->
+          <article class="artefact-card construction-card" id="card-roof-slab" data-category="roof" data-component-type="roof_slab" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-roof-slab" aria-hidden="true">
+              <span class="swatch-slab-lines"></span>
+            </div>
+            <div class="card-details">
+              <div class="card-name-row">
+                <span class="card-name">Precast Roof Slab</span>
+                <span class="card-badge">Roofing</span>
+              </div>
+              <div class="card-spec">1.20m × 0.08m × 1.20m · 138.0kg</div>
+            </div>
+            <button type="button" class="btn-card-select" tabindex="-1">Select</button>
+          </article>
+
+          <article class="artefact-card construction-card" id="card-roof-panel" data-category="roof" data-component-type="roof_panel" role="listitem" tabindex="0">
             <div class="card-swatch swatch-roof-panel" aria-hidden="true">
               <span class="swatch-zinc-corrugation"></span>
             </div>
             <div class="card-details">
               <div class="card-name-row">
                 <span class="card-name">Roof Panel</span>
-                <span class="card-badge">Roof</span>
+                <span class="card-badge">Roofing</span>
               </div>
-              <div class="card-spec">1.20m × 0.04m × 2.40m · 48.0kg</div>
+              <div class="card-spec">1.20m × 0.05m × 1.40m · 48.0kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
@@ -456,52 +673,52 @@
             <div class="card-details">
               <div class="card-name-row">
                 <span class="card-name">Roof Truss</span>
-                <span class="card-badge">Roof</span>
+                <span class="card-badge">Roofing</span>
               </div>
-              <div class="card-spec">2.40m × 1.00m × 0.15m · 42.0kg</div>
+              <div class="card-spec">2.40m × 0.80m × 0.15m · 42.0kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
 
-          <article class="artefact-card construction-card" id="card-timber" data-category="roof" data-component-type="timber_piece" role="listitem" tabindex="0">
-            <div class="card-swatch swatch-timber" aria-hidden="true">
-              <span class="swatch-timber-bar"></span>
+          <article class="artefact-card construction-card" id="card-roof-ridge" data-category="roof" data-component-type="roof_ridge" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-roof-ridge" aria-hidden="true">
+              <span class="swatch-truss-tri"></span>
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Timber Batten</span>
-                <span class="card-badge">Roof</span>
+                <span class="card-name">Roof Ridge Cap</span>
+                <span class="card-badge">Roofing</span>
               </div>
-              <div class="card-spec">0.10m × 0.05m × 1.20m · 4.5kg</div>
+              <div class="card-spec">1.20m × 0.15m × 0.25m · 15.0kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
 
-          <!-- ── Category: Finishing ── -->
-          <article class="artefact-card construction-card" id="card-finish-roof" data-category="finishing" data-component-type="roofing_material" role="listitem" tabindex="0">
+          <article class="artefact-card construction-card" id="card-roofing-material" data-category="roof" data-component-type="roofing_material" role="listitem" tabindex="0">
             <div class="card-swatch swatch-roof-tiles" aria-hidden="true">
-              <span class="swatch-tile-curves"></span>
+              <span class="swatch-zinc-corrugation"></span>
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Roofing Material</span>
-                <span class="card-badge">Finishing</span>
+                <span class="card-name">Corrugated Zinc Sheet</span>
+                <span class="card-badge">Roofing</span>
               </div>
-              <div class="card-spec">1.20m × 0.05m × 2.40m · 28.0kg</div>
+              <div class="card-spec">1.40m × 0.02m × 1.00m · 12.0kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
 
+          <!-- ── Category F: Finishing Materials ── -->
           <article class="artefact-card construction-card" id="card-finish-floor" data-category="finishing" data-component-type="floor_finish" role="listitem" tabindex="0">
             <div class="card-swatch swatch-floor-finish" aria-hidden="true">
               <span class="swatch-terrazzo-dots"></span>
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Floor Finish</span>
+                <span class="card-name">Ceramic Floor Tiles</span>
                 <span class="card-badge">Finishing</span>
               </div>
-              <div class="card-spec">1.20m × 0.02m × 1.20m · 18.0kg</div>
+              <div class="card-spec">1.20m × 0.02m × 1.20m · 32.0kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
@@ -512,10 +729,24 @@
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Wall Finish</span>
+                <span class="card-name">Plaster Wall Finish</span>
                 <span class="card-badge">Finishing</span>
               </div>
-              <div class="card-spec">1.20m × 2.40m × 0.02m · 15.0kg</div>
+              <div class="card-spec">1.20m × 2.40m × 0.02m · 45.0kg</div>
+            </div>
+            <button type="button" class="btn-card-select" tabindex="-1">Select</button>
+          </article>
+
+          <article class="artefact-card construction-card" id="card-finish-paint" data-category="finishing" data-component-type="paint_texture" role="listitem" tabindex="0">
+            <div class="card-swatch swatch-paint-texture" aria-hidden="true">
+              <span class="swatch-terrazzo-dots"></span>
+            </div>
+            <div class="card-details">
+              <div class="card-name-row">
+                <span class="card-name">Textured Wall Coating</span>
+                <span class="card-badge">Finishing</span>
+              </div>
+              <div class="card-spec">0.60m × 0.60m × 0.02m · 5.0kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>
@@ -526,10 +757,10 @@
             </div>
             <div class="card-details">
               <div class="card-name-row">
-                <span class="card-name">Decorative Element</span>
+                <span class="card-name">Architectural Cornice</span>
                 <span class="card-badge">Finishing</span>
               </div>
-              <div class="card-spec">0.30m × 0.30m × 0.30m · 6.0kg</div>
+              <div class="card-spec">0.60m × 0.15m × 0.15m · 8.5kg</div>
             </div>
             <button type="button" class="btn-card-select" tabindex="-1">Select</button>
           </article>

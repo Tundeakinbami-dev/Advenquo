@@ -187,6 +187,9 @@
       <div class="secondary-btn" id="btn-tablet-undo">
         <div class="secondary-btn-text">Undo Placement</div>
       </div>
+      <div class="secondary-btn" id="btn-tablet-minimize">
+        <div class="secondary-btn-text">Hide Tablet</div>
+      </div>
       <div class="secondary-btn" id="btn-tablet-reset">
         <div class="secondary-btn-text">Reset Project</div>
       </div>

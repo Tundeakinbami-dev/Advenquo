@@ -548,6 +548,186 @@ export function createComponentMesh(type: ComponentType): Object3D {
       root.add(molding);
       break;
     }
+
+    case 'half_brick': {
+      // 1. Half brick body (genuine half length of clay_brick)
+      const body = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      root.add(body);
+
+      // 2. Single modular interlocking stud centered on top
+      const studGeo = new CylinderGeometry(0.024, 0.024, 0.016, 12);
+      const stud = new Mesh(studGeo, studMat);
+      stud.position.set(0, h / 2 + 0.008, 0);
+      stud.castShadow = true;
+      root.add(stud);
+      break;
+    }
+
+    case 'corner_block': {
+      const body = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      root.add(body);
+
+      // Two directional interlocking studs on top (for 90-degree corner)
+      const studGeo = new CylinderGeometry(0.03, 0.03, 0.02, 14);
+      const studX = new Mesh(studGeo, studMat);
+      studX.position.set(w / 4, h / 2 + 0.01, -d / 4);
+      studX.castShadow = true;
+      root.add(studX);
+
+      const studZ = new Mesh(studGeo, studMat);
+      studZ.position.set(-w / 4, h / 2 + 0.01, d / 4);
+      studZ.castShadow = true;
+      root.add(studZ);
+      break;
+    }
+
+    case 'foundation_section': {
+      // Heavy concrete footing block
+      const body = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      root.add(body);
+
+      // Two raised anchor pedestals for columns / walls
+      const pedestalGeo = new BoxGeometry(0.28, 0.03, 0.28);
+      const pedL = new Mesh(pedestalGeo, studMat);
+      pedL.position.set(-0.30, h / 2 + 0.015, 0);
+      pedL.castShadow = true;
+      root.add(pedL);
+
+      const pedR = new Mesh(pedestalGeo, studMat);
+      pedR.position.set(0.30, h / 2 + 0.015, 0);
+      pedR.castShadow = true;
+      root.add(pedR);
+      break;
+    }
+
+    case 'lintel_beam': {
+      const body = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      root.add(body);
+
+      // Top alignment studs for masonry above
+      const studGeo = new CylinderGeometry(0.025, 0.025, 0.015, 12);
+      const stud1 = new Mesh(studGeo, studMat);
+      stud1.position.set(-0.35, h / 2 + 0.0075, 0);
+      root.add(stud1);
+
+      const stud2 = new Mesh(studGeo, studMat);
+      stud2.position.set(0.35, h / 2 + 0.0075, 0);
+      root.add(stud2);
+      break;
+    }
+
+    case 'half_wall_panel': {
+      const body = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      root.add(body);
+
+      // Recessed panel inlay
+      const reliefMat = new MeshStandardMaterial({
+        color: p.colorHex,
+        roughness: Math.min(1.0, p.roughness + 0.1),
+        metalness: p.metalness,
+      });
+      const inlay = new Mesh(new BoxGeometry(w - 0.16, h - 0.16, d + 0.01), reliefMat);
+      root.add(inlay);
+
+      // Top alignment studs
+      const studGeo = new CylinderGeometry(0.03, 0.03, 0.02, 12);
+      const studL = new Mesh(studGeo, studMat);
+      studL.position.set(-0.35, h / 2 + 0.01, 0);
+      root.add(studL);
+
+      const studR = new Mesh(studGeo, studMat);
+      studR.position.set(0.35, h / 2 + 0.01, 0);
+      root.add(studR);
+      break;
+    }
+
+    case 'window_lintel': {
+      const body = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      root.add(body);
+
+      // Bearing end notches / studs
+      const studGeo = new CylinderGeometry(0.025, 0.025, 0.015, 12);
+      const stud1 = new Mesh(studGeo, studMat);
+      stud1.position.set(-0.45, h / 2 + 0.0075, 0);
+      root.add(stud1);
+
+      const stud2 = new Mesh(studGeo, studMat);
+      stud2.position.set(0.45, h / 2 + 0.0075, 0);
+      root.add(stud2);
+      break;
+    }
+
+    case 'roof_slab': {
+      const body = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      root.add(body);
+
+      // Border perimeter flange for weather sealing
+      const borderMat = new MeshStandardMaterial({
+        color: p.colorHex,
+        roughness: 0.6,
+        metalness: 0.1,
+      });
+      const flange = new Mesh(new BoxGeometry(w, 0.02, d), borderMat);
+      flange.position.set(0, h / 2 + 0.01, 0);
+      root.add(flange);
+      break;
+    }
+
+    case 'roof_ridge': {
+      // Angular apex ridge cap connecting roof panel slopes
+      const flankGeo = new BoxGeometry(w, 0.015, 0.14);
+      const flankLeft = new Mesh(flankGeo, mainMat);
+      flankLeft.position.set(0, -0.02, -0.05);
+      flankLeft.rotation.x = Math.PI / 6; // 30 deg slope
+      flankLeft.castShadow = true;
+      root.add(flankLeft);
+
+      const flankRight = new Mesh(flankGeo, mainMat);
+      flankRight.position.set(0, -0.02, 0.05);
+      flankRight.rotation.x = -Math.PI / 6;
+      flankRight.castShadow = true;
+      root.add(flankRight);
+
+      // Central cylindrical ridge cap
+      const rollCap = new Mesh(new CylinderGeometry(0.025, 0.025, w, 12), studMat);
+      rollCap.rotation.z = Math.PI / 2;
+      rollCap.position.set(0, 0.03, 0);
+      rollCap.castShadow = true;
+      root.add(rollCap);
+      break;
+    }
+
+    case 'paint_texture': {
+      // Architectural finish sample panel
+      const panel = new Mesh(new BoxGeometry(w, h, d), mainMat);
+      panel.receiveShadow = true;
+      root.add(panel);
+
+      // Frame border
+      const frameMat = new MeshStandardMaterial({ color: 0x334155, roughness: 0.5 });
+      const frameTop = new Mesh(new BoxGeometry(w + 0.02, 0.02, d + 0.01), frameMat);
+      frameTop.position.set(0, h / 2, 0);
+      root.add(frameTop);
+
+      const frameBot = new Mesh(new BoxGeometry(w + 0.02, 0.02, d + 0.01), frameMat);
+      frameBot.position.set(0, -h / 2, 0);
+      root.add(frameBot);
+      break;
+    }
   }
 
   return root;

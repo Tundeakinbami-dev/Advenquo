@@ -193,6 +193,26 @@ export class ConstructionTutorialManager {
     }
   }
 
+  public nextStep(): void {
+    this.advanceStep();
+  }
+
+  public previousStep(): void {
+    if (this.currentStepIndex > 1) {
+      this.currentStepIndex--;
+      this.isCompleted = false;
+      this.notify();
+    }
+  }
+
+  public goToStep(index: number): void {
+    if (index >= 1 && index <= TUTORIAL_STEPS.length) {
+      this.currentStepIndex = index;
+      this.isCompleted = false;
+      this.notify();
+    }
+  }
+
   public reset(): void {
     this.currentStepIndex = 1;
     this.isCompleted = false;

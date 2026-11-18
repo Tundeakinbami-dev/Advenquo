@@ -23,11 +23,19 @@ import {
 
 import { assemblySystem } from '../assembly/assembly-system.js';
 import type { SnapCandidate } from '../assembly/snap-point.js';
-import { ConstructionBlock } from '../core/construction-components.js';
+import {
+  BlueprintPlacementGuide,
+  ConstructionBlock,
+  ConstructionWorkshopState,
+} from '../core/construction-components.js';
 import type { ComponentType } from '../core/construction-types.js';
 import { constructionPhysicsManager } from '../physics/construction-physics-manager.js';
 import { challengeManager } from '../progression/challenge-manager.js';
 import { constructionTutorialManager } from '../progression/construction-tutorial-manager.js';
+import {
+  blueprintProgressionEngine,
+  type TaskProgressSummary,
+} from '../progression/blueprint-progression-engine.js';
 import { PlacementPreview } from './placement-preview.js';
 
 export class ConstructionInteractionSystem extends createSystem({
@@ -42,6 +50,7 @@ export class ConstructionInteractionSystem extends createSystem({
   private preview: PlacementPreview = new PlacementPreview();
   private activeCandidate: SnapCandidate | null = null;
   private lastHeldEntity: Entity | null = null;
+  private guideEntity: Entity | null = null;
 
   // Scratch math objects allocated once
   private tempPos = new Vector3();
@@ -65,6 +74,19 @@ export class ConstructionInteractionSystem extends createSystem({
       (this.world as any).scene.add(this.preview.getRoot());
     }
 
+    // Create persistent ECS entity tracking blueprint placement guide & workshop state
+    this.guideEntity = this.world.createTransformEntity();
+    if (this.guideEntity.object3D) {
+      this.guideEntity.object3D.name = 'BlueprintPlacementGuideEntity';
+    }
+    this.guideEntity.addComponent(BlueprintPlacementGuide);
+    this.guideEntity.addComponent(ConstructionWorkshopState);
+
+    const unsub = blueprintProgressionEngine.subscribe((summary) => {
+      this._syncGuideEntity(summary);
+    });
+    this.cleanupFuncs.push(unsub);
+
     // Subscribe to grabbed entities
     this.queries.heldBlocks.subscribe('qualify', (entity: Entity) => {
       this.onBlockGrabbed(entity);
@@ -73,6 +95,25 @@ export class ConstructionInteractionSystem extends createSystem({
     this.queries.heldBlocks.subscribe('disqualify', (entity: Entity) => {
       this.onBlockReleased(entity);
     });
+  }
+
+  private _syncGuideEntity(summary: TaskProgressSummary): void {
+    if (!this.guideEntity) return;
+    this.guideEntity.setValue(BlueprintPlacementGuide, 'targetComponentId', summary.activeTargetId || '');
+    const activeTarget = blueprintProgressionEngine.getActiveTarget();
+    this.guideEntity.setValue(BlueprintPlacementGuide, 'targetMaterialType', activeTarget?.componentType || '');
+    this.guideEntity.setValue(BlueprintPlacementGuide, 'currentTaskId', `Task_${summary.currentTaskIndex}`);
+    this.guideEntity.setValue(BlueprintPlacementGuide, 'isGhostActive', summary.activeTargetId !== null);
+    this.guideEntity.setValue(
+      BlueprintPlacementGuide,
+      'validationStatus',
+      summary.activeTargetId ? blueprintProgressionEngine.getTargetStatus(summary.activeTargetId) : 'unplaced',
+    );
+
+    this.guideEntity.setValue(ConstructionWorkshopState, 'activeChallengeId', summary.currentLevelId);
+    this.guideEntity.setValue(ConstructionWorkshopState, 'completionPercentage', summary.overallLevelCompletionPercent);
+    this.guideEntity.setValue(ConstructionWorkshopState, 'validationPassed', summary.isTaskCompleted);
+    this.guideEntity.setValue(ConstructionWorkshopState, 'isCompleted', summary.isLevelCompleted);
   }
 
   private onBlockGrabbed(entity: Entity): void {
@@ -91,6 +132,7 @@ export class ConstructionInteractionSystem extends createSystem({
     if (isPlaced) {
       entity.setValue(ConstructionBlock, 'isPlaced', false);
       assemblySystem.unregisterBlock(instanceId);
+      blueprintProgressionEngine.onComponentRemoved(instanceId);
     }
   }
 
@@ -125,6 +167,15 @@ export class ConstructionInteractionSystem extends createSystem({
     } else {
       // Free physics settlement
       constructionPhysicsManager.releaseComponentToPhysics(instanceId);
+    }
+
+    if (entity.object3D) {
+      blueprintProgressionEngine.onComponentPlaced({
+        instanceId,
+        componentType,
+        position: entity.object3D.position,
+        rotation: entity.object3D.quaternion,
+      });
     }
 
     constructionTutorialManager.onComponentPlaced({

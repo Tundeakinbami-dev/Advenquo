@@ -23,12 +23,43 @@ export class MaterialSelector {
 
   constructor(initialUnlocked?: ComponentType[]) {
     this.availableComponents = initialUnlocked || [
+      // A. Basic building blocks
       'clay_brick',
-      'concrete_block',
+      'half_brick',
+      'square_block',
+      'large_brick',
+      'foundation_block',
+      'corner_block',
+      // B. Structural components
+      'foundation_section',
+      'floor_component',
       'reinforced_column',
       'horizontal_beam',
+      'lintel_beam',
+      'rebar',
+      'steel_connector',
+      // C. Walls and partitions
       'wall_panel',
+      'half_wall_panel',
+      'internal_partition',
+      'corner_wall',
+      // D. Doors and windows
+      'door_frame',
+      'door',
+      'window_frame',
+      'window',
+      'window_lintel',
+      // E. Roofing
+      'roof_slab',
       'roof_panel',
+      'roof_truss',
+      'roof_ridge',
+      'roofing_material',
+      // F. Finishing materials
+      'floor_finish',
+      'wall_finish',
+      'paint_texture',
+      'decorative_element',
     ];
   }
 

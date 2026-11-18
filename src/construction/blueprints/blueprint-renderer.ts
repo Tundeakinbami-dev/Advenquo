@@ -33,6 +33,17 @@ export interface BlueprintDrawingOptions {
   showDimensions?: boolean;
   showRoomLabels?: boolean;
   showGrid?: boolean;
+  targetMarkers?: Map<
+    string,
+    {
+      number: number;
+      status: 'pending' | 'required' | 'placed_valid' | 'placed_needs_adjustment' | 'invalid';
+      isHighlighted?: boolean;
+    }
+  >;
+  activeTargetId?: string | null;
+  activeTaskIndex?: number;
+  interactiveMarkers?: boolean;
 }
 
 export class BlueprintRenderer {
@@ -257,6 +268,15 @@ export class BlueprintRenderer {
       .area { font-family: sans-serif; font-size: 9px; fill: #94a3b8; text-anchor: middle; }
       .dim { font-family: monospace, sans-serif; font-size: 10px; font-weight: bold; fill: ${themeColors.dim}; text-anchor: middle; }
       .subtext { font-family: sans-serif; font-size: 9px; fill: #94a3b8; }
+      .marker-base { cursor: pointer; transition: transform 0.15s ease, filter 0.15s ease; }
+      .marker-base:hover { filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.9)); }
+      .marker-text { font-family: monospace, sans-serif; font-size: 9px; font-weight: bold; fill: #ffffff; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+      @keyframes blueprintPulse {
+        0% { r: 12px; opacity: 0.85; stroke-width: 2px; }
+        50% { r: 17px; opacity: 0.35; stroke-width: 3.5px; }
+        100% { r: 12px; opacity: 0.85; stroke-width: 2px; }
+      }
+      .pulse-ring { animation: blueprintPulse 1.6s ease-in-out infinite; fill: none; }
     </style>`;
 
     // Background & Border
@@ -330,6 +350,84 @@ export class BlueprintRenderer {
       svg += `<line x1="${wx - winW}" y1="${wy}" x2="${wx + winW}" y2="${wy}" stroke="#ffffff" stroke-width="1"/>`;
     }
 
+    // =========================================================================
+    // Authoritative Component Target Markers (Interactive Blueprint Placement)
+    // =========================================================================
+    svg += `<g class="blueprint-targets-layer" id="blueprint-targets-group">`;
+
+    let markerCounter = 1;
+    for (const comp of this.design.components) {
+      const mx = toSvgX(comp.position[0]);
+      const my = toSvgY(comp.position[2]);
+
+      const markerInfo = options.targetMarkers?.get(comp.id);
+      const status = markerInfo?.status || (comp.id === options.activeTargetId ? 'required' : 'pending');
+      const isHighlighted = comp.id === options.activeTargetId || markerInfo?.isHighlighted;
+      const markerNum = markerInfo?.number ?? markerCounter++;
+
+      const isCurrentStage = options.activeTaskIndex === undefined || comp.stageIndex === options.activeTaskIndex;
+      const opacity = isCurrentStage ? '1.0' : '0.35';
+
+      let fillColor = '#1e293b';
+      let strokeColor = '#64748b';
+      let statusIcon = `${markerNum}`;
+      let statusDesc = 'Pending';
+
+      switch (status) {
+        case 'placed_valid':
+          fillColor = '#15803d';
+          strokeColor = '#4ade80';
+          statusIcon = '✓';
+          statusDesc = 'Placed & Valid';
+          break;
+        case 'required':
+          fillColor = '#0284c7';
+          strokeColor = '#38bdf8';
+          statusIcon = `${markerNum}`;
+          statusDesc = 'Next Required Component';
+          break;
+        case 'placed_needs_adjustment':
+          fillColor = '#b45309';
+          strokeColor = '#fbbf24';
+          statusIcon = '!';
+          statusDesc = 'Needs Adjustment';
+          break;
+        case 'invalid':
+          fillColor = '#b91c1c';
+          strokeColor = '#f87171';
+          statusIcon = '✕';
+          statusDesc = 'Invalid Placement';
+          break;
+        case 'pending':
+        default:
+          fillColor = '#1e293b';
+          strokeColor = '#64748b';
+          statusIcon = `${markerNum}`;
+          statusDesc = 'Pending';
+          break;
+      }
+
+      // Orientation footprint outline (subtle CAD geometry)
+      const [cw, , cd] = comp.dimensions;
+      const pw = Math.max(8, cw * scale);
+      const pd = Math.max(8, cd * scale);
+      svg += `<rect x="${mx - pw / 2}" y="${my - pd / 2}" width="${pw}" height="${pd}" fill="${status === 'placed_valid' ? 'rgba(74, 222, 128, 0.2)' : 'rgba(56, 189, 248, 0.08)'}" stroke="${strokeColor}" stroke-width="1" stroke-dasharray="2,2" opacity="${opacity}"/>`;
+
+      // Interactive Marker Group
+      svg += `<g class="blueprint-target-marker marker-base" data-target-id="${comp.id}" data-component-type="${comp.componentType}" data-stage-index="${comp.stageIndex}" data-status="${status}" opacity="${opacity}" role="button" tabindex="0">`;
+      svg += `<title>Target #${markerNum}: ${comp.description || comp.id} (${comp.componentType.replace(/_/g, ' ')}) · ${statusDesc}</title>`;
+
+      if (isHighlighted || status === 'required') {
+        svg += `<circle cx="${mx}" cy="${my}" r="14" stroke="#38bdf8" class="pulse-ring"/>`;
+      }
+
+      svg += `<circle cx="${mx}" cy="${my}" r="10" fill="${fillColor}" stroke="${strokeColor}" stroke-width="${isHighlighted ? '2.5' : '1.5'}"/>`;
+      svg += `<text x="${mx}" y="${my}" class="marker-text">${statusIcon}</text>`;
+      svg += `</g>`;
+    }
+
+    svg += `</g>`;
+
     // Dimensions
     if (options.showDimensions !== false) {
       // Overall Width dimension at bottom
@@ -352,6 +450,24 @@ export class BlueprintRenderer {
       <rect width="280" height="40" fill="rgba(2, 132, 199, 0.3)" stroke="${themeColors.border}" stroke-width="1"/>
       <text x="10" y="16" class="title">${this.design.title.toUpperCase()} — FLOOR PLAN</text>
       <text x="10" y="32" class="subtext">Scale 1:50 | Total Area: ${this.design.totalAreaM2.toFixed(1)} m² | Status: APPROVED</text>
+    </g>`;
+
+    // Accessible Visual Status Legend
+    const legX = Math.max(310, width - 360);
+    const legY = height - 55;
+    svg += `<g transform="translate(${legX}, ${legY})">
+      <rect width="340" height="40" fill="rgba(2, 132, 199, 0.3)" stroke="${themeColors.border}" stroke-width="1"/>
+      <circle cx="16" cy="14" r="5" fill="#15803d" stroke="#4ade80"/>
+      <text x="25" y="17" class="subtext" style="font-size:8px;">✓ Placed</text>
+      <circle cx="85" cy="14" r="5" fill="#0284c7" stroke="#38bdf8"/>
+      <text x="94" y="17" class="subtext" style="font-size:8px;">▶ Active</text>
+      <circle cx="155" cy="14" r="5" fill="#1e293b" stroke="#64748b"/>
+      <text x="164" y="17" class="subtext" style="font-size:8px;">○ Pending</text>
+      <circle cx="230" cy="14" r="5" fill="#b45309" stroke="#fbbf24"/>
+      <text x="239" y="17" class="subtext" style="font-size:8px;">! Adjust</text>
+      <circle cx="295" cy="14" r="5" fill="#b91c1c" stroke="#f87171"/>
+      <text x="304" y="17" class="subtext" style="font-size:8px;">✕ Error</text>
+      <text x="12" y="32" class="subtext" style="fill:#38bdf8; font-size:8px;">Interactive Floor Plan · Click any numbered target to inspect</text>
     </g>`;
 
     // North Arrow

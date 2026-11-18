@@ -60,3 +60,23 @@ export const ConstructionWorkshopState = createComponent(
   },
   'Workshop challenge and blueprint validation state',
 );
+
+/**
+ * Tracks blueprint guided placement state for the active task and target component.
+ */
+export const BlueprintPlacementGuide = createComponent(
+  'BlueprintPlacementGuide',
+  {
+    /** Target component definition ID from the blueprint sequence */
+    targetComponentId: { type: Types.String, default: '' },
+    /** Required material / component type */
+    targetMaterialType: { type: Types.String, default: '' },
+    /** Active construction task identifier */
+    currentTaskId: { type: Types.String, default: '' },
+    /** Whether the ghost preview is active in 3D workspace */
+    isGhostActive: { type: Types.Boolean, default: false },
+    /** Status of placement: 'unplaced', 'highlighted', 'valid', 'invalid', 'adjust' */
+    validationStatus: { type: Types.String, default: 'unplaced' },
+  },
+  'Blueprint guided placement and task target state',
+);

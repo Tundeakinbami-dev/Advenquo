@@ -98,6 +98,7 @@ export class VRTabletSystem extends createSystem({}) {
     const btnBlueprint = this.tablet.getElementById('btn-tablet-blueprint');
     const btnPin = this.tablet.getElementById('btn-tablet-pin');
     const btnHint = this.tablet.getElementById('btn-tablet-hint');
+    const btnMinimize = this.tablet.getElementById('btn-tablet-minimize');
 
     const onBlueprint = (): void => {
       const visible = blueprintManager.toggleVisibility();
@@ -172,12 +173,17 @@ export class VRTabletSystem extends createSystem({}) {
       }
     };
 
+    const onMinimize = (): void => {
+      this.dismissTablet();
+    };
+
     if (btnValidate) btnValidate.addEventListener('click', onValidate);
     if (btnUndo) btnUndo.addEventListener('click', onUndo);
     if (btnReset) btnReset.addEventListener('click', onReset);
     if (btnBlueprint) btnBlueprint.addEventListener('click', onBlueprint);
     if (btnPin) btnPin.addEventListener('click', onPin);
     if (btnHint) btnHint.addEventListener('click', onHint);
+    if (btnMinimize) btnMinimize.addEventListener('click', onMinimize);
 
     this.cleanupFuncs.push(() => {
       if (btnValidate) btnValidate.removeEventListener('click', onValidate);
@@ -186,6 +192,7 @@ export class VRTabletSystem extends createSystem({}) {
       if (btnBlueprint) btnBlueprint.removeEventListener('click', onBlueprint);
       if (btnPin) btnPin.removeEventListener('click', onPin);
       if (btnHint) btnHint.removeEventListener('click', onHint);
+      if (btnMinimize) btnMinimize.removeEventListener('click', onMinimize);
     });
   }
 

@@ -164,4 +164,16 @@ export const MATERIAL_SPECS: Record<string, MaterialPhysicalProperties> = {
     roughness: 0.35,
     metalness: 0.85,
   },
+
+  architectural_coating: {
+    name: 'Textured Architectural Coating',
+    densityKgM3: 1400.0,
+    compressiveStrengthMpa: 8.0,
+    tensileStrengthMpa: 2.0,
+    friction: 0.65,
+    restitution: 0.05,
+    colorHex: 0xe07a5f, // Earthy terracotta-tinted architectural finish
+    roughness: 0.85,
+    metalness: 0.02,
+  },
 };
